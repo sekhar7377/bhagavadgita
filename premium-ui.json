@@ -1,0 +1,1 @@
+{"profile":"brand-content","sourceRoots":["src"],"commands":{"build":"npm run build","test":"npm test","format":"npm run format:check"},"requiredCommands":["build","test","format"]}

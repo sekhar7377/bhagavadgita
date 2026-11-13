@@ -1,0 +1,779 @@
+Bhagavad Gītā — The Stillness Before Action
+Website and artwork master prompts, based on a live study of Immersive Garden
+Prepared and revised: 13 November 2026. Reference: https://immersive-g.com/
+
+Revision 2: source-verified relief interaction and a reference-led Bhagavad Gītā art pipeline. The highest-priority requirement is the working cursor-driven sculpture reveal. The user will supply visual references for the characters, Kurukṣetra and war scenes; those references must guide the artwork when received.
+How to use this document
+This document contains a reference audit and two substantial, copy-ready prompts.
+1. For the website: copy everything between WEBSITE MASTER PROMPT — BEGIN and WEBSITE MASTER PROMPT — END into a coding-capable AI environment. Give it this entire document as its brief when possible.
+2. For the images: copy everything between ARTWORK MASTER PROMPT — BEGIN and ARTWORK MASTER PROMPT — END into ChatGPT with image generation available. The artwork prompt includes the shared visual rules, all 18 scene briefs, and the production order.
+3. For a combined workflow: attach this document together with your available visual references and say: “Execute the website master prompt. Treat my references as the art-direction authority. Build and validate the cursor-driven 3D relief first, then complete the website and artwork. Work through the quality gates and report actual completion.”
+The goal is very close fidelity to the reference’s visual language, interaction depth, pacing, and craftsmanship, re-authored for the Bhagavad Gītā. This revision incorporates inspection of the publicly served production JavaScript, embedded shaders and relief-model metadata. It identifies the actual geometry deformation, reveal field, packed shading and automatic motion; it does not claim access to the studio’s private repository or original authoring files. Source-confirmed settings and proposed adaptation values are explicitly separated. A prompt cannot guarantee an identical result: the build must demonstrate fidelity through a working prototype and motion comparisons.
+1. Reference audit: what was actually established
+Evidence and inspection coverage
+Directly inspected: the live desktop opening; pointer-driven relief changes; homepage scrolling through the opening statement, film, introductory passage, featured media, later project-name sequence, and dark footer; project index and preview hover; Chartogne Taillet case-study page and its backstage route; studio menu; the Our Approach and Services presentation; and selected narrow-screen states at a 390 × 844 CSS-pixel viewport. Desktop observations used an approximately 1150-pixel-wide viewport. The viewport was restored after inspection.
+
+Published first-party explanations consulted: Immersive Garden’s own Awwwards case study and its responses in Communication Arts. These confirm its broad technology and production approach. [R1–R2]
+
+Public client code inspected: the served entry bundle, home module and default-layout module. The relief investigation traced the field-rendering pass, vertex and fragment shaders, scene configuration, automatic motion and scroll update. The JSON metadata in the high-detail GLB was also read; the binary geometry was not reconstructed or imported into a new site. Source URLs and the entry-bundle fingerprint are recorded in R8–R9. No new Bhagavad Gītā implementation or generated artwork is being represented as completed by this research.
+
+Limits: this is an audit of the site’s major experience patterns, not a frame-by-frame reverse engineering of all 51 listed projects. Every project, filter combination, audio track, keyboard path, breakpoint, and device was not exhaustively tested. The narrow-screen check was a resized desktop browser, not a physical phone. Screenshot capture briefly timed out on heavy desktop scenes. Some captures show transitions in progress. Do not mistake an intermediate animation frame for the final layout. Audio controls were observed; audio quality was not auditioned.
+Observed design system
+Element	Live observation	Translation for the Gītā
+Opening background	Almost monochrome, pale mineral/plaster surface with fine texture	A shallow carved Kurukṣetra relief in warm ivory stone
+Relief subjects	Birds, blossoms, stems, leaves, branching organic forms	Chariot wheel, bow, conch, horse profiles, lotus, banner and the two speakers
+Pointer response	Regions become more legible around movement; public code confirms a persistent field with pointer and automatic inputs	Couple local sculpture depth and shading to an evolving field, preserving overlapping trails
+Physical depth	Public vertex shader scales relief depth from a shallow residual state toward its full modeled form	Original sculpted Gītā geometry must actually flatten and rise; aligned maps support it
+Opening composition	Small wordmark on the left, a restrained single-line serif statement across the middle, scroll cue on the right	Small Gītā identity, a quiet central statement, and “Scroll to begin”
+Peripheral navigation	Menu at upper right; project-index access near lower left; small sound interface near lower right	Menu, “All 18 chapters,” and an accessible sound control
+Main type	Computed CSS family names include PSTimes, serif	License the actual font if available; otherwise match its editorial proportions with a legal alternative
+Utility type	Computed menu style includes HelveticaNeueRegular, sans-serif; approximately 14 px in the inspected desktop state	Quiet neutral sans-serif for labels and controls
+Type scale	The sampled main heading was about 44.74 px; sampled project-description text about 28.76 px	Medium, readable editorial scale; avoid an enormous generic marketing hero
+Opening scroll	A large left-aligned statement appears; a centered film follows; a short centered introduction creates a pause	Narrative premise, a short atmospheric sequence, then a concise explanation of the dialogue
+Featured work layout	Wide landscape media and narrower portrait media occupy offset columns, with generous empty space	Alternate chapter artworks, close details, verse passages and moments of stillness
+Image treatment	Flat-edged media, little interface framing, large gaps and purposeful crops	Images as exhibition pieces; no repeated rounded card grid
+Text transitions	Portions of letters/lines reveal and disappear through masks during transitions	Subtle clipped or texture-mediated text reveals while preserving a readable DOM version
+Later homepage	A centered sequence of project names appears with small offset imagery and changing emphasis	A compact chapter list with an active chapter and small preview
+Index	Two text columns for category and title; a separate preview appears at the left on hover; a fine underline identifies the active title	Chapter number/theme plus title, with a stable preview region and keyboard equivalents
+Index filtering	A “Click to filter” affordance is exposed	Optional theme filters with a visible active state and reset; implementation must be verified
+Menu	A dark sculpted wall, vertically arranged serif navigation, expanded descriptions, Roman-number cues and a luminous irregular opening	A dark Gītā navigation world with exact chapter numbers and a restrained opening into light
+Studio subpages	Monumental Roman numerals integrated with natural objects, dark backgrounds and reflective water	Chapter-specific three-dimensional numerals or exact Devanāgarī numbers with relevant symbolic objects
+Case-study template	Centered multiline title, a small launch link, broad media, alternating explanatory passages, persistent backstage entry	Chapter title, “Read the verses,” featured scene, concise interpretation, persistent “Explore the meaning”
+Backstage	Dark horizontal media sequence, mixed portrait/landscape planes, a thin central guide, small captions, close control	A deeper chapter reading gallery with source context, symbols and accessible linear reading mode
+Footer	A dark botanical world with a central contact line and small peripheral information	Quiet reflective conclusion, sources, credits, reading access and a return to the beginning
+Mobile sample	Monumental numeral imagery stays visually dominant, crops into the portrait frame and retains reflective water and small controls	Re-compose scenes for portrait use; do not just scale a desktop screenshot down
+
+
+The small black pointer indicator and contextual labels belong to the interaction study. A blue glow around the operating-system pointer in some inspection frames is not a reliable site-design detail and should not be copied.
+What the studio itself confirms
+The studio describes an atmospheric, minimal design using bas-relief and sculpted Roman numerals, with a separate backstage experience. Its published stack includes Vue/Nuxt, Three.js, GSAP, Lenis, Strapi/Node and Vercel. Its production explanation mentions GPU texture compression, channel packing, glTF export automation and 3D authoring tools. [R1–R2]
+
+These published explanations support the broad architecture. The additional public-code inspection establishes the specific relief mechanism below. The studio’s full deployment configuration, original sculpting process and complete animation system remain outside this audit.
+The central technical finding
+The opening uses actual relief meshes. A small GPU field retains successive pointer stamps, with animated noise and a second programmed path adding variation. The vertex shader uses that field to change the sculpture’s depth; the fragment shader simultaneously blends packed shading states so the apparent shadows follow the reveal. A plaster texture joins the sculptures and background into one mineral surface. Scrolling shifts the field and recycles sections. [R8–R9]
+
+This is why a finished illustration alone cannot deliver the requested effect. The production needs original Gītā relief geometry, matching shading data and a coordinated interaction system. Section J specifies that work in detail. The automatic path is initialized by the relief scene; it is not established as an idle-only feature. A stationary pointer can also continue contributing coverage, so “pointer stopped” and “all field injection stopped” are different tests.
+WEBSITE MASTER PROMPT — BEGIN
+You are responsible for creating a complete, exceptionally crafted Bhagavad Gītā website. Work as a creative director, interaction designer, technical artist, frontend engineer, accessibility specialist and careful editor of sacred-text material.
+
+The visual and interaction reference is https://immersive-g.com/. Study the live site if browsing is available. Use the reference audit in this document as grounded evidence. Recreate the reference’s degree of precision and its recognizable composition, restrained typography, pale sculpted relief, pointer-driven revelation, dark sculptural navigation, immersive chapter pages and layered storytelling. Re-author every visual and word for the Bhagavad Gītā.
+
+Allocate the time and iteration required for a polished result. Do not stop after a plan, one landing screen, a static mockup, or an attractive hero. Implement the entire navigable experience, generate or prepare its original assets, integrate the assets, test the result, and revise visible weaknesses. Do not claim to keep working after a session ends. If execution limits prevent completion, save a precise checkpoint of completed files, remaining assets and next actions.
+A. The creative brief
+Working title: Bhagavad Gītā — The Stillness Before Action.
+
+Core experience: the visitor approaches what appears to be a quiet stone surface. Movement reveals a carved world. Scrolling moves through Arjuna’s crisis, Krishna’s teaching, the vision of the universal form, and Arjuna’s recovered clarity. Every interaction should support attention, discovery, contemplation or understanding.
+
+Opening identity: “BHAGAVAD GĪTĀ.”
+
+Opening central line: “The stillness before action.”
+
+Opening scroll cue: “Scroll to begin.”
+
+First narrative statement: “Before the battle begins, a warrior lays down his bow. A conversation changes the way he sees.”
+
+Closing editorial line: “The field is the same. His understanding has changed.”
+
+These lines are original editorial copy, not scriptural quotations. Label verse translations separately and attribute them accurately.
+
+Aim for a museum-quality digital exhibition: tactile, intelligent, quiet, emotionally substantial and visually convincing. The primary surface is ivory relief and the secondary surface is dark stone. Reserve saturated cinematic images for meaningful narrative windows. Avoid filling every screen with gold, blue nebulae, orange gradients, particle storms or ornament.
+B. Fidelity priorities
+Preserve these in order:
+1. The working cursor-driven relief: real depth change, coherent shading, organic persistence, continuing automatic revelation and correct behavior while scrolling.
+2. The user’s visual references translated into detailed, consistent Gītā artwork, within the reference website’s sparse composition and spatial balance.
+3. Editorial typography, line wrapping and negative space.
+4. Smooth, coherent transitions between light and dark worlds.
+5. Offset imagery and narrative pacing throughout the whole site.
+6. The menu, chapter index, chapter detail, deeper-reading gallery and ending.
+7. Consistency of characters, materials, light and scene scale.
+8. Mobile usability, accessibility and measured rendering performance.
+Do not substitute stock religious photographs, unrelated 3D ornaments, repetitive cards or a generic scroll-animation template for the designed experience.
+C. Research before implementation
+If the reference is accessible, inspect its opening at rest, slow and fast pointer movement, stationary-pointer behavior, image hover, small and large scroll increments, route changes, menu entry/exit, index previews, a project page, backstage and narrow-screen behavior. Record observations with four labels: visually observed, confirmed in public client code, documented by the creator, and proposed adaptation. Do not invent inspection results. Inspect publicly delivered code and asset metadata where needed; no access to a private repository is assumed.
+
+Use the creator’s technical case study and official library documentation. Verify current APIs before implementation and pin the versions actually used. Preserve source links in a research note. If reference access fails, continue from this brief and explicitly identify the fidelity limits.
+
+The user will provide visual references. Inspect the actual attachments and create a reference register before deriving the final artwork. Preserve their intended character identity, level of detail, battlefield scale, architecture, lighting and emotional tone; use the reference workflow in the artwork prompt. Those references take priority over the default character/costume descriptions in this brief. When they have not yet arrived, mark them pending and continue the interaction research, project structure, content verification and a clearly provisional relief prototype. Do not claim to have seen missing images or lock final character designs from assumptions. A routine reference intake is not a demand that the user source every asset or provide working 3D files.
+
+Create additional compatible references and production assets where useful, reusing the supplied visual language. Make reasonable production choices and use suitable original assets and tools. Identify any genuinely necessary paid license before depending on it. Do not buy anything automatically.
+D. Complete information architecture
+Implement these routes or equivalent clean routes with the same functionality:
+Route	Purpose	Required behavior
+/	Cinematic introduction and guided story	Relief, narrative sections, artwork windows, featured chapters, index sequence and ending
+/chapters	All 18 chapters	Number, title, short theme, preview, theme filters, keyboard navigation, direct links
+/chapters/01 through /chapters/18	Individual chapter experiences	Unique artwork, coherent chapter narrative, verse anchors, context, reading access, previous/next
+/chapters/01/meaning through /chapters/18/meaning	Deeper reading	Visual exploration, source references, symbolism, interpretation and linear reading alternative
+/read	Distraction-free text reader	All verified chapters and verses, chapter/verse navigation, translation attribution and working anchors
+/about	Context for the work	Scope, editorial approach, visual interpretation, bibliography, credits and accessibility controls
+
+
+The global menu is a designed state of the application, not a dummy destination. It must be reachable from the home and chapter pages, close correctly, preserve the underlying position and support browser history sensibly.
+
+Suggested menu entries: The Dialogue, The 18 Chapters, Paths of Understanding, Read the Gītā, About this Experience. For the 18-chapter view, use a scrollable list; never cram eighteen large lines into one screen.
+E. Content authority and narrative boundaries
+Use the Bhagavad Gītā’s 18 chapters as the source structure. Verify Sanskrit, chapter names, verse references and speaker changes against a reliable textual source such as IIT Kanpur’s Gita Supersite/Heritage resources and a clearly identified edition.
+
+Choose and document a numbering convention. A commonly used recension has 700 verses; some editions include an additional question at the start of Chapter 13 and count 701. Do not combine numbering schemes silently. The reader’s count, citations, search and chapter totals must agree.
+
+The dialogue occurs within the Mahābhārata’s battlefield setting and its narrative frame. Do not turn every teaching metaphor into an event that literally occurs in the story. Mark symbolic artworks as interpretations. Do not present Krishna and Arjuna as traveling physically to mountains, cosmic observatories or other locations during every chapter.
+
+Keep these content layers distinct:
+- Sanskrit source text: verified, exact and rendered as text.
+- Translation: attributed and legally reusable.
+- Editorial paraphrase: original contemporary explanation, identified as such.
+- Interpretive note: contextual explanation that can acknowledge differing philosophical readings.
+- Visual metaphor: artistic interpretation, not evidence of a literal scene.
+Never fabricate a verse or attribute an invented quotation to Krishna. Do not reduce karma-yoga to indifference about consequences. Do not frame dharma as a universal instruction to obey every authority. Do not erase the ethical tension of Arjuna’s situation. When discussing caste, gender or contested interpretation, use precise contextual language rather than endorsing social hierarchy.
+
+Write clear English. Include exact Sanskrit chapter titles and optional transliteration. An English experience with a verified Sanskrit reader is the initial scope; do not display nonfunctional language switches. Additional languages are complete only when their content and type rendering have been checked.
+F. The 18-chapter storyboard
+The labels below are editorial themes; canonical titles and transliteration variants must follow the selected edition. Verse anchors are production candidates to verify, not permission to invent quotations.
+Ch.	Chapter name	Narrative emphasis	Primary artwork / symbol	Candidate anchor
+01	Arjuna Viṣāda Yoga	Recognizing the human cost; Arjuna’s collapse of certainty	The lowered bow and still chariot between two armies	1.28–30, 1.47
+02	Sāṅkhya Yoga	The Self, discernment and steady understanding	Krishna speaking, Arjuna listening; transient forms against quiet continuity	2.20, 2.47–48
+03	Karma Yoga	Action without possessive attachment	Chariot wheel, working hands, shared effort	3.19, 3.30
+04	Jñāna Karma Sannyāsa Yoga	Knowledge, transmission and the transformation of action	A restrained flame and the continuity of teaching	4.7–8, 4.34, 4.37
+05	Karma Sannyāsa Yoga	Renunciation, action and inward freedom	Lotus leaf holding clear water above dark water	5.10, 5.18
+06	Dhyāna / Ātma Saṃyama Yoga	Discipline of attention and the returning mind	A sheltered steady lamp and a quiet seated figure	6.19, 6.26
+07	Jñāna Vijñāna Yoga	Knowing and realizing; the divine ground of experience	Pearls held on a subtle thread	7.7–8
+08	Akṣara Brahma Yoga	Imperishability, remembrance and mortality	An immense horizon beyond passing forms	8.5–8
+09	Rāja Vidyā Rāja Guhya Yoga	Intimate knowledge and sincere offering	Leaf, flower, fruit and water	9.26
+10	Vibhūti Yoga	Recognizing divine manifestations	One coherent landscape of mountain, river, tree and light	10.20, 10.41
+11	Viśvarūpa Darśana Yoga	Awe, scale, time and the universal form	A carefully designed cosmic divine manifestation before a small Arjuna	11.8, 11.12, 11.32
+12	Bhakti Yoga	Devotion expressed through qualities and conduct	A quiet encounter, offered lotus, compassionate presence	12.13–14
+13	Kṣetra Kṣetrajña Vibhāga Yoga	The field and the knower	A cultivated field and an observing figure	Verify numbering against selected edition
+14	Guṇatraya Vibhāga Yoga	The three guṇas and freedom from their binding	Three material qualities woven together	14.5, 14.22–25
+15	Puruṣottama Yoga	The inverted tree and what lies beyond entanglement	Aśvattha tree with roots above and branches descending	15.1–4
+16	Daivāsura Sampad Vibhāga Yoga	Ethical dispositions and self-examination	Different uses of human hands and intention	16.1–3, 16.21
+17	Śraddhātraya Vibhāga Yoga	Faith, intention, discipline and giving	Carefully arranged offerings, vessels and an open hand	17.14–17, 17.20–22
+18	Mokṣa Sannyāsa Yoga	Integration, surrender and recovered clarity	Return to the original chariot composition, transformed by understanding	18.63, 18.66, 18.73
+
+
+The homepage may feature six major beats—crisis, discernment, action, contemplation, vision and integration—but all 18 chapters must exist with their own content and visual identity. Do not call six highlight sections a complete Gītā website.
+G. Screen-by-screen direction
+G1. Loading and entry
+Start with a lightweight mineral surface, a small identity and genuine loading progress for critical assets. Do not invent a percentage that reaches 100 while the experience remains blocked. The page must remain useful if WebGL or a large asset fails. Load fonts and a small poster first; decode the first relief resources before switching to interactive rendering.
+
+The desktop opening should retain the reference’s horizontal balance: identity around the left tenth, main line near the central band, scroll cue to the right. Keep the content’s visual center near half the viewport height. This is a starting composition, not a rigid pixel map.
+
+No giant rectangular primary button. Provide a small semantic “Begin” action for users who need it. Use a quiet 2–3 px cursor mark only on fine-pointer devices, with a visible native-cursor fallback. Sound begins muted; show an intelligible sound control.
+G2. The carved opening world
+Compose a shallow Kurukṣetra relief with the chariot wheel at the lower left, horses moving through the right side, a banner near an outer edge and Krishna with Arjuna in the midground. Keep faces and the primary narrative objects out of the central text-safe strip. The carving should emerge from the same stone as the wall.
+
+At rest, the mineral surface is legible and calm. Pointer movement raises local sculpture depth and resolves its shading through overlapping organic trails. A separate quiet automatic path intermittently reveals details elsewhere, as the reference does. A stationary pointer and a pointer that has left the surface must behave deliberately; test coverage and velocity separately. Preserve text contrast independently. This screen cannot pass its fidelity gate with a beauty image and a circular opacity mask.
+G3. Premise, film and pause
+Scroll brings in the opening editorial statement, left aligned with intentional line breaks and generous space. Follow with one broad atmospheric media window. If a true video has not been produced, use a real-time layered scene or an explicitly labeled animated still; do not claim it is generated film.
+
+Then offer a centered paragraph of two to four lines explaining the setting and the reader’s journey. Keep long explanations out of this section. Introduce the reading alternative unobtrusively.
+G4. Chapter sequence
+Use alternating wide and narrow media with offset text blocks. A chapter can have a broad artwork on the left, a concise passage on the right, then a smaller close detail farther down on the opposite side. Do not repeat identical left-image/right-copy sections eighteen times.
+
+Use blank space as pacing. Alternate visual scale, density, lightness and narrative intensity. The page’s pale relief may continue quietly behind the editorial sequence. A chapter’s localized motifs must be geographically coherent with the artwork.
+
+Feature Chapter 11 as a genuine dramatic peak. Approach it with stillness, expand the visual scale, transition to a dark field, then restore human scale in Chapter 12. Constant climax destroys the story’s rhythm.
+G5. Chapter index
+Use a typographic index resembling the reference’s project archive. On desktop, keep a stable preview region at left, a narrow column for the chapter number/theme, and titles in the right column. Hover/focus changes the preview and draws a hairline underline. The entire row must be a real link. Inactive labels may soften but remain readable.
+
+Provide optional theme filters such as Action, Knowledge, Meditation and Devotion. These are editorial cross-references, not claims that each chapter belongs exclusively to one category. Expose the selected filter, result count and “All chapters” reset. No hidden-only filtering.
+G6. Dark menu
+Opening the menu transforms the pale surface into a dark carved world. Use the same underlying compositional family with different material and illumination. A narrow organic opening may disclose a restrained warm interior light; avoid a giant bloom that washes out text.
+
+Menu items have short labels at rest. Hover or keyboard focus can reveal a longer description, a numeral or preview, and a small directional cue. Keep layout motion restrained so links do not flee the pointer. Dark textural depth must remain visible behind the menu.
+
+Escape closes the menu, focus returns to its trigger, body scrolling is correctly restored, and the underlying narrative position is preserved. Trap focus only while the modal is actually open. Remove inactive content from the accessibility tree appropriately.
+G7. Chapter detail pages
+Each page contains: a centered title; chapter number; canonical title and concise English theme; a full artwork; an introductory paragraph; two or three narrative beats; one or more verified verse anchors; a short interpretive note; a persistent “Explore the meaning” link; a reading link; previous/next chapter navigation; and a return to index.
+
+Introduce a monumental exact chapter numeral in a dark scene where appropriate. Generate numeral geometry from verified text/vector outlines, not from AI-rendered letters. Integrate a relevant object—wheel, lamp, pearl-thread, lotus, tree—with water or stone. The numeral remains recognizable at every camera angle.
+G8. Explore the meaning
+Adapt the reference’s backstage mechanic into a distinct deep-reading mode. On wide screens, offer a horizontal sequence of image planes and short captions on a dark field, anchored by a thin guide. A diagram or textual context can accompany a scene, but never turn generated pseudo-manuscript text into a source.
+
+Provide “Read as a page” that renders exactly the same meaningful content in a normal vertical document. Touch defaults to that vertical sequence. Wheel routing must not trap the visitor. The close action returns to the original chapter position, including browser Back behavior.
+
+Content modules: narrative context, source verse, original paraphrase, symbol explanation, interpretive nuance, related chapter and source attribution. Do not expose development tools or shader explanations in this reader-facing layer; put production information in credits or documentation.
+G9. Ending and reader
+Return to the chariot from Chapter 1 with consistent geography. The outer situation has not magically vanished. Arjuna’s posture and understanding are different. The ending offers reflection and access to the full text, not a victory advertisement.
+
+The reader must work without cinematic effects. Support chapter/verse links, browser history, text selection, search, type-size adjustment and a clear return to the experience. Bookmarks may be stored locally, with an honest label. No fabricated login, newsletter or database integration.
+H. Visual tokens and typography
+The following are proposed reconstruction values, to tune against screenshots and readability, not exact sampled source tokens.
+Token	Starting value / rule
+Mineral base	#E8E6E1, with low-amplitude warm/cool texture variation
+Stone highlight	#F3F0E9
+Main ink	#111110
+Dark-world base	#090A09
+Dark-world readable text	#ECE9E1
+Muted label	Choose per surface to meet actual contrast; do not hardcode illegible grey
+Rare warm accent	#B89A65, used sparingly
+Content width	Approximately 80–84vw on desktop, with a sensible maximum
+Peripheral controls	Approximately 32–44 px from desktop edges; safe-area-aware on mobile
+Large narrative type	About 40–64 px desktop, 30–42 px mobile, tuned to language
+Opening central line	About 24–32 px desktop; deliberate wrapping on mobile
+Editorial supporting type	About 22–30 px desktop
+Long reading text	About 18–21 px with 1.5–1.7 line height
+Utility labels	About 13–15 px desktop; never too small to operate on touch
+Rules	Fine 1 px lines; no unnecessary panels or boxes
+Corners	Predominantly square; media should look curated, not like app cards
+
+
+The observed family names are PSTimes and HelveticaNeueRegular. Do not claim a foundry or licensing entitlement from those CSS aliases. Use licensed font files only if supplied or lawfully obtained. Otherwise use a carefully tuned editorial serif such as an appropriately licensed Source Serif family, with Georgia/Times as fallback, and a neutral sans with Arial/Helvetica fallback. Verify actual font licensing and coverage.
+
+For Sanskrit, use a properly licensed Devanāgarī font with correct shaping and marks, such as Noto Serif Devanagari. Set lang="sa" on Sanskrit passages. Match optical size and line rhythm instead of forcing Latin and Devanāgarī into identical metrics. Never add Latin-style letter spacing to connected Devanāgarī text. Do not split Devanāgarī characters for animations; reveal whole words or lines. Keep all text selectable and accessible.
+I. Motion specification
+The editorial motion values below are proposed starting targets. The relief interaction must instead begin from the source-confirmed architecture and settings in Section J. Do not replace that mechanism with a generic cursor effect or interpret a per-frame coefficient as a duration in milliseconds.
+Interaction	Proposed behavior	Starting range
+Pointer follow	A small damped marker, with immediate hit testing on the true pointer	Visual damping 70–130 ms
+Relief brush	Aspect-correct soft stamp, animated texture modulation, overlapping coverage	Source falloff 0.38 becomes 0.19 in the field shader; see J
+Relief persistence	Field decays while new input continues to accumulate	Source dissipation 0.953 with frame compensation; see J
+Relief shading	Shading resolves with modeled depth	Packed shading stages, matching mineral texture and restrained secondary effects
+Scene parallax	Layers differ subtly in depth	Roughly 3–15 px at full pointer excursion
+Text arrival	Masked rise and opacity; maintain readable pauses	0.65–1.0 s; line stagger 50–90 ms
+Link underline	Hairline grows/retracts in a coherent direction	0.18–0.3 s
+Preview hover	Crossfade and mild crop/position adjustment	0.25–0.45 s
+Menu transition	Texture/material dissolve, then text resolves	0.8–1.2 s total
+Route transition	Old page exits, new resources settle, new page enters	Normally 0.7–1.3 s, excluding real loading
+Image reveal	Clipped entrance plus very small depth adjustment	0.8–1.2 s
+Water	Low-amplitude, physically quiet movement	Slow loop, never distracting
+Audio fade	Smooth gain ramp on explicit enable/disable	0.3–0.6 s
+
+
+No springy bouncing of sacred figures or scripture. No continuous shaking, arbitrary cursor magnetism, aggressive chromatic aberration, flashy particles, or motion that hides the reading target. If button magnetism is used at all, cap it to a few pixels and keep the hit area stationary. Restore native cursor behavior around selectable text and form controls.
+
+Do not replay all entrances when the user scrolls one pixel upward. Establish deterministic timeline progress, deliberate enter/leave behavior, and correct reverse scrolling. Every interaction must survive rapid input, resize and route interruption.
+J. The cursor-driven relief — the first acceptance gate
+J1. Required result and evidence
+Build an original shallow Gītā sculpture that physically compresses into the wall and emerges through movement, with shading that changes coherently with its depth. Preserve the reference’s persistent trails, irregular texture, secondary automatic revelation, surface continuity and behavior during scrolling. This is the project’s defining interaction. Complete and assess it before scaling the site to all chapters.
+
+The mechanism below was traced in the public production bundle at https://immersive-g.com/assets/entry.DyxL_KXi.js on 13 November 2026. The bundle’s release-specific name may change; re-establish the current asset from the live page when necessary. This brief summarizes behavior and data flow. Write maintainable original code and create original Gītā assets; do not incorporate the studio’s bundle, sculptures or textures into the delivered website.
+
+Distinguish three deliverables: the art reference, the usable sculpture and shading assets, and the running interaction. A PNG satisfies only the first. A shader without a sufficiently detailed sculpture does not satisfy the intended visual quality. A beautiful sculpture without the field-driven motion does not satisfy the interaction.
+J2. Source-confirmed baseline
+The following values are extracted settings or logic from the inspected client code, not estimates from screenshots. Their interaction matters more than copying isolated numbers.
+Part	Source-confirmed setting or behavior	Meaning for the new implementation
+Field storage	Two 256 × 256 render targets, swapped after rendering	Maintain a persistent GPU field with read/write separation
+Field precision	Float targets, with a half-float branch for iPad/iPhone/iPod user-agent matches; depth buffer disabled	Choose renderable precision by capability testing in the new build; do not blindly copy device detection
+Channel meaning	R/G hold signed velocity contributions; B holds a nonlinear speed response; A holds stamp coverage	A one-channel cursor circle omits part of the behavior
+Pointer position	Interpolation coefficient 0.4 per update	Start from its observed response; normalize for frame rate in the new implementation
+Pointer velocity	Interpolation coefficient 0.1 while moving, 0.04 when velocity is zero	Speed influence relaxes differently from positional following
+Falloff	Configuration 0.38; setter multiplies it by 0.5	Effective radial falloff is 0.19 in aspect-corrected field UV coordinates
+Stamp strength	Alpha 1; velocity scaled by 50 before nonlinear magnitude shaping	Coverage and speed are distinct signals; define units explicitly
+Dissipation	0.953	Used in the frame-compensated decay expression below; it is not a duration
+Frame multiplier	Frame delta capped at 32 ms, divided by 16 ms	The field update accounts for elapsed time, with a suspension clamp
+User stamp texture	Animated noise modulation with a 0.15 baseline and 0.85 variable component	A soft, textured mark remains possible even where the noise is low
+Automatic stamp	A separate pointer path; stamp scaled by 3, R/G zeroed, A set from B before addition	The secondary path contributes revelation without copying the user’s directional velocity
+Vertex response	Average of B and A drives local depth; original local Z scales between 0.05 and 1.0 in normal mode	A mostly flattened residual carving grows toward its modeled form
+In-plane scale	Vertex X/Y are multiplied by 1.004	Preserve seamless coverage when tuning section boundaries; this is separate from depth extrusion
+Fragment response	Samples the same field at twice its strength before computing the shading response	Shading resolves sooner than full geometry depth; do not assume both responses are identical
+Shading assets	Two RGB textures read from the GLB material’s map and emissive-map slots	These are packed scalar shading stages, not ordinary colored albedo/emission in the final custom shader
+Mineral treatment	Plaster strength 1; gradient strength 0.17	Join background and relief through consistent texture and broad illumination
+Brightness transform	Desktop factor/offset 0.6/0.4; mobile 0.5/0.6	Tune the adaptation’s display transform deliberately; these are source values, not universal color rules
+Scroll contribution	Scroll scale 0.25; world section pitch 9.995; field offset from scroll delta, clamped in magnitude to 0.2	Reproject the existing field and recycle relief sections without visible slipping
+Camera	FOV capped at 30°, distance 15, near/far 5/20; slow/fast zoom 1/0.6	These rely on the source scene’s units and layout; adapt coherently to the Gītā model
+Fast-scroll extrusion	Noise size 7.77, speed 2, mask range −1 to 1, strength 1.02	Fast mode has its own noise-driven depth behavior; it is not simply faster mouse movement
+Automatic choreography	One to three randomized direction steps, axis tweens around 0.7–1.0 s, then a randomized 1–3 s pause	The loop is initialized by the relief scene; do not mislabel it as an idle-only feature
+
+
+These settings describe the inspected build. Per-frame interpolation, field-space distance, camera units and shader response have different units. Do not combine them as if they were interchangeable CSS animation values. New geometry, viewport proportions and render scale require visual calibration.
+J3. Build the coordinated rendering pipeline
+Implement this sequence under one animation clock:
+1. Normalize input. Track pointer position, velocity, entry/leave and input type. Use the canvas’s actual content rectangle and the renderer’s pixel ratio consistently. Keep semantic link hit testing on the true pointer, independent of any decorative cursor lag.
+2. Update the field. Sample the previous field with the scroll reprojection offset, attenuate it, add separate user and automatic stamps, constrain channel ranges, and swap the render targets. Never read from the same texture currently being written.
+3. Project into the sculpture. Determine screen coordinates from the undeformed vertex/camera state, sample the field, and derive the local relief factor. The source uses screen-space field lookup, not a prepainted per-object hole.
+4. Change real depth. Compress each sculpted vertex toward its wall plane and restore it according to that factor. Use a consistent local axis and wall origin. The reference scales local Z; a differently oriented asset needs an equivalent coordinate transform, not an arbitrary world-Z multiplication.
+5. Resolve the surface shading. Blend the correctly aligned baked stages as the relief resolves, then apply the mineral texture, restrained broad gradient and any justified secondary response. Geometry and shading must stay visually coupled during reveal and recession.
+6. Composite the experience. Render the continuous wall and relief behind the readable DOM interface, with appropriate depth/occlusion for media layers. Coordinate the pale/dark material transition, camera and chapter transitions from the same state rather than stacking unrelated fullscreen effects.
+The inspected scene extracts each mesh’s geometry, placement, scale and two shading textures from the GLB, adds a separate background plane, and recycles sculpted sections vertically. Its high-detail GLB metadata contains 18 meshes, 6 materials and 12 WebP images, with Draco mesh compression. Those counts explain the asset strategy; they are not a required polygon budget or permission to reuse the model. The code also defines a lower-detail model for mobile or lower-tier devices. Build corresponding quality tiers for the new artwork.
+J4. Field behavior and time handling
+Use a smooth radial stamp with aspect correction. In the reference, horizontal distance is multiplied by viewport aspect before evaluating falloff. Smooth the boundary and modulate it with a slowly moving noise field so it reads as emerging mineral detail rather than a perfectly uniform flashlight disk.
+
+For the source decay rule, define d = 0.953 and step = min(frameDeltaMs, 32) / 16. The previous field’s multiplier is 1 / (1 + step × (1/d − 1)). Reproject the previous field, multiply it by that factor, then add the noise-modulated stamps weighted by step. The source upper-clamps the field at 1 and lower-clamps RGB at −1. Preserve signed velocity and bounded nonnegative coverage appropriately in the new implementation.
+
+Do not substitute the older generic maximum-of-brush-and-mask model for this accumulated field. Additive history, continued coverage, velocity relaxation and automatic input together determine what is visible. The source’s B response saturates nonlinearly with speed; A can keep contributing under a stationary pointer. Therefore a stopped pointer does not imply that every nearby contour must disappear. Test decay with all injection disabled as a separate diagnostic.
+
+Make frame-rate handling explicit. To preserve the feel of a per-update coefficient a defined at 16 ms, a proposed time-normalized equivalent is 1 − (1 − a)^(dtMs / 16). This is a reconstruction improvement, not a claim that the source uses that formula for its pointer interpolation. Compare 30, 60 and 120 Hz where practical. Normalize velocity consistently before applying any source-derived gain; screen pixels per second and normalized-frame displacement are not interchangeable.
+
+Use coalesced input or appropriately spaced stamps if fast movement produces holes, while preserving the intended energy per unit time. This interpolation is an implementation choice to verify, not a source finding. Pause rendering when hidden, reset stale velocity on return, and avoid a giant stroke after a suspended tab resumes. On pointer leave, stop real-pointer injection deliberately and let the field settle while the separate automatic mode follows its own policy.
+J5. Geometry and packed shading production
+Create the new relief from the selected Gītā references using an actual 3D workflow. Preserve modeled volume in faces, hands, bow, wheel spokes, horses, folds and layered ornaments. Work from large shapes to fine carving; extremely noisy texture cannot replace missing anatomy or sculptural depth. Place supporting motifs at the edges while retaining the opening’s quiet central text band.
+
+Use one modeled asset and one stable UV layout to generate the relevant shading states. The source reads six scalar slots in this order: second texture B/G/R, then first texture B/G/R. Its fragment shader replaces the initial level-zero value with a constant 0.54504, then blends toward levels one through five over successive 0.2-wide response intervals. Thus it does not simply display six independent beauty images, and not all six packed channels contribute as unmodified stages.
+
+For the new original pipeline, document which channels correspond to which known deformation/shading states and bake them under one controlled lighting setup. A baseline plus five resolved stages is a practical source-inspired contract; confirm it against the new model and desired response. The original offline bake depths and lighting rig were not established from the served files, so do not invent them as historical facts. Use linear data textures for newly authored packed scalar data and explicitly verify sampling, interpolation, gamma and output conversion; do not accidentally apply an albedo color-space transform to numerical channels.
+
+Supply clean UVs, consistent scale/origin, sensible bounds, mesh quality tiers, packed shade textures and a documented material manifest. Use a supported model/texture compression workflow and verify the compressed result. Record the normal-map convention if normal maps supplement the bakes. Preserve full sculpture detail in the art master while loading only the needed scene resources in the browser.
+
+The source’s appearance combines baked shading and secondary shader effects; do not describe it as an entirely physically simulated dynamic-lighting system. A newly built real-light approach may also work, but it must match the reveal’s visual character and measured performance. Avoid promising mathematically correct live shadows from a flat beauty plate.
+J6. Automatic motion, scrolling and light/dark continuity
+Keep user-driven revelation and automatic revelation separately controllable in development. The automatic path should wander through meaningful details without obscuring labels or constantly revealing the whole sculpture. Reproduce the reference’s continuing discoveries; the user’s own motion should remain perceptibly connected to the area they touch. A new preference to reduce automatic movement is useful, but the standard desktop experience should not silently omit this behavior.
+
+Keep the field aligned while the relief scrolls. The inspected implementation scrolls/recycles scene sections and offsets the previous field during its update. Match this relationship to the new camera and layout. Test slow scroll, fast scroll, reverse scroll, route changes and viewport resizing. Do not let trails slide across a stationary sculpture due to an inconsistent UV/camera calculation.
+
+Fast-scroll mode uses a separate animated-noise extrusion response and camera zoom, with a corresponding shading treatment. Reconstruct its perceptual role where observed in the reference’s chapter-index-like sequence. Avoid mapping any tiny wheel event directly to maximum extrusion. Use a clear state/timeline and test reversal and interruption.
+
+The dark world should preserve sculptural geography and material continuity. Build it from the same geometry and compatible shading data, with controlled material/exposure transitions. A separately generated dark poster cannot guarantee correspondence. The chapter/menu DOM must remain readable throughout transitions, even while the wall changes.
+J7. Prototype, diagnostics and pass/fail tests
+Before producing all artwork or pages, build a standalone relief scene inside the actual project, using one original representative Gītā sculpture. It must include fine anatomical or ornamental detail, broad volume and quiet wall space; a displaced checkerboard is insufficient evidence of the intended finish. A temporary proxy is useful for engineering but must be marked provisional until replaced by the representative sculpture.
+
+In a development-only inspector, expose: user field on/off; automatic field on/off; fast mode; R/G/B/A field views; frozen clock; reproducible automatic seed; wireframe or depth view; shading-stage view; and render-time/memory diagnostics. These controls belong to development, not the visitor’s reading experience. This enables actual diagnosis instead of tuning the whole scene blindly.
+
+Use a repeatable motion sequence at matched viewport sizes: rest; slow horizontal sweep; fast diagonal; small circles; stationary pointer; pointer exit; movement at all edges; scroll down and back; resize; menu open and close. Separate three runs: user input only, automatic input only, then both together. Do not infer human-pointer decay from a recording with automatic injection still active.
+
+The first gate passes only when:
+- Geometry demonstrably rises from its residual state and retreats; wireframe/depth inspection confirms physical deformation.
+- Packed or equivalent shading follows that change without frozen dark creases, sliding highlights or ghost silhouettes.
+- The reveal has soft, irregular edges, visible motion continuity and credible surface detail at the intended viewing scale.
+- Stationary-pointer coverage, trail decay and automatic discoveries behave intentionally and can be distinguished.
+- No seams appear between relief sections, the wall plane or wrapped scroll segments.
+- Pointer coordinates remain correct at center, corners, different pixel ratios, after resize and while scrolling.
+- Pale/dark transitions, rapid menu changes and route interruption leave no stale field or duplicate scene.
+- A matched-viewport motion capture supports the fidelity assessment; still screenshots alone do not pass it.
+- Frame-time and quality measurements identify the actual test device/browser and the tradeoffs of each tier.
+A flat radial opacity reveal, plain cursor spotlight, unchanging photographic shadows, generic particle trail or attractive static hero does not satisfy this gate. Keep iterating on the specific failed behavior. A 2.5D or static presentation remains a useful accessibility/device fallback; it must not be presented as completion of the required primary desktop interaction. If tools cannot produce the geometry and bakes, record that specific production gap and retain the gate as unresolved rather than claiming an exact match.
+K. Technical architecture
+Use Nuxt with Vue and TypeScript, Three.js for rendering, GSAP for controlled timelines, and Lenis only where it improves scrolling. This aligns with the documented reference architecture without assuming that copying library names reproduces its design. If an existing project requires React, retain its framework and recreate the same rendering/data separation rather than rewriting it solely for fashion.
+
+Separate these responsibilities:
+- Semantic interface: headings, links, controls, reader, focus management and text content.
+- Scene renderer: relief, chapter numerals, lighting, water, atmosphere and transitions.
+- Input manager: pointer, keyboard, touch, reduced motion and visibility state.
+- Motion coordinator: one authoritative clock and scroll progress source.
+- Asset manager: preload, decode, compression, quality tiers, disposal and failure handling.
+- Content layer: verified chapter/verse records, original summaries, references and related themes.
+- Route coordinator: route state, transitions, cancellation, history and scroll restoration.
+Use one persistent renderer where practical, not a new WebGL context for every image. Maintain real DOM content even if a small decorative text element is mirrored in the canvas. Do not reproduce inaccessible canvas-only reading.
+
+Start with validated local data or content files. A CMS is optional; do not introduce Strapi merely because the reference uses it. If editors need a CMS, define its schema and integration properly. Never leave the apparent content editor connected to a fake endpoint.
+
+Suggested modules: AppShell, ReliefScene, ReliefMaterial, PackedShadeSampler, PointerField, AutomaticRevealPath, ScrollFieldProjection, ChapterScene, SceneTransition, ChapterIndex, ChapterPreview, MeaningGallery, VerseReader, SoundControl, MotionPreferences, AssetLoader, SourceNote and ErrorFallback. A development-only ReliefInspector exposes the diagnostics in J7.
+
+Define explicit contracts between the input state, field pass and sculpture material. Keep texture ownership, coordinate spaces, delta-time units, scroll transform, quality tier and scene lifetime documented. Route transitions must cancel old scene work safely; asynchronous asset completion must not resurrect a disposed chapter. Store tuned settings in a versioned scene configuration rather than scattering constants through components.
+
+Suggested source organization: pages/, components/, composables/, scenes/, shaders/, content/chapters/, content/verses/, public/art/, scripts/, tests/, and docs/. Keep shaders and content out of giant page components.
+
+Each chapter record needs: number, canonical title, transliteration, editorial title, slug, summaries, source edition, verse references, theme tags, artwork IDs, focal points, alt text, symbol notes, previous/next links and completion status.
+
+Each asset record needs: ID, actual file, dimensions, media type, variant, source/generation history, contributing user-reference IDs, rights status, crop-safe area, focal point, related chapter, readiness status and fallback. For relief assets also record local axes, wall origin, mesh tiers, UV layout, packed-channel definitions, shader/data color spaces and the associated bake revision. A file is ready only when it exists and has been checked.
+L. Artwork integration
+Execute the artwork master prompt included in this document. First inspect the user’s supplied images and establish which references control identity, composition, architecture, materials and lighting. Derive the shared visual bible from those references, creating additional compatible studies only where needed. Produce one representative opening relief and its actual mesh/shading assets, then pass J7 before expanding to the complete chapter set. Maintain the same visual bible throughout.
+
+Keep artwork separate from interface lettering. All titles, numbers, Sanskrit, captions, translations and credits must be real text or exact vector geometry. Do not place unreadable pseudo-Sanskrit inside images.
+
+For every integrated artwork, verify its desktop crop, portrait composition, edge behavior, focal point, color profile and compression. Build responsive images from actual masters. If a portrait crop loses important anatomy, create a portrait recomposition rather than hiding the problem with object-fit: cover.
+
+Use generated images as images. Build animation, meshes, masks and lighting through the appropriate graphics pipeline. Do not claim that a PNG contains an animatable sculpture, perfect normal map or seamless video loop. If a required capability is unavailable, continue useful independent work and identify the remaining production step. An accessible fallback does not close the primary relief gate.
+M. Performance and loading
+Treat performance numbers as measured targets, not guarantees:
+- Aim for fluid 60 fps on a capable desktop, with an adaptive lower-cost tier for weaker devices.
+- Keep initial critical transfer around a few megabytes; target no more than roughly 5 MB before optional rich media, then measure the actual result.
+- Load the first scene and neighboring scene assets; do not decode all 18 chapters on entry.
+- Use responsive AVIF/WebP or equivalent suitable image formats; use KTX2/Basis GPU compression where supported and appropriate.
+- Use a lower-cost shader tier, cap device-pixel ratio (start around 1.5 desktop and 1–1.25 mobile), and adjust based on observed frame time.
+- Budget decoded memory, not just compressed file size: an uncompressed 4096 × 4096 RGBA texture is roughly 64 MiB before mipmaps and other buffers.
+- Release unused textures, geometries, render targets, event listeners and animation timelines when their ownership ends.
+- Stop expensive rendering in hidden tabs and when a static fallback is sufficient.
+- Handle WebGL context loss, unsupported devices, asset timeouts and decoding failures without blank screens.
+- Avoid unnecessary postprocessing passes, huge bloom buffers, unbounded particles and multiple competing animation loops.
+Use official KTX2Loader and animation documentation for the versions selected. If using Lenis with GSAP, follow the current documented integration so one clock drives scroll and rendering. Do not combine automatic and manual frame loops accidentally.
+N. Mobile, accessibility and comfort
+Mobile must be art directed, not squeezed. Re-compose artwork for portrait, preserve important faces and hands, keep controls clear of notches, use at least approximately 44 px touch targets, and test both browser chrome expansion and orientation changes. Use dynamic viewport units thoughtfully with fallbacks.
+
+Touch should not require a hover state to discover content. Use a calm automatic reveal or scroll-driven detail on the relief. Avoid gestures that conflict with reading and browser navigation. Disable unnecessary custom cursors. Do not require gyroscope permissions.
+
+Provide a clear reduced-motion option and honor the operating-system preference. Reduced motion should eliminate smoothing, camera drift, reveal trails, water motion and elaborate transitions; present stable relief imagery and directly readable content. Avoid an unusable “everything invisible until animated” state.
+
+Provide keyboard navigation, visible focus, semantic landmarks, accessible labels, correct heading hierarchy, skip links, text contrast and image descriptions. Keep atmospheric textural details out of accessible names. Provide narration transcripts if narration exists. Sound must always be optional and muted on first use. Do not use borrowed copyrighted devotional recordings without permission.
+
+Preserve native link behavior, meaningful page titles, deep links and browser Back. Test screen-reader reading order, 200% zoom and text reflow. The complete teaching must remain available when animation is disabled.
+O. Acceptance checks
+Do not declare completion until these are checked and any exception is identified:
+
+Gate zero is Section J7. All of its primary-desktop relief requirements must pass before the overall experience can be described as having achieved the requested interaction fidelity. Record separate evidence for the user field, automatic field and combined motion.
+1. Every route loads directly and through navigation; refresh and browser Back work.
+2. All 18 chapters have distinct, correct content and assigned artwork.
+3. All selected verse references resolve under one documented numbering convention.
+4. No placeholder copy, fake quotations, dead controls, missing assets or fabricated API responses remain.
+5. Pointer reveal works at center, edges and corners, after resize, and under slow/fast movement.
+6. Relief stays coherent during scrolling; text does not distort with the surface.
+7. Repeated rapid menu open/close and route changes do not leave ghost scenes or blocked scrolling.
+8. The chapter index works by pointer, keyboard and touch, including filtering and reset.
+9. Meaning-gallery close restores the originating chapter position.
+10. The text reader works without WebGL and with reduced motion.
+11. Desktop widths around 1440 and 1920, a tablet width around 768, and mobile widths around 390 and 430 are inspected; adjust testing to available devices.
+12. Long titles, Devanāgarī, transliteration marks and 200% zoom are visually checked.
+13. Slow loading, failed media and context loss show useful fallbacks.
+14. Actual performance is measured on at least one specified device/browser; do not advertise universal 60 fps from a screenshot.
+15. Generated figures are checked for anatomy, costume and identity consistency; Chapter 11’s intentional divine multiplicity is not confused with accidental limb errors.
+16. No unlicensed reference assets, proprietary logo, copied brand copy or unsupported font license assumptions are included.
+17. Supplied visual references have been registered and actually used; every significant character, costume or composition change is intentional and traceable.
+18. Meshes, shading stages and beauty images share a coherent asset revision; changing one has not silently broken the others.
+19. Fine details remain convincing at final viewport size: hands, faces, bow grip, reins, wheel construction, material edges, glyph shaping, cursor scale and hairline rules.
+20. The final comparison identifies measured matches and remaining differences; a statement such as “same architecture” is supported by working behavior and the component/data structure.
+Capture representative screenshots and a short interaction recording when tools permit: opening rest; pointer path; statement/media sequence; index hover/focus; dark menu; representative chapter; Chapter 11; deeper reading; mobile; reduced motion. Compare framing and motion against the reference at matched viewport sizes. A still image alone does not validate an interaction.
+P. Work sequence and completion report
+Proceed through these gates without asking for routine permission:
+1. Establish the source-grounded reference audit, supplied-image register, content edition, art bible and asset inventory. Mark missing references honestly and progress independent engineering.
+2. Prove the defining effect first: original representative relief mesh, packed or equivalent coherent shading, persistent user field, automatic path, scroll reprojection and pale/dark continuity. Pass J7 with repeatable motion evidence. Do not postpone this until the final polish stage.
+3. Build a complete vertical slice around it: loading → opening relief → statement → one chapter → dark menu → reader. Validate pacing, typography, navigation and portrait composition.
+4. Produce and integrate the full visual and content set, deriving new scenes from the supplied references and established art bible.
+5. Build every route and deeper-reading view, then refine transitions, sound behavior and responsive details.
+6. Test the full acceptance checks, correct specific failures and package the result with its evidence.
+Deliver the runnable website source, actual generated/prepared assets, original relief-authoring source where available, mesh exports, shading/bake manifest, supplied-reference register, asset inventory, content/source inventory, setup instructions, build output or preview where supported, and a concise test report. Include a short motion comparison and the final tuning configuration. Report completed, approximated and unfinished elements honestly. A 2.5D fallback must be labeled as such and cannot be passed off as the requested primary relief. Do not call an art direction draft or unfinished mockup a complete production website.
+
+Begin the work now. The brief is sufficient for routine decisions. Prioritize visible craft, faithful interaction, complete storytelling and a result that actually works.
+WEBSITE MASTER PROMPT — END
+ARTWORK MASTER PROMPT — BEGIN
+You are the art director and image-production artist for Bhagavad Gītā — The Stillness Before Action, a complete cinematic and sculptural website.
+
+The reference for craftsmanship and visual restraint is https://immersive-g.com/: tactile pale bas-relief, subtle natural details, quiet editorial space, dark carved worlds, integrated three-dimensional symbols and convincing light. Create original Gītā artwork with comparable material sophistication. Do not copy the studio’s logo, proprietary sculptures or client imagery.
+
+Produce actual images using the image-generation tool available to you. Do not merely describe images or return prompts unless image generation is unavailable. This production brief supplies the prompts and decisions. Work through it systematically. Use the highest useful native resolution the tool actually supports, report the real dimensions, and never label a smaller image “8K” because that phrase appeared in the prompt.
+
+Use the time available for detail, consistency and correction. A large production set will require batches. Do not promise silent background work or pretend a tool can output the entire set in one call. Maintain a completed-asset ledger and an exact continuation point. If generation limits stop the session, preserve the generated assets and list the next asset ID. Do not restart approved/completed assets unnecessarily.
+0. Start from the user’s visual references
+The user will supply reference images showing the intended Bhagavad Gītā world, Kurukṣetra, Krishna, Arjuna, chariots, armies and related artwork. Those actual references are the principal art-direction input. The character and palette descriptions below are defaults for unresolved details, not instructions to overwrite the supplied visual vision.
+
+Inspect each received image at full available resolution before generating derivatives. Assign stable IDs such as UREF-01, UREF-02 and so on, and maintain a register containing its actual filename, depicted content, intended role, distinctive visible details, what must be preserved, what may change, and which assets will use it. Do not describe a reference as received, inspected or incorporated until it has actually been provided and used.
+
+Assign reference roles precisely:
+Reference role	Preserve	Adapt where required
+Character identity	Facial proportions, age, complexion treatment, hair, distinguishing features, demeanor	Pose, expression, shot angle and light, while keeping the person recognizable
+Costume and objects	Armor construction, textile layers, jewelry vocabulary, bow, chariot and harness design	Natural folds, wear, viewing angle and placement consistent with the scene
+Battlefield composition	Scale, army spacing, chariot relationship, horizon, dust, emotional atmosphere	Camera framing and breathing room for the website; no unexplained geography changes
+Architecture and environment	Material, structural vocabulary, scale and atmospheric depth actually shown	Scene-specific placement; do not insert a palace or temple into the open battlefield without narrative reason
+Light and color	Direction, softness, tonal balance, skin/material response and overall grade	Controlled exposure for readability; coherent time-of-day changes only
+Material/detail	Stone carving, metal finish, woven cloth, skin, wood grain and weathering	Level of detail appropriate to the final display scale and relief interpretation
+Website reference	Spatial rhythm, sculptural revelation, editorial quiet, transitions and interaction quality	Bhagavad Gītā content, imagery, symbols, chapter routes and accessible equivalents
+
+
+Resolve conflicts with this priority: the user’s latest explicit direction; the user-designated primary reference for that property; consistent details across the supplied set; a documented derived visual bible; then this brief’s defaults. The website reference governs interaction and editorial architecture; the supplied artwork governs the Gītā visual world. If two images disagree, identify the disagreement and choose the role-appropriate reference for a reversible study. Ask for a decision only when it would materially change the final identity or story, while continuing independent work.
+
+Use the actual reference-image attachment/edit controls supported by the generation tool. Merely writing “use my image” in a text prompt is insufficient if the image has not been supplied to the tool. Do not invent unsupported numerical image weights or claim deterministic identity locking. Inspect the generated result against its references and correct specific differences.
+
+For each production image, assemble a concrete instruction containing: asset ID and website role; relevant UREF IDs; visible features to preserve; chapter action and emotion; subject positions and scale; camera/perspective; material behavior; light direction; palette; quiet areas and crop constraints; and exact exclusions. Describe how to translate the reference into the output, rather than adding only adjectives such as cinematic, epic or masterpiece.
+
+Create additional references when they solve a real continuity gap: a needed profile view, hands holding the chosen bow, chariot geometry, horse harness, cloth detail, stone treatment or wider battlefield geography. Derive them from the supplied set. Use those derived images to extend the same world, not to replace the user’s references with an unrelated style. Keep beauty references separate from technically validated geometry, depth and material data.
+
+If the promised images have not arrived, mark their register as pending. Continue the material/interaction plan and clearly provisional studies where useful. Do not finalize Krishna’s or Arjuna’s identity from the defaults and later pretend it came from the user’s images. The website’s engineering can progress with a provisional original mesh while final art direction awaits the references.
+1. What you are making
+Create a coherent original asset family with two connected visual modes:
+
+Mode R — carved revelation: warm ivory limestone/plaster relief emerging from a continuous wall, exceptionally fine carving, subtle pores, believable shallow depth, soft contact shadows, restrained grazing light, almost monochrome. This is the core identity and should be recognizable throughout the site.
+
+Mode H — living narrative: photographic/cinematic plausibility, culturally considered Indian epic visual language, human emotional realism, exact material texture and disciplined composition. Use muted earth, mineral, silk, bronze, water and dawn light. Cosmic luminosity is reserved primarily for Chapter 11. These are fictional artistic depictions, not archaeological reconstructions or documentary photographs.
+
+Dark stone variants must feel like the same world seen through a different material and lighting treatment, not unrelated black-and-gold posters. Avoid artificial plastic skin, excessive ornament, crushed-black detail, candy saturation and indiscriminate magical glow.
+2. Global visual bible
+The following defines a coherent fallback direction. Replace any conflicting visual choice with the applicable supplied reference, while preserving chapter meaning, correct anatomy, production consistency and the website’s required quiet composition. Record the final decisions in one visual bible that accompanies every later generation.
+Characters
+Krishna: a consistently recognizable adult Indian male figure with composed, compassionate attention; refined but human facial structure; deep expressive eyes; dark wavy hair; a restrained crown or head ornament with a single peacock feather; controlled, traditional blue-toned skin rendered with material and lighting nuance rather than neon blue. Wear a warm muted yellow/saffron dhoti and a restrained indigo drape, with limited fine gold jewelry. In ordinary narrative scenes he has two arms. He is the charioteer and teacher here; do not introduce a flute into battlefield teaching scenes merely because it is a familiar Krishna attribute.
+
+Arjuna: a consistently recognizable adult Indian warrior with athletic but credible proportions, medium warm-brown skin, dark eyes, dark tied-back hair, a fixed subtle facial-hair choice and a coherent set of finely worked bronze-toned armor over natural textiles. Avoid a superhero bodybuilder silhouette and Western medieval armor. His bowed posture, tense hands and searching expression in Chapter 1 gradually become attentive, awestruck and finally clear. Keep face, age, costume construction and bow design consistent.
+
+These descriptions establish an artistic interpretation rather than claiming one compulsory iconographic tradition. Use the supplied character references and their consistent derived studies for all later scenes. Do not switch faces, ages or costume systems between chapters.
+Chariot and setting
+Create one consistent, plausible open two-wheeled chariot with carved wood, bronze fittings, an identifiable wheel motif, coherent axle, yoke, reins and platform. Use a four-white-horse configuration as a chosen traditional visual convention; do not claim the Gītā itself specifies that exact count. A restrained banner can contain a verified, intentionally designed Hanuman emblem if it can be rendered clearly; otherwise use a simple fabric standard without fake symbols. Avoid modern tack, machinery, European heraldry or a fantasy war tank.
+
+Kurukṣetra is an expansive plain with distant opposing armies, dust, banners and open sky. The drama is the pause before action. Avoid gratuitous gore, spectacular explosions or a battlefield that looks like a video-game boss arena. Keep the relative positions of Krishna, Arjuna, the wheel, horses, horizon and armies consistent between the opening and ending.
+Camera and lighting
+- Relief assets: straight-on or near-orthographic view, no wide-angle warping; nominal upper-left grazing light; coherent shallow depth and soft ambient fill.
+- Human story images: roughly a 35–50 mm full-frame-equivalent perspective unless a scene specifies otherwise; natural anatomy and unforced cinematic framing.
+- Macro details: roughly 85–100 mm-equivalent perspective; deliberate focus plane and physically reasonable depth of field.
+- Grand Chapter 11 scene: wider perspective is allowed, with a stable horizon and intentional human scale.
+- Material colors must survive browser display. Keep shadow detail and highlight information; do not bake extreme contrast into every asset.
+- Do not change the direction of the sun between connected shots without narrative reason.
+Website composition
+Use large intentional quiet regions. Most landscape narrative images need approximately one third of the frame with lower detail for nearby interface composition; do not put text into that space. Opening reliefs need a central quiet band. Important faces, hands, bow tips and horse heads must survive desktop and portrait layouts.
+
+No image may include a title, caption, logo, watermark, border, interface button, mock website, random writing or pseudo-Sanskrit. Generate artwork only. Exact lettering and numerals will be built separately as real text/vector geometry.
+Consistency rules
+Before each scene, reuse the applicable user-reference IDs, derived character studies and established material references. Preserve identity, costume, jewelry, chariot design and grading. Reference-based editing improves consistency but does not guarantee it; visually compare every result.
+
+Create variants from the corresponding finished master by editing/reference conditioning. Never generate supposedly aligned light and dark states as unrelated images. Do not claim separate images have pixel-exact registration unless it was verified. If alignment fails, use one source image plus a real-time material treatment or a deliberately hidden transition.
+3. Asset manifest and naming
+This is the complete target inventory, not a claim that all files already exist:
+Group	Count	Purpose
+Shared assets S00–S11	12	Character/chariot references, opening/closing walls, transition fields and material textures
+C01-H through C18-H	18	One narrative hero per chapter
+C01-D through C18-D	18	One purposeful close detail per chapter
+C01-R through C18-R	18	One chapter-specific ivory relief
+C01-P through C18-P	18	Portrait recomposition of each chapter hero
+S04-P, S05-P, S08-P	3	Portrait opening, dark-menu and closing compositions
+Core bitmap target	87	Full shared and chapter set
+
+
+The 87 outputs describe functional asset slots, including references and working textures as well as visible website images. A suitable supplied image or validated derivative may fulfill a slot; do not regenerate it merely to increase a count. Record whether each slot is supplied, derived, newly generated, technically prepared, provisional or complete. User inputs are registered separately and are not falsely counted as newly generated work. The website does not load all assets at once. Some detail outputs may be valid, high-resolution crops/edits of a hero; do not invent a second composition when a precise detail from the same scene is better.
+
+Suggested filenames: s04-opening-ivory-relief-landscape.png, c01-arjuna-despair-hero.png, c01-arjuna-despair-detail.png, c01-arjuna-despair-relief.png, c01-arjuna-despair-portrait.png. Use the actual format delivered; do not change extensions without converting the file.
+
+Additional non-bitmap production: exact numerals 01–18 or १–१८, logo/wordmark, SVG rules/icons, meshes, masks, verified depth/normal maps, packed material maps, responsive encodes and animation. These require appropriate design/3D/code tools. Do not pretend an AI beauty image is any of these assets.
+4. Shared-asset prompts
+For every prompt below, apply the actual reference register, final visual bible and negative constraints. Treat the written subject descriptions as adaptable scene directions within the user’s visual world. Create each output separately with a clear asset ID. Reference sheets are internal production material and may contain multiple views; final website art must not be a collage. When a supplied image already establishes identity, derive the needed views from it instead of inventing a replacement character.
+S00 — Krishna identity reference
+Create an internal character reference board of the same adult Krishna in a neutral studio environment: a clear front head view, three-quarter head view, side profile and one full-body standing pose. Use the character specification above, with consistent facial structure, hair, single peacock feather, warm yellow/saffron draped clothing, indigo fabric and restrained finely worked jewelry. Calm, attentive expression; realistic skin response with traditional blue-toned coloration handled subtly. Soft neutral light, accurate hands, normal two-arm anatomy. No flute, no floating symbols, no decorative scenery, no text labels. This is a consistency reference, not a devotional poster. Render enough fabric and jewelry detail to guide later scenes.
+S01 — Arjuna identity reference
+Create an internal character reference board of one adult Arjuna: front face, three-quarter face, profile and full-body pose. Follow the visual bible’s warm-brown skin, tied-back dark hair, consistent subtle facial hair, credible athletic proportions, natural textile layers and restrained bronze-toned armor. Define one recognizable bow with plausible grip, string, curvature and carved detail. Hands must be clear and anatomically correct. Neutral studio background and soft even lighting; no battle scene, no text. Include a natural, attentive expression rather than an aggressive grimace. This same person and equipment must continue through the entire series.
+S02 — Chariot, horses and prop reference
+Create a coherent reference image set within one internal board showing the same open two-wheeled chariot from side and three-quarter views, a close wheel/axle view, a rein/yoke detail, and the selected bow and conch. Use plausible carved wood, worn bronze and natural rope. Show the intended four-white-horse arrangement clearly in one view without merging bodies or reins. Use a restrained standard. Each view must agree on construction, material and proportions. No decorative fictional script, no impossible floating wheel, no modern machinery, no war tank, no perspective contradictions. This board is a visual reference; engineering-valid geometry must still be modeled and checked separately.
+S03 — Material and light reference
+Create a single carefully composed material study: a carved lotus petal, a small section of chariot wheel, a simple cloth fold and a feather detail, all emerging from one warm ivory limestone/plaster slab. Use near-orthographic framing, delicate stone pores, tiny edge wear, shallow relief and soft upper-left grazing illumination. No separate colored materials; these are all carved from the same mineral. Retain fine contour shadows without dark outlines. Include broad untouched mineral areas so the surface can be judged. No text, grid, border or labels. This image defines the relief quality for the series.
+S04 — Opening ivory relief, landscape master
+Create a wide landscape artwork intended for approximately 16:9 display: a continuous pale ivory limestone/plaster wall with an exceptionally detailed shallow bas-relief of the Bhagavad Gītā’s battlefield pause. Krishna and Arjuna are carved into the midground toward the right of center, emotionally readable but restrained. Arjuna’s bow lowers toward the chariot; Krishna’s poised attention holds the scene. A carefully carved wheel occupies the lower-left region; horse profiles and fine reins flow toward the far right; distant standards and a faint plain create depth without crowding the sky. Sculpt cloth hems, jewelry edges, horse hair, fingers, wheel fittings and fine stone pores with consistent material logic. Keep the horizontal band from about 42% to 58% of image height comparatively quiet and low relief for the website’s central line; do not put faces under that band. Keep the upper-right and lower corners quiet for controls. Soft upper-left grazing light, restrained ambient occlusion, no colored paint, no gold, no frame, no text. The result must look like a real commissioned relief wall photographed carefully, not a flat line drawing or a grayscale painting.
+S05 — Dark menu relief, aligned edit
+Use S04 as the editing reference. Preserve its camera, crop, major contours and relative positions. Transform the surface into deep charcoal stone with subtle mineral variation, delicate grazing highlights and readable dark relief. Add one restrained irregular seam of warm inner light near an outer lower region, avoiding every text-safe area. The seam should suggest an opening into another space, not a violent crack or molten lava. Preserve carved faces and hands. Do not invent a new chariot or move the horses. Keep highlights below clipping. No typography. Report any visible composition drift instead of claiming exact alignment. This is an artistic dark state; actual real-time relighting will be handled in the renderer.
+S06 — Left transition relief field
+Create a wide ivory relief panel in the exact S03 material language. Arrange a partially seen chariot wheel, disciplined reins, a conch and lightly carved dust/wind curves toward the lower-left and side edges. The center and right half become increasingly quiet mineral surface. Use shallow connected carving, soft occlusion, continuous upper-left light and the same surface scale as S04. This is a transition field for scrolling, not a standalone poster. Avoid a frame, vignette border, figures cut abruptly at the edge or a dense decorative mandala. Allow sufficient neutral overlap for a technical artist to blend the panel with neighboring surfaces.
+S07 — Right transition relief field
+Create the companion transition field to S06 with the same camera, material scale and light. Place a lotus stem, a softly folded cloth edge, a fine feather and a modest banner detail toward the right and upper-right, leaving a broad quiet center and left region. Integrate each shape into the mineral wall instead of laying objects on top. Use calm asymmetry and gradual changes in carving depth. Fine veins, fibers and stone detail should reward close inspection without filling the page with ornament. No writing or frame. This panel must feel like an adjacent section of the same commission, although exact seamless tiling must be checked separately.
+S08 — Closing ivory relief, reference-preserving edit
+Use S04 and the same character/chariot references. Preserve the geography, camera and carved material. The scene is again the chariot between the armies. Arjuna is now upright and attentive, with the bow held in a stable, purposeful position rather than lowered in distress. Krishna’s face remains calm; no triumphal grin. The light is subtly clearer while remaining monochrome and physically plausible. The armies and battlefield have not disappeared. Maintain the central text-safe band and the opening scene’s quiet regions. Express changed understanding through posture and relationship, not a magical victory transformation. No text, no new architecture, no celebratory battle aftermath.
+S09 — Quiet ivory surface
+Create a high-resolution, nearly flat, front-facing warm ivory limestone/plaster texture with fine mineral variation, subtle pores and extremely restrained natural imperfections. Even diffuse illumination with no directional cast shadow, strong vignette, carved object or recognizable repeated landmark. Suitable as a base surface under text and as a material reference. Aim for tile-friendly edges; actual seam testing and correction are required before calling it seamless. No invented inscriptions or decorative cracks. Preserve a calm tonal range so small dark text remains readable above it.
+S10 — Quiet charcoal surface
+Create a companion charcoal mineral surface with fine-scale physical roughness and extremely subtle cool/warm variation. Broad, controlled dark values retain material information without large shiny highlights. Front-facing, evenly lit, no vignette, no sculpture, no text. This is an artistic surface source, not a certified roughness, metalness or normal map. Make its edge structure suitable for later seam correction and avoid recognizable repetitive marks.
+S11 — Empty Kurukṣetra atmosphere plate
+Create a wide, restrained cinematic plain at early light, using the same horizon and landscape language planned for C01-H. Place distant army standards near the side horizons and low dusty air close to the ground. Keep the center free of people, horses and large objects, with believable space in which foreground layers can later be composed. Soft earth colors, pale light, subtle aerial perspective and a stable level horizon. No giant temple, no modern city, no mountains invented merely for spectacle, no dramatic explosion. This is an empty supporting plate, not a factual photograph of a historical event.
+5. Chapter output adapters
+For each chapter, use its detailed scene brief below to create four deliverables:
+
+H — hero: a single landscape narrative image, preferably approximately 16:9. Follow the stated camera, light, subject positions and quiet region. Use finished character references whenever those characters appear. No collage, image-in-image or UI.
+
+D — detail: a separate approximately 4:5 image or a sufficiently detailed reference-preserving edit focusing on the specified object/action. Preserve material and physical continuity. Do not invent a contradictory prop. Fine-detail quality matters more than shallow-focus blur.
+
+R — relief: reinterpret the chapter’s specified symbolic/narrative arrangement as a continuous warm ivory shallow relief, using S03’s material and lighting. Front-facing, restrained depth and generous flat surface. Characters and objects must still be identifiable; they are carved from one material, not colored figures pasted over stone. Generate a composition suited to a wide panel, approximately 16:9, with a low-detail central/side region designated in the brief. These are chapter-specific variations, not eighteen copies of S04.
+
+P — portrait: re-compose the H scene for approximately 9:16, keeping its central meaning, identities and material logic. This is an adaptation, not necessarily an exact crop. Maintain a quiet upper region for a small title and protect the central faces and hands from controls. Keep physically coherent perspective. Do not squeeze or stretch the landscape image.
+
+Produce H first, then derive D, R and P using the available reference/edit workflow. A beauty relief is not a normal/depth map. Write the actual output dimensions and completion status into the asset ledger.
+6. All 18 detailed scene briefs
+C01 — The bow lowers
+Theme: Arjuna’s distress, not cowardice as a visual caricature.
+
+H prompt: Create an intimate yet spacious view of the chariot paused between two distant armies. Camera slightly outside the chariot at a natural human height with a 40 mm-equivalent perspective. Place Arjuna in the right third, seated or sinking into the chariot with shoulders weighted by grief and moral uncertainty; his recognizable bow descends diagonally toward the lower center. Krishna is farther left within the same chariot, composed and attentive, not dominating the frame with supernatural effects. The four horses are only partly visible at the far right, with plausible reins. Distant banners and softly suspended dust establish the armies without identifiable violence. Early muted light catches fingers, cloth and worn bronze. Keep the upper-left third relatively quiet. Convey the unbearable recognition of people on both sides through Arjuna’s expression and posture, not tears exaggerated for melodrama. No fallen bodies, no battle action, no magical glow.
+
+D: Arjuna’s hand loosening on the bow grip, knuckles and string physically correct, chariot wood beneath.
+
+R: The lowered bow forms the main diagonal; wheel below, two figures above; quiet left-center stone.
+C02 — Listening becomes possible
+Theme: The first opening toward discernment and steadiness.
+
+H prompt: Use the same chariot, characters and established light. Frame a calm three-quarter two-person composition at roughly 50 mm equivalent. Krishna sits or stands in the charioteer’s position, making one small, natural explanatory gesture with a clearly articulated hand. Arjuna turns toward him, still troubled but now listening closely. Give the faces enough scale for emotional subtlety. Let shallow dust, passing fabric and the still wheel distinguish changing surfaces from the steadiness of attention. Do not represent the Self as a tiny glowing person leaving a body. Keep the rightmost third quiet and atmospheric for the page composition. Tone is intimate, humane and intellectually serious. Detail silk weave, the edge of the feather, fine metal work and natural skin response without visual clutter.
+
+D: Krishna’s restrained teaching gesture and Arjuna’s attentive hand resting nearby, no fused fingers.
+
+R: Two profiles connected by an arc of draped cloth; no floating letters; low-detail center below their faces.
+C03 — The work of action
+Theme: Deliberate action and responsibility without possessiveness.
+
+H prompt: Create an explicitly symbolic, carefully staged cinematic close-wide scene of the chariot’s wheel, axle and reins. A human hand performs a necessary adjustment with care; the action belongs to a believable physical mechanism rather than a heroic pose. A second pair of hands may support the task, but keep anatomy unmistakable. Show the wheel as functional wood and bronze, not an oversized glowing chakra. Dust, rope fibers, small worn edges and pressure in the fingers communicate effort. Use lateral early light and a grounded low camera, approximately 50 mm equivalent, with the wheel concentrated on the left and quiet dusty depth at right. This is an editorial metaphor for action, not a claim that this repair occurs in the scripture. Avoid victory symbolism, money, harvest guarantees or mystical machinery.
+
+D: Tension in a real rope/rein and a careful hand against the wheel fitting.
+
+R: A partial wheel, one working hand and gently interlaced lines; generous open right side.
+C04 — Knowledge transforms
+Theme: Teaching, inquiry and the fire-of-knowledge metaphor.
+
+H prompt: Create a restrained symbolic scene of a small contained flame illuminating the open space between teacher and student, with the same Krishna and Arjuna reference identities if their faces appear. The flame is a quiet visual metaphor, not a literal fire added to the battlefield narrative. Fine suspended dust catches its light, and the warm illumination reveals carefully made objects and attentive hands. Suggest continuity of teaching through repeated subtle depth planes of light and stone, not a crowd of invented historical gurus. Use a medium 50 mm-equivalent perspective, low visual density and a dark mineral background with warm shadow detail. Let the left half breathe. The flame has real shape and scale; no fireball, exploding pages, burning scripture, fake manuscript text or supernatural laser beam.
+
+D: A small flame and warm light on an open listening hand, with no text-bearing prop.
+
+R: Fine flame contours carved into stone beside an open hand; restrained layered arcs suggest transmission.
+C05 — Untouched like the lotus
+Theme: Engagement without adhesion, using the lotus-leaf metaphor.
+
+H prompt: Photograph-like cinematic study of a single mature lotus leaf above still dark water, carrying a clear rounded droplet that reveals its surface tension. The leaf is naturally imperfect, with fine branching veins, delicate edge undulation and plausible waxy reflectance. A restrained lotus bloom may appear far behind in soft focus but must not become a crowded ornamental arrangement. Use a low close perspective around 85 mm equivalent, gentle early light from upper left and a quiet dark right half. Render the waterline and reflection consistently. The scene should express participation without clinging through real materials, not floating words or a spiritual icon montage. Keep the palette muted sage, mineral grey and warm ivory.
+
+D: The droplet on the leaf with physically plausible highlight and magnified vein detail.
+
+R: A leaf, bead-like droplet and one stem carved from ivory stone; quiet central band.
+C06 — Returning the mind
+Theme: Meditation as repeated attentive return; the lamp in a windless place.
+
+H prompt: Create a quiet symbolic meditation setting with a small steady oil lamp sheltered from wind. A seated adult figure is visible at a respectful distance, with dignified grounded posture and natural anatomy. Do not imply that the battlefield dialogue literally relocates to this place; this is a teaching image. Use simple stone, woven natural fibers and very little ornament. A single stable flame gives an intelligible focal point while soft ambient dawn light keeps the figure readable. Frame at 50 mm equivalent with the lamp on the lower-right and open air or stone on the upper-left. No chakras rendered as colored stickers, no floating body, no swirling energy tunnel. The visual emotion is disciplined quiet, not trance spectacle.
+
+D: The steady flame, oil surface and worked rim of the lamp; no flickering blur baked in.
+
+R: Lamp, folded seated silhouette and one soft contour suggesting breath; preserve broad smooth stone.
+C07 — The thread through all
+Theme: A connecting ground represented through the pearl-thread image.
+
+H prompt: Create a refined material still life of natural pearls threaded on one continuous, physically credible thread. Arrange the strand in a restrained flowing arc across a charcoal stone plane, with several pearls rising slightly because of the real curvature of the surface beneath them, not floating without cause. Show nacre irregularity, tiny contact shadows and the thread appearing between pearls. Soft directional light from upper left reveals unity without making every pearl identical. The arc should occupy the lower-left and middle, leaving a large quiet upper-right. Use a macro-to-medium 85 mm-equivalent perspective, subdued ivory and charcoal, and museum-level material detail. No star field, no giant glowing DNA strand, no printed symbols.
+
+D: Three pearls and their connecting thread, with correct contact and focus.
+
+R: A connected strand emerging from a continuous wall, with pearl forms shallow rather than spherical objects pasted on.
+C08 — Beyond the passing horizon
+Theme: Remembrance, impermanence and the imperishable; symbolic, not a diagram of an afterlife.
+
+H prompt: Create a spacious contemplative landscape of an ancient plain or river horizon at the boundary of night and morning. A very small human silhouette stands on firm ground near the lower-left, facing the expanse. Light changes gradually across the air; delicate moving clouds and a still horizon distinguish passing appearances from visual continuity. Use a natural 40 mm-equivalent lens and believable atmospheric perspective. The upper-right two thirds are quiet. Do not show a dead body, an escaping soul, a guaranteed heavenly destination or a religious travel portal. Keep the colors mineral blue-grey, warm dust and restrained dawn ivory. Let the scale and stillness carry the meaning.
+
+D: A quiet water/shore or earth/light boundary with delicate real texture, not an abstract gradient alone.
+
+R: A low horizon, small grounded figure and shallow cloud contours; maximum empty stone above.
+C09 — The simple offering
+Theme: Sincerity of devotion through leaf, flower, fruit and water.
+
+H prompt: Create a reverent, unpretentious still life containing one leaf, one fresh flower, one natural fruit and a small vessel of clear water on a simple stone surface. Arrange them with breathable asymmetry, not a commercial product grid. Use handmade material, a carefully formed water meniscus, naturally imperfect petals and a visible leaf vein structure. A pair of open human hands may approach from the lower edge without hiding the objects. Warm morning light, 50–85 mm-equivalent perspective, soft contact shadows. Keep the left-upper third empty and readable. The quality lies in observation and sincerity; no enormous gold altar, glitter, banknotes, decorative Sanskrit, fake ritual diagram or extravagant wealth.
+
+D: One flower and the water vessel near an open hand, preserving physical scale.
+
+R: The four offerings connected by a shallow stone surface; a quiet upper band.
+C10 — The extraordinary within the world
+Theme: Divine manifestations, represented as one coherent landscape rather than a collage.
+
+H prompt: Create a single believable panoramic landscape combining a distant great mountain, a flowing river and one venerable tree in a coherent geography. This is an editorial composite inspired by the chapter’s language of manifestations, not a claim to document a named real location. Use natural aerial perspective and consistent dawn light from one direction. Detail rock, bark, water current and cloud scale carefully. A small human viewpoint should establish scale without turning the scene into tourism advertising. Use about a 35 mm-equivalent perspective. Concentrate the strongest forms on the right, leaving a quiet band of sky and distant plain at left. No cut-and-paste objects, no simultaneous suns, no floating symbols, no giant cosmic face in the clouds.
+
+D: A physically specific detail of river moving around rock or bark receiving light.
+
+R: Mountain, river and tree integrated into one shallow relief with distinct depth planes and clean negative space.
+C11 — The universal form
+Theme: Awe and disorientation before overwhelming totality, including the dimension of time.
+
+H prompt: Create the central dramatic artwork of the series: Arjuna appears small and grounded in the lower-left foreground, reacting with reverent awe to Krishna’s universal manifestation filling the larger right and upper field. Use the established Arjuna identity and garments. The manifestation is deliberately composed sacred multiplicity: ordered layers of divine faces, eyes, crowns and arms with intelligible anatomical organization, interwoven with luminous cosmic depth and innumerable worlds. This is not accidental extra-limb distortion. Preserve a calm organizing axis within the overwhelming scale. Include an austere, slightly unsettling sense of time and dissolution without graphic bodily destruction. Use deep indigo-black, ivory radiance and disciplined bronze-gold accents. Manage highlight detail; no featureless white explosion, random neon planets or science-fiction armored monster. Use a wide but controlled perspective. Reserve a quiet lower-right margin for adjacent UI, never place text across the divine faces. Awe must come from scale, order and depth, not visual noise.
+
+D: A purposeful region of ordered divine eyes/hands/crown detail, free of fused fingers and malformed facial fragments.
+
+R: An extremely refined shallow carved cosmic arrangement with Arjuna visibly smaller below; hierarchy matters more than ornament density.
+C12 — Devotion returns to the human scale
+Theme: Compassion, steadiness and relational devotion after the vision.
+
+H prompt: Return to the recognizable Krishna and Arjuna in a gentle, close human-scale composition. Krishna is again in the ordinary two-armed teaching/charioteer form. Arjuna’s posture is receptive, no longer physically recoiling from the cosmic vision. A single offered lotus or open hand can carry the devotional theme without creating a new unsupported literal event; present it as symbolic if used. The world is quiet, with soft natural light, muted textiles and a shallow background. Frame at approximately 50 mm equivalent with faces on the left and open atmosphere on the right. The relationship conveys compassion, respect and attention. Avoid sentimental exaggeration, forced smiles, giant heart shapes, tears used as decoration or another cosmic backdrop.
+
+D: An open hand or lotus near a calm garment fold; preserve the characters’ identity cues.
+
+R: Two figures in a restrained facing composition, with a small lotus low in frame and quiet stone to one side.
+C13 — The field and the knower
+Theme: Distinguishing the field of experience from its knower; a visual metaphor rather than a scientific claim.
+
+H prompt: Create a broad cultivated field seen from a low elevated vantage, with textured earth, fine lines of growth and one observing adult figure at the edge. The figure stands outside the densest field pattern while remaining within the world, looking carefully rather than possessing or conquering it. Use one coherent dawn-light direction and natural 40 mm-equivalent perspective. Avoid making the observer a floating ghost or a brain outside a body. Let a soft reflection in a small water channel subtly complicate the relation of observer and observed without turning it into a literal schematic. Keep the upper-left region quiet. This is a contemplative editorial analogy, not a literal event in the battlefield dialogue.
+
+D: A precise boundary between cultivated ground, reflected sky and the observer’s grounded shadow.
+
+R: Furrow patterns and one modest observing silhouette integrated into a single wall, broad smooth sky above.
+C14 — Three qualities, one weave
+Theme: Sattva, rajas and tamas as interacting qualities, not racial or moral identities.
+
+H prompt: Create a sophisticated symbolic material study of three intertwined natural textile strands or ribbons. One is light and translucent, one has a warmer active fold, and one is dense and shadowed. They belong to one continuous woven structure rather than three isolated badges. Use ivory, muted copper and charcoal, with physically plausible fibers, tension, overlap and shadow. Avoid assigning the qualities to human skin colors or presenting darkness as a people’s identity. Frame in a dark, controlled studio-like mineral environment at roughly 85 mm equivalent. The strongest weave occupies the center-right, with quiet space at left. No labels, charts, neon energy ropes or three unrelated objects.
+
+D: The point where all three materials cross, showing unambiguous layering and believable fiber scale.
+
+R: Three distinguishable carved ribbons in one ivory material; differentiate by form and texture, not colored paint.
+C15 — The tree with roots above
+Theme: The inverted aśvattha tree and the image of entanglement.
+
+H prompt: Create a solemn, highly detailed symbolic inverted sacred fig tree: roots visibly extend into the upper space and branches descend toward the lower field. Make the botanical structure intelligible, with fine root branching, fig-tree leaf shapes, bark texture and deliberate hierarchy. The inversion must be unmistakable without making the image look accidentally rotated. Upper roots emerge into a restrained source of pale light; lower branches extend into dark atmospheric depth. Use a small grounded human scale cue only if it improves comprehension. Keep one side relatively quiet and maintain a stable camera. No random upside-down forest, floating lettering, decorative zodiac wheel or exploding galaxy. The image is a visual interpretation of the chapter’s metaphor.
+
+D: The transition of trunk into descending branches, with precise leaf veins and bark texture.
+
+R: An inverted tree carved into ivory, roots above and branches below, with generous negative space along its sides.
+C16 — The quality of intention
+Theme: Ethical dispositions without racialized angels and demons.
+
+H prompt: Create one coherent symbolic composition showing the same human material world under different choices of intention. Use two restrained hand gestures within the scene: one hand carefully opens to offer or protect, while another tightly clenches around a simple object. The contrast is behavioral, not a division into light-skinned heroes and dark-skinned villains. Render both hands with equally human dignity and accurate anatomy. Use a plain stone plane, restrained directional light and credible shadow, approximately 85 mm equivalent. Leave broad quiet space above. Avoid horned monsters, violent spectacle, melodramatic split-screen light/dark faces or a simplistic good-versus-evil poster. The scene should invite self-examination.
+
+D: The open palm or a releasing hand, with natural tendons, creases and physical tension.
+
+R: A paired contrast of open and closed gestures carved from identical ivory stone, balanced but not perfectly symmetrical.
+C17 — Faith takes form in action
+Theme: Intention in offering, discipline and giving; avoid judging people by appearance.
+
+H prompt: Create a restrained, materially rich scene with three simple handmade vessels arranged at different depths, a natural offering and a human hand giving without theatrical display. The vessels share a material family but differ subtly in treatment, weight and condition, suggesting reflection on qualities of practice without putting moral labels on food, class or identity. Use earthenware, natural fibers, quiet stone and gentle directional light. A 50–85 mm-equivalent view gives intimate scale. Keep the right third low in detail. No giant ritual fire, fake Sanskrit inscriptions, gold abundance, donors posed for admiration or literal graphic comparison chart. This is an editorial metaphor and must not masquerade as an exact scriptural illustration of every category.
+
+D: A simple gift passing from an open hand to another without dramatic ownership cues; correct fingers and object contact.
+
+R: Vessels and an open giving gesture in shallow stone, with careful depth separation and a quiet upper region.
+C18 — Clarity in the same world
+Theme: Integration and Arjuna’s recovered resolve; the conversation ends before the battle narrative continues.
+
+H prompt: Return to C01-H’s exact intended location, chariot design, character identities, army positions and camera family. Arjuna is now upright and steady, holding the same bow with clear, unforced purpose. Krishna remains composed in the charioteer’s place. The horses, wheel, reins and banner agree with the opening. The light is clearer and the atmospheric dust slightly settles, but the armies are still present: the ethical world has not disappeared. Use the same muted material palette, natural anatomy and restrained 40 mm-equivalent perspective. Keep the same quiet region used in Chapter 1 so the paired images can be compared. No victorious charge, defeated enemies, celebratory confetti, halo explosion or invented battle outcome. Convey a change of understanding through posture, gaze and relationship.
+
+D: Arjuna’s hand now holding the original bow steadily, explicitly comparable to C01-D.
+
+R: Match the opening relief’s geographic family while changing Arjuna’s posture; quietly resolve the bow diagonal and preserve text-safe stone.
+7. Portrait shared assets
+Create S04-P, S05-P and S08-P as intentional portrait recompositions. Preserve the central subjects and story, but relocate supporting motifs to upper/lower edges so the artwork reads vertically. Keep the first-screen central line and top-right navigation areas quiet. The dark portrait must be derived from the portrait opening reference, not from an unrelated landscape regeneration. Preserve recognizable faces and complete hands. The closing portrait must answer the opening portrait’s composition.
+
+Never claim these are perfect crops when their composition has been regenerated. Record which outputs are crops and which are reference-guided recompositions.
+8. Layer preparation and technical handoff
+For assets used in parallax, supply or prepare a coherent background, midground and foreground only when the tools support it. Remove an extracted subject from the background through a deliberate clean-plate edit; simply cutting the subject out while leaving its painted duplicate behind creates ghosting. Check boundary halos and partially transparent hair/fabric.
+
+Use genuine transparency for cutouts. Do not render a checkerboard into a flat image and call it transparent. Preserve lighting and perspective across separated layers. Do not put a transparent-background requirement on full-frame reliefs or full-scene heroes; they need their surfaces.
+
+The primary interactive relief requires an actual modeled surface and coherent shading data. Create the beauty plate as art direction, then prepare an original relief mesh through an appropriate sculpting/reconstruction workflow. Bake the stages from that same model and UV layout; preserve subject positions, detail and lighting consistency. The website prompt’s Section J explains the reference’s field-driven geometry and packed shading. A height or normal map may supplement this pipeline, but a generated grayscale picture is not verified depth and a colored “normal-map-looking” image is not a usable tangent-space normal map.
+
+The technical handoff must identify the wall plane and local depth axis; real geometry bounds and detail tiers; UV layout; packed shading-channel definitions; known bake/deformation states; noise and plaster textures; relevant color-space settings; and corresponding beauty-reference IDs. For a height-derived mesh, check occlusions, face profiles, rein crossings and fine silhouettes manually. Do not turn photographic dark regions into holes by treating luminance as geometry. Separate source art, derived geometry and baked outputs in the ledger.
+
+If only image-generation tools are available, provide the actual beauty/reference images and a precise pending 3D handoff. Do not claim those images are working GLB files, completed bakes or proof of cursor behavior. A lower-cost 2.5D presentation may be useful as a fallback, while the requested primary desktop interaction remains an explicit engineering milestone.
+
+Do not generate numeral images. Build exact chapter numbers from verified font/vector geometry and place them in 3D scenes. Do not ask the image model to create a font file, working GLB mesh, physically calibrated material set or seamless animation unless a tool actually supports that output and it is validated.
+
+Prepare browser delivery encodes separately from archival masters. Record actual dimensions, file size, color profile when available and usage. Full-resolution images need not all load on mobile. Do not repeatedly upscale a low-quality image and mistake sharp edges for new sculptural detail.
+9. Quality-control checklist for every asset
+- Does it show the specified chapter idea, or merely generic spiritual imagery?
+- Are Krishna and Arjuna consistent with the reference sheets where present?
+- Are the specific identity, light, materials, architecture and battlefield scale from the user’s assigned references preserved?
+- Are fingers, joints, faces, bows, horse anatomy, harnesses and reins coherent?
+- Are normal scenes two-armed, with deliberate sacred multiplicity confined to the universal-form interpretation?
+- Is the light source consistent with the scene and connected shots?
+- Do cloth, wood, bronze, water, skin and stone behave as distinct materials?
+- In relief mode, are all elements truly interpreted as the same carved mineral rather than colored figures with a grey filter?
+- Is there intentional quiet space and a useful focal hierarchy at small scale?
+- Are highlights controlled and dark details visible?
+- Is there any accidental writing, watermark, decorative gibberish or malformed symbol?
+- Does the portrait version preserve meaning and complete anatomy?
+- Does the detail image agree with the hero image’s objects and scale?
+- Are opening/closing pairs recognizable as the same world?
+- Are symbolic scenes labeled as interpretations in the handoff notes?
+- Are dimensions and generation status factual?
+Correct concrete defects with targeted reference-based edits. Do not regenerate an otherwise excellent image wholesale simply to fix one hand or a small crop. Keep earlier approved/completed outputs until replacements have passed review.
+10. Execution order and first action
+Batch 0: Inspect and register the supplied images. Establish which one governs each visual property and identify missing views. If images are pending, record that fact and progress only clearly provisional studies and independent planning.
+
+Batch 1: Fulfill S00–S03 from the supplied images or compatible derived studies, establishing character, chariot and material consistency. Do not redraw an established character from defaults.
+
+Batch 2: S04, S05 and their portrait versions; validate the opening’s composition and light/dark continuity. Prepare the representative sculpture and shading handoff. In a combined website/artwork workflow, pass the running relief prototype in Section J7 before bulk chapter generation. An image-only session can continue the requested artwork, but must leave the engineering milestone pending and never describe it as validated by stills.
+
+Batch 3: C01-H/D/R/P, C06-H/D/R/P and C11-H/D/R/P. These test human emotion, material stillness and the universal-form climax before scaling the style.
+
+Batch 4: Produce the remaining chapter H/D/R/P sets in chapter order, reusing the same visual references.
+
+Batch 5: S06–S11 and S08-P; check the opening/closing relationship and complete the shared background system.
+
+Batch 6: Integrate, inspect responsive crops, correct consistency defects, prepare valid layers/maps through the appropriate tools and export delivery formats.
+
+Start by inspecting the attached references and showing a concise account of what will be preserved from each. Then produce the first needed actual asset or reference-based edit and continue through the production order within available tool limits. If no references have arrived, state that accurately and avoid treating a provisional identity as final. Make routine production choices without repeated approval questions. After each meaningful batch, show the actual generated results and a short ledger of asset IDs completed, UREF IDs used, issues corrected and what comes next. Do not describe files as created unless they actually exist or are returned by the image tool.
+
+The final asset handoff should include the actual artwork, an asset contact sheet or index if useful, filenames/IDs, dimensions, crop guidance, scene descriptions, supplied-reference register, derived character references, generation/edit history, technical readiness and known limitations. Any mesh or bake handoff must be distinguished from image-only output. The final website must use the artwork and technical assets that were actually delivered.
+ARTWORK MASTER PROMPT — END
+2. Reconstruction choices that must remain explicit
+1. Relief mechanism: the publicly served client bundle was inspected. Its field, vertex depth scaling, packed shading, automatic path and scroll behavior are established at code level. The new original Gītā implementation has not been built or runtime-validated in this prompt-writing task.
+2. Animation values: Section J distinguishes values read from the source from proposed frame-rate normalization and adaptation choices. Editorial durations in Section I remain proposed targets. Source configuration alone does not prove identical motion on a different device or mesh.
+3. Fonts: PSTimes and HelveticaNeueRegular were observed CSS names, not verified license grants or full foundry identifications.
+4. Symbols: the reference uses sculptural Roman numerals; using exact Devanāgarī or Arabic chapter numerals is a deliberate adaptation.
+5. Narrative art: the Gītā illustrations and poetic editorial copy are new creative direction. Metaphorical images are not claims about literal events or historical appearance.
+6. Full text: source access and edition verification must precede claims that the reader is complete. No verse dataset was generated or validated as part of this prompt-writing task.
+7. Generated images and supplied references: this deliverable is a production prompt and specification. The 87-slot inventory describes future outputs or suitable supplied/derived assets; those images have not been generated in this task. The user’s promised visual references remain pending and have not been invented or represented as inspected.
+8. Completeness: the prompts cover the complete target website. The live reference inspection sampled major routes and interactions; it did not exhaustively verify every project and microstate.
+9. Private authoring data: source-model authoring files, the original offline lighting/baking setup and the private repository were not accessed. Reading GLB metadata is not the same as decoding and visually validating its binary geometry. Font licensing remains unverified.
+10. Fidelity gate: a complete prompt is delivered here. Achievement of the final website’s fidelity requires the original geometry, running reveal prototype, completed routes/assets and the prescribed comparison evidence.
+3. Sources and further verification
+R1 — Creator-authored technical and design case study. Immersive Garden, “Case Study: Immersive Garden’s New Website,” Awwwards, 4 March 2025. Confirms the broad art direction, backstage concept, numerals, stack and production optimizations. https://www.awwwards.com/case-study-immersive-gardens-new-website.html
+
+R2 — First-person studio responses. “Immersive Garden,” Communication Arts. Confirms minimalism, navigation priorities and production technology. https://www.commarts.com/webpicks/immersive-garden
+
+R3 — Live reference. Home, projects, studio, selected case study and backstage were inspected on 13 November 2026. https://immersive-g.com/ · https://immersive-g.com/projects/ · https://immersive-g.com/the-studio/ · https://immersive-g.com/the-studio/our-approach · https://immersive-g.com/the-studio/services · https://immersive-g.com/projects/chartogne-taillet-1/ · https://immersive-g.com/projects/chartogne-taillet-1/backstage/
+
+R4 — Text structure and future verse verification. IIT Kanpur Heritage, Śrīmad Bhagavad Gītā chapter index. The current continuous-reading page reports 18 chapters and 701 verses, illustrating the need to identify the chosen numbering convention. The web extraction exposed the chapter index and selected verse metadata, not a complete verified verse dataset. https://heritage.iitk.ac.in/SBG · https://heritage.iitk.ac.in/SBG/read · https://heritage.iitk.ac.in/SBG/2.47
+
+R5 — Three.js official documentation. KTX2Loader and WebGLRenderer. Use current version-specific documentation for actual implementation. https://threejs.org/docs/pages/KTX2Loader.html · https://threejs.org/docs/pages/WebGLRenderer
+
+R6 — GSAP official documentation. ScrollTrigger and responsive/reduced-motion handling through matchMedia. https://gsap.com/docs/v3/Plugins/ScrollTrigger/ · https://gsap.com/docs/v3/GSAP/gsap.matchMedia%28%29/
+
+R7 — Lenis official project. Current integration and scrolling documentation. https://github.com/darkroomengineering/lenis · https://oss.darkroom.engineering/lenis
+
+R8 — Public production client code, inspected 13 November 2026. The entry bundle contains the relief field pass, vertex/fragment programs, scene updates, automatic motion and scene configuration. The home and default-layout modules provide surrounding page structure. These are deployed compiled assets, not the studio’s private repository. Entry: https://immersive-g.com/assets/entry.DyxL_KXi.js · Home: https://immersive-g.com/assets/HomePage.ClaPmn7U.js · Default layout: https://immersive-g.com/assets/default.CxpTjDRZ.js
+
+Entry-bundle SHA-256: 03005fd5882e0ad17e433c6e9b98e50f58defdaae42c02645821a4e7b1b4fffc. Release filenames and implementation can change. Research locators in this build include the flow-field class E_e, relief class D_e, fragment program C_e and vertex program S_e; these minified names are evidence locators, not suggested names for new code.
+
+R9 — Public relief asset metadata and surface resources. High-detail GLB metadata confirms 18 meshes, 6 materials, 12 WebP images and Draco mesh compression. The entry bundle defines a lower-detail fallback. The plaster and noise resources were exposed by the live page. Inspected metadata: https://immersive-g.com/webgl/home/reliefs_high_compressed.glb · Code-declared fallback: https://immersive-g.com/webgl/home/reliefs_low_compressed.glb · Surface: https://immersive-g.com/webgl/home/plaster.jpg · Mask noise: https://immersive-g.com/webgl/global/noises/mask-noise.png
+
+The long creative specifications, asset briefs, proposed motion values and Bhagavad Gītā adaptation are original production directions. They are not quoted claims from the reference studio.
