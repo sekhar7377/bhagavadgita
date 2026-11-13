@@ -71,9 +71,14 @@ lum_detail = blur(art, 1.0) - blur(art, 5)
 # at the rim like modelled plaster, instead of standing up as a flat plate.
 solid = (mask > 0.5).astype(np.uint8)
 inside_dist = cv2.distanceTransform(solid, cv2.DIST_L2, 5)
-pillow = np.sqrt(np.clip(1 - (1 - np.clip(inside_dist / 26.0, 0, 1)) ** 2, 0, 1))
-form = np.clip(low, 0, 1.1) ** 0.8
-height = pillow * (0.16 + 0.62 * form) + pillow**0.5 * (2.3 * mid + 2.9 * fine + 0.11 * lum_detail)
+pillow = np.sqrt(np.clip(1 - (1 - np.clip(inside_dist / 64.0, 0, 1)) ** 2, 0, 1))
+rim = np.sqrt(np.clip(1 - (1 - np.clip(inside_dist / 9.0, 0, 1)) ** 2, 0, 1))
+# Big volumes come from the scene's own depth at two scales, so the wheel,
+# canopy, riders and horses each swell as separate bodies.
+body = blur(dn, 9) - blur(dn, 60)
+form = np.clip(low, 0, 1.1) ** 0.75
+height = (0.10 + 0.34 * pillow) * rim + rim * (0.50 * form + 1.5 * np.clip(body, -0.2, 0.4))
+height += rim**0.5 * (2.0 * mid + 2.6 * fine + 0.10 * lum_detail)
 soft = blur(mask, 1.2)
 height = np.clip(height, 0, None) * np.clip(soft * 1.3, 0, 1) * sink
 
@@ -96,7 +101,7 @@ wall /= wall.max()
 # shadow and sky occlusion; the shader cross-fades those stages as the field
 # raises the geometry. Values are in the wall's tone space: flat plaster = REST.
 REST = 0.54504
-DEPTH_TEXELS = float(sys.argv[5]) if len(sys.argv) > 5 else 0.62 / 16.08 * W
+DEPTH_TEXELS = float(sys.argv[5]) if len(sys.argv) > 5 else 0.9 / 16.08 * W
 STEPS = 46
 STEP = 2.0
 

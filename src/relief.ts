@@ -23,7 +23,7 @@ const DISSIPATION = 0.953;
 const POINTER_EASE = 0.4;
 const WALL_W = 16.08;
 const WALL_H = 8.04;
-const DEPTH = 0.62;
+const DEPTH = 0.9;
 const CAMERA_DISTANCE = 15;
 const CAMERA_FOV = 30;
 

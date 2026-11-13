@@ -3,9 +3,9 @@
 Validates the rebuilt **opening wall**. It does not certify parity with the reference or a finished site. Everything ran in Chromium with software WebGL (SwiftShader); no physical GPU was used.
 
 - `npm run build`: PASS — strict TypeScript, Vite production build.
-- `npm test`: PASS — 7 Playwright tests, 3.7 minutes. Opening WebGL and menu keyboard flow; narrow screen with reduced motion and no motion control; band positions within 2px of the reference's measured grid at 1440×810, 28px sentence, 60% scroll cue; WebGL unavailable; missing artwork; pointer movement raises the carving (pixel contrast over the wheel); height data failing leaves a usable page.
+- `npm test`: PASS — 7 Playwright tests, 3.1 minutes on the final run. Opening WebGL and menu keyboard flow; narrow screen with reduced motion and no motion control; band positions within 2px of the reference's measured grid at 1440×810, 28px sentence, 60% scroll cue; WebGL unavailable; missing artwork; pointer movement raises the carving (pixel contrast over the wheel); height data failing leaves a usable page.
 - `npm run format:check`: PASS.
-- Tone comparison against the user's real-GPU recording of the reference (8-bit grey): wall 196 vs 196, median 190 vs 191, deepest shade about 125 vs 124, brightest plaster about 220 vs 226.
+- Tone comparison against the user's real-GPU recording of the reference (8-bit grey): wall 196 vs 196, median 190 vs 191, deepest shade about 125 vs 114–119, brightest plaster about 220 vs 220–231.
 - Visual comparison images: `docs/reference-study/2026-11-13-b/`.
 
 ## Not verified / not complete
