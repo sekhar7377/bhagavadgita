@@ -115,6 +115,8 @@ test("missing artwork provides a readable fallback without losing the story", as
 test("pointer movement raises the carving out of a resting wall", async ({
   page,
 }) => {
+  // Two WebGL walls on a software renderer make each pointer frame slow.
+  test.setTimeout(240000);
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto("/");
   await expect(page.locator("#relief")).toHaveAttribute(

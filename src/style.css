@@ -256,7 +256,40 @@ h1 {
 }
 .story {
   background: var(--paper);
-  padding: 72px var(--gutter) 135px;
+  padding: 0 var(--gutter) 135px;
+}
+/* The plaster wall continues past the opening: a second carved scene sits
+   behind the statement, as the reference does after its hero. */
+.scene-wall {
+  position: relative;
+  isolation: isolate;
+  min-height: 560px;
+  height: 100svh;
+  margin: 0 calc(-1 * var(--gutter)) 72px;
+  padding: 72px var(--gutter) 0;
+  display: flex;
+  flex-direction: column;
+  color: #030303;
+}
+.scene-relief {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  background: var(--wall);
+}
+.scene-relief canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.scene-relief[data-fallback="true"] {
+  background: var(--wall) url("/relief/scene2-fallback.webp") center / cover
+    no-repeat;
+}
+.scene-wall .section-meta {
+  color: #030303;
+  opacity: 0.6;
 }
 .section-meta {
   display: flex;

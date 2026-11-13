@@ -5,82 +5,22 @@
   ],
   "elements": [
     {
-      "name": "lotus-band-lower-left",
-      "depth": "docs/relief-sources/lotus-v2-depth.png",
-      "luma": "docs/relief-sources/lotus-v2-luma.png",
-      "separation": "wall",
-      "threshold": 0.035,
+      "name": "chariot-battlefield",
+      "depth": "docs/relief-sources/battlefield-cg-depth.png",
+      "luma": "docs/relief-sources/battlefield-cg-luma.png",
+      "separation": "full",
       "sink": {
         "bottom": [
-          0.98,
-          0.02
+          0.9,
+          0.1
         ],
-        "left": 0.0
+        "left": 0.07,
+        "top": 0.08,
+        "right": 0.16
       },
-      "height": 0.62,
+      "height": 0.98,
       "anchor": [
-        0.0,
-        1.0
-      ],
-      "pivot": [
-        0.14,
-        0.83
-      ],
-      "gain": 0.7,
-      "crop": [
-        0.03,
-        0.14,
-        0.97,
-        0.95
-      ]
-    },
-    {
-      "name": "lotus-band-upper-right",
-      "depth": "docs/relief-sources/lotus-v2-depth.png",
-      "luma": "docs/relief-sources/lotus-v2-luma.png",
-      "separation": "wall",
-      "threshold": 0.035,
-      "flip": true,
-      "sink": {
-        "bottom": [
-          0.98,
-          0.02
-        ],
-        "left": 0.0
-      },
-      "height": 0.5,
-      "anchor": [
-        1.0,
-        0.0
-      ],
-      "pivot": [
-        0.97,
-        0.2
-      ],
-      "gain": 0.65,
-      "crop": [
-        0.03,
-        0.14,
-        0.97,
-        0.95
-      ]
-    },
-    {
-      "name": "chariot-tableau",
-      "depth": "docs/relief-sources/chariot-v2-depth.png",
-      "luma": "docs/relief-sources/chariot-v2-luma.png",
-      "separation": "wall",
-      "threshold": 0.035,
-      "sink": {
-        "bottom": [
-          0.97,
-          0.03
-        ],
-        "left": 0.0
-      },
-      "height": 0.74,
-      "anchor": [
-        0.44,
+        0.4,
         0.5
       ],
       "pivot": [
@@ -88,12 +28,8 @@
         0.5
       ],
       "gain": 1.0,
-      "crop": [
-        0.0,
-        0.0,
-        1.0,
-        0.96
-      ]
+      "paint": 1.0,
+      "paint_contrast": 1.1
     },
     {
       "name": "wheel-bearer",
@@ -123,7 +59,9 @@
         0.02,
         0.98,
         0.98
-      ]
+      ],
+      "paint": 1.0,
+      "paint_contrast": 1.1
     }
   ]
 }

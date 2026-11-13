@@ -13,6 +13,14 @@ try {
 } catch {
   host.dataset.fallback = "true";
 }
+// Scene 2: the wall continues behind the statement with its own carving.
+const sceneHost = document.querySelector<HTMLElement>("#relief-scene2")!;
+let sceneRelief: ReturnType<typeof mountRelief> | undefined;
+try {
+  sceneRelief = mountRelief(sceneHost, "scene2");
+} catch {
+  sceneHost.dataset.fallback = "true";
+}
 // No visible motion control: the operating-system preference decides. With
 // reduced motion the whole carving is shown at rest instead of animating.
 const motionPreference = matchMedia("(prefers-reduced-motion: reduce)");
@@ -20,6 +28,7 @@ let paused = motionPreference.matches;
 function setMotion(value: boolean) {
   paused = value;
   relief?.setPaused(value);
+  sceneRelief?.setPaused(value);
   document.documentElement.classList.toggle("motion-paused", value);
 }
 motionPreference.addEventListener("change", (event) =>
@@ -68,6 +77,7 @@ menuButton.addEventListener("click", () => {
   document.documentElement.classList.add("menu-open");
   menuButton.setAttribute("aria-expanded", "true");
   relief?.setPaused(true);
+  sceneRelief?.setPaused(true);
 });
 let pendingDestination: HTMLElement | null = null;
 function closeMenu() {
@@ -78,6 +88,7 @@ dialog.addEventListener("close", () => {
   document.documentElement.classList.remove("menu-open");
   menuButton.setAttribute("aria-expanded", "false");
   relief?.setPaused(paused);
+  sceneRelief?.setPaused(paused);
   const destination = pendingDestination;
   pendingDestination = null;
   if (destination) {
@@ -116,5 +127,6 @@ if (artwork.complete && artwork.naturalWidth === 0) artworkFailed();
 if (import.meta.hot)
   import.meta.hot.dispose(() => {
     relief?.dispose();
+    sceneRelief?.dispose();
     observer.disconnect();
   });

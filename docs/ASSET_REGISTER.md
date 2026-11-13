@@ -107,3 +107,17 @@ The user also supplied a still of the reference studio's sculpture under dark dr
 - Depth: Depth Anything V2 Large → `docs/relief-sources/chariot-v2-depth.png` (16-bit) and `chariot-v2-luma.png`.
 - Also generated with text-only prompts and placed on the wall after the user reviewed them: `wheelbearer-plaster.png` (2048², warrior lifting a wheel overhead, matching the film's wheel-bearer) and `lotus-plaster.png` (2912×1440, lotus, vines, two cranes; used twice, once mirrored). Depth in `docs/relief-sources/wheelbearer-v2-*` and `lotus-v2-*`. `chariot-plaster.png` is unused. All sparkle-cleaned.
 - R7–R10: four screen recordings of the film's opening supplied by the user on 13 November 2026 (see HANDOFF next work, item 1). Credits and subtitles are burned in; reference only, not stored in Git.
+
+### G05 — chariot battlefield panel, ChatGPT plaster render (wall centrepiece, 14 November 2026)
+
+- Subject: the user's own ChatGPT painting, saved as `docs/references/chariot-chatgpt-subject.png` (1536×1024). Style reference: the two studio-still crops (carving manner only; the prompt forbids adding anything from it).
+- Generated in ChatGPT (user's Plus account, browser). First attempt removed the background (`chariot-plaster-chatgpt.png`); the user rejected it. Final prompt asked to carve the entire scene as one plaster relief panel: chariot group in deep relief, then armies, banners, hills, clouds and sun in progressively lower relief, uniform matte plaster, soft frontal light, no text or frame.
+- Output: `docs/references/chariot-battlefield-chatgpt.png` (1536×1024). No visible watermark. Inspected: no text or lettering.
+- Depth on GPU (DirectML), long side 1022 → `docs/relief-sources/battlefield-cg-depth.png` and `battlefield-cg-luma.png`.
+
+### G06 — scene 2 "The bow lowers", ChatGPT plaster render (14 November 2026)
+
+- Same ChatGPT conversation as G05, for character and ornament continuity. Prompt asked for a completely different camera from earlier panels: an intimate eye-level view on the chariot, Arjuna large on the right in grief, the bow sliding from his hand in a diagonal across the foreground, quiver tipping, Krishna in the left third turned toward him with calm compassion, canopy bells across the top, armies glimpsed small between them; uniform plaster, no text or frame.
+- Output 1774×887: `docs/references/scene2-falling-bow-chatgpt.png`. Inspected: no text. Depth (GPU, 1022) → `docs/relief-sources/scene2-depth.png`, `scene2-luma.png`.
+- Rejected first attempt, kept for record: `docs/references/scene2-arjuna-grief-chatgpt.png` (same wide composition as scene 1).
+- Film window: `public/art/kurukshetra.webp` re-encoded from the user's own painting `docs/references/chariot-chatgpt-subject.png`.

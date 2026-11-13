@@ -221,7 +221,7 @@ async function loadHeight(url: string, signal: AbortSignal) {
   return texture;
 }
 
-export function mountRelief(container: HTMLElement) {
+export function mountRelief(container: HTMLElement, sceneName = "kurukshetra") {
   const noop = { dispose() {}, setPaused(_: boolean) {}, reveal() {} };
   let renderer: THREE.WebGLRenderer;
   try {
@@ -286,7 +286,7 @@ export function mountRelief(container: HTMLElement) {
   const noise = data("/relief/noise.png", true);
   const plaster = data("/relief/plaster.webp", true);
   const stages = [1, 2, 3, 4, 5].map((index) =>
-    data(`/relief/kurukshetra-stage${index}.webp`, false),
+    data(`/relief/${sceneName}-stage${index}.webp`, false),
   );
   const blank = new THREE.DataTexture(
     new Uint16Array([0]),
@@ -519,7 +519,7 @@ export function mountRelief(container: HTMLElement) {
     onContextRestored,
   );
 
-  loadHeight("/relief/kurukshetra-height.png", abort.signal)
+  loadHeight(`/relief/${sceneName}-height.png`, abort.signal)
     .then((texture) => {
       if (disposed) return texture.dispose();
       wallUniforms.tHeight.value = texture;

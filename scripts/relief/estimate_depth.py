@@ -19,7 +19,12 @@ tw, th = (round(w * s / 14) * 14, round(h * s / 14) * 14)
 x = np.asarray(im.resize((tw, th), Image.BICUBIC), np.float32) / 255
 x = (x - [0.485, 0.456, 0.406]) / [0.229, 0.224, 0.225]
 x = x.transpose(2, 0, 1)[None].astype(np.float32)
-sess = ort.InferenceSession(model, providers=["CPUExecutionProvider"])
+# Prefer a GPU when the installed runtime has one (onnxruntime-directml on
+# Windows, onnxruntime-gpu with CUDA); the CPU fallback needs ~6 GB free RAM.
+preferred = ["CUDAExecutionProvider", "DmlExecutionProvider", "CPUExecutionProvider"]
+providers = [p for p in preferred if p in ort.get_available_providers()]
+sess = ort.InferenceSession(model, providers=providers)
+print("providers:", sess.get_providers())
 d = sess.run(None, {sess.get_inputs()[0].name: x})[0].squeeze().astype(np.float32)
 d = np.asarray(Image.fromarray(d).resize((w, h), Image.BICUBIC), np.float32)
 np.save(out, d)

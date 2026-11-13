@@ -6,8 +6,8 @@ The manifest lists each sculpture: its 16-bit depth map, a luminance image for
 fine carving, how to separate it from its scene, and where it sits on the wall.
 
 Writes into OUT_DIR:
-  kurukshetra-height.png   R,G = 16-bit height (hi, lo), half resolution
-  kurukshetra-stage1..5.webp  baked lighting at 20/40/60/80/100% extrusion
+  NAME-height.png   ("name" in the manifest, default kurukshetra) R,G = 16-bit height (hi, lo), half resolution
+  NAME-stage1..5.webp  baked lighting at 20/40/60/80/100% extrusion
   plaster.webp            tileable mineral texture (G is sampled)
   noise.png               tileable smooth noise used by the reveal field
 
@@ -26,6 +26,7 @@ import os
 manifest_path, out_dir = sys.argv[1:3]
 preview_path = sys.argv[3] if len(sys.argv) > 3 else None
 manifest = json.load(open(manifest_path))
+NAME = manifest.get("name", "kurukshetra")  # output file prefix, one per scene
 root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(manifest_path))))
 
 W, H = manifest["wall"]  # wall canvas, 2:1
@@ -53,6 +54,10 @@ def sculpt(spec):
         ground_row = np.maximum.accumulate(blur(ground_row[:, None], 9)[:, 0])
         ground = ground_row[:, None] * np.ones((1, w0), np.float32)
         mask = np.clip((d - ground * 1.06 - 16) / 14, 0, 1)
+    elif spec["separation"] == "full":
+        # A panel carved edge to edge (sky, armies, ground all sculpted):
+        # keep everything; the sink below feathers the edges into the wall.
+        mask = np.ones((h0, w0), np.float32)
     elif spec["separation"] == "wall":
         # A plaster render: the subject is carved out of a flat wall. Fit a
         # plane to the frame's border (only bare wall there), then keep what
@@ -61,7 +66,16 @@ def sculpt(spec):
         yy_, xx_ = np.mgrid[0:h0, 0:w0].astype(np.float32)
         b = max(4, int(min(h0, w0) * 0.03))
         border = np.zeros((h0, w0), bool)
-        border[:b], border[-b:], border[:, :b], border[:, -b:] = True, True, True, True
+        # Only edges that show bare wall: a render may let the sculpture run off a side.
+        edges = spec.get("plane_edges", ["top", "bottom", "left", "right"])
+        if "top" in edges:
+            border[:b] = True
+        if "bottom" in edges:
+            border[-b:] = True
+        if "left" in edges:
+            border[:, :b] = True
+        if "right" in edges:
+            border[:, -b:] = True
         A = np.stack([xx_[border], yy_[border], np.ones(border.sum(), np.float32)], 1)
         coef, *_ = np.linalg.lstsq(A, d[border], rcond=None)
         plane = coef[0] * xx_ + coef[1] * yy_ + coef[2]
@@ -101,6 +115,10 @@ def sculpt(spec):
         xx = np.linspace(0, 1, w0, dtype=np.float32)[None, :]
         left = np.clip((xx - 0.005) / spec["sink"]["left"], 0, 1)
         sink = sink * left * left * (3 - 2 * left)
+    if spec["sink"].get("right", 0) > 0:
+        xx = np.linspace(0, 1, w0, dtype=np.float32)[None, :]
+        right = np.clip((0.995 - xx) / spec["sink"]["right"], 0, 1)
+        sink = sink * right * right * (3 - 2 * right)
 
     # --- bas-relief compression
     # Relative depth keeps the big forms; local detail is amplified so
@@ -121,19 +139,32 @@ def sculpt(spec):
     # canopy, riders and horses each swell as separate bodies.
     body = blur(dn, 9 / unit) - blur(dn, 60 / unit)
     form = np.clip(low, 0, 1.1) ** 0.75
-    height = (0.10 + 0.34 * pillow) * rim + rim * (0.50 * form + 1.5 * np.clip(body, -0.2, 0.4))
+    if spec["separation"] == "full":
+        # No base plate: the farthest plane (sky) sits at wall level so the
+        # scene grows out of the plaster instead of reading as a stuck-on slab.
+        form = np.clip(low - np.percentile(low, 8), 0, 1.1) ** 0.75
+        height = rim * (0.75 * form + 1.5 * np.clip(body, -0.2, 0.4))
+    else:
+        height = (0.10 + 0.34 * pillow) * rim + rim * (0.50 * form + 1.5 * np.clip(body, -0.2, 0.4))
     height += rim**0.5 * (2.0 * mid + 2.6 * fine + 0.10 * lum_detail)
     soft = blur(mask, 1.2)
-    return np.clip(height, 0, None) * np.clip(soft * 1.3, 0, 1) * sink
+    alpha = np.clip(soft * 1.3, 0, 1) * sink
+    return np.clip(height, 0, None) * alpha, art, alpha
 
 
 # --- place every element on the wall -----------------------------------------
 wall = np.zeros((H, W), np.float32)
+# "Paint": the source render's own shading, carried onto the wall. A depth
+# estimate cannot hold a render's fine carving (scrollwork, faces, cloud
+# texture), so where an element asks for it the revealed surface shows the
+# render itself, while the height field still raises the geometry.
+paint_tone = np.full((H, W), 0.0, np.float32)
+paint_w = np.zeros((H, W), np.float32)
 for spec in manifest["elements"]:
-    height = sculpt(spec)
+    height, art, alpha = sculpt(spec)
     if spec.get("flip"):
         # Mirror a reused element so repeats across the wall don't read as copies.
-        height = height[:, ::-1]
+        height, art, alpha = height[:, ::-1], art[:, ::-1], alpha[:, ::-1]
     h0, w0 = height.shape
     scale = spec["height"] * H / h0
     sw, sh = int(round(w0 * scale)), int(round(h0 * scale))
@@ -143,7 +174,19 @@ for spec in manifest["elements"]:
     oy = int(H * spec["anchor"][1] - sh * spec["pivot"][1])
     x0, y0 = max(ox, 0), max(oy, 0)
     x1, y1 = min(ox + sw, W), min(oy + sh, H)
-    wall[y0:y1, x0:x1] = np.maximum(wall[y0:y1, x0:x1], placed[y0 - oy : y1 - oy, x0 - ox : x1 - ox])
+    src = (slice(y0 - oy, y1 - oy), slice(x0 - ox, x1 - ox))
+    dst = (slice(y0, y1), slice(x0, x1))
+    wall[dst] = np.maximum(wall[dst], placed[src])
+    if spec.get("paint", 0) > 0:
+        # Map the render into wall tone space: its typical plaster value
+        # becomes the resting wall tone REST, contrast scaled by paint_contrast.
+        ref = np.median(art[alpha > 0.5])
+        tone = 0.54504 * (1 + spec.get("paint_contrast", 1.0) * (art / ref - 1))
+        tone = cv2.resize(tone, (sw, sh), interpolation=interpolation)[src]
+        weight = cv2.resize(alpha * spec["paint"], (sw, sh), interpolation=interpolation)[src]
+        take = weight > paint_w[dst]
+        paint_tone[dst] = np.where(take, tone, paint_tone[dst])
+        paint_w[dst] = np.maximum(paint_w[dst], weight)
 wall = np.clip(blur(wall, 0.7), 0, None)
 wall /= wall.max()
 
@@ -202,15 +245,20 @@ for level in (0.2, 0.4, 0.6, 0.8, 1.0):
     # Raised plaster catches more of the room's light than the wall plane.
     lift = 1 + 0.2 * level * np.clip(wall / 0.22, 0, 1)
     o = REST * (0.66 * key + 0.34 * sky**1.2 + bounce) * lift
-    stages.append(blur(o, 0.6))
+    o = blur(o, 0.6)
+    # Fade the render's own shading in as the carving rises; keep a little of
+    # the bake so cast shadows still deepen with extrusion.
+    w = paint_w * min(1.0, level / 0.4)
+    painted = paint_tone * (o / REST) ** 0.25
+    stages.append(o * (1 - w) + painted * w)
 
 h16 = np.round(wall * 65535).astype(np.uint16)
 small = cv2.resize(h16, (W // 2, H // 2), interpolation=cv2.INTER_AREA)
 rgb = np.dstack([(small >> 8).astype(np.uint8), (small & 255).astype(np.uint8), np.full(small.shape, 255, np.uint8)])
-Image.fromarray(rgb).save(f"{out_dir}/kurukshetra-height.png", optimize=True)
+Image.fromarray(rgb).save(f"{out_dir}/{NAME}-height.png", optimize=True)
 for index, stage in enumerate(stages, 1):
     Image.fromarray((np.clip(stage, 0, 1) * 255).round().astype(np.uint8)).save(
-        f"{out_dir}/kurukshetra-stage{index}.webp", quality=90, method=6
+        f"{out_dir}/{NAME}-stage{index}.webp", quality=90, method=6
     )
 
 # --- 5. tileable plaster and field noise -----------------------------------
