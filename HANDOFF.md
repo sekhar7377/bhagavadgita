@@ -9,7 +9,9 @@ Build an immersive Gītā experience **one milestone at a time**, matching the c
 - Go back to the reference and compare after every piece of work. Do not judge by eye from memory.
 - **Do not invent extras.** The reference has no pause-motion control, no menu icon, no eyebrow or subtitle in the opening; those were removed. Add nothing the reference does not have unless the content needs it.
 - The reference's public code may be read to learn mechanisms and values. Do not ship its assets, models, textures, fonts or compiled code.
-- Supplied film footage guides art direction. Production imagery must carry no captions, credits or lettering.
+- **The user decided the supplied film footage may be used directly** as source material (it is their project and their call; do not re-argue it). Remove captions, credits and lettering from anything used.
+- The user wants a partner who guides: when something is blocked, say the way around it and keep building. Never just stop.
+- Image generation: no ChatGPT or Gemini access exists in a cloud session. The user declined API keys and prefers browser logins. Best route is running Claude Code locally with the Claude in Chrome extension; a Browser Use Cloud sign-in was offered as the cloud alternative and was not completed in this session.
 
 Do not republish or reconfigure the cloud environment.
 
@@ -17,7 +19,7 @@ Do not republish or reconfigure the cloud environment.
 
 Milestone 02: the opening wall rebuilt on the reference's architecture. Still a single page; no chapters, reader, audio or loader.
 
-- **Sculpture.** `scripts/relief/estimate_depth.py` runs Depth Anything V2 Large (ONNX, CPU) on the project's own artwork `docs/artwork/kurukshetra-original.png`. `scripts/relief/build_relief.py` separates chariot, riders and horses from terrain, compresses and inflates the forms into a bas-relief height field, places it on a 2304×1152 wall, and **bakes lighting offline at five extrusion depths** (20–100%): soft key light, cast shadow, sky occlusion, bounce. Outputs live in `public/relief/` (about 700 KB total).
+- **Sculpture.** Two elements so far, listed in `scripts/relief/elements.json`: the chariot (from the project's generated artwork) and a warrior holding a chariot wheel aloft (from the supplied film clip at 30.2 s). `scripts/relief/estimate_depth.py` runs Depth Anything V2 Large (ONNX, CPU); 16-bit depth maps are kept in `docs/relief-sources/` so the wall rebuilds without the model. `scripts/relief/build_relief.py` separates each subject from its scene, compresses and inflates the forms into a bas-relief height field, places it on a 2304×1152 wall, and **bakes lighting offline at five extrusion depths** (20–100%): soft key light, cast shadow, sky occlusion, bounce. Outputs live in `public/relief/` (about 700 KB total).
 - **Reveal field.** `src/relief.ts` keeps a 256×256 RGBA ping-pong field: R/G velocity, B nonlinear speed, A coverage. Constants and stamp/decay maths follow the reference's public shader: falloff 0.38×0.5, dissipation 0.953 per 16 ms step, pointer ease 0.4, velocity ease 0.1 moving / 0.04 resting, noise stamp 0.15 + 0.85, automatic input ×3 with coverage = speed. Automatic path: 1–3 segments of 0.7–1.0 s, then a 1–3 s pause.
 - **Wall shader.** Vertex depth = height × mix(0.05, 1, avg(B, A)). Fragment samples the field at twice the strength and cross-fades the five baked stages over 0.2 intervals, starting from the constant 0.54504; then plaster texture, screen wash, `tone × 0.6 + 0.4`. Camera: perspective, fov 30, distance 15.
 - **Micro-details from the user's real-GPU recording:** faint iridescent tint on shadowed rims while plaster moves (an approximation, see gaps), and a 4px dot trailing the pointer.
@@ -36,7 +38,7 @@ Milestone 02: the opening wall rebuilt on the reference's architecture. Still a 
 ## Known gaps against the reference — be honest about these
 
 1. **Sculpture quality.** The reference is a hand-sculpted high-relief model: thick rounded volumes, undercuts, overlapping birds, flowers and vines across the whole wall. Ours is one chariot derived from a depth estimate of a 1536×1024 image: finer and flatter, with softer anatomy. This is the largest gap. See the user's supplied still (dark dramatic render of the studio's sculpture) for the target feel.
-2. **One element.** The reference wall carries many elements over several screen heights and recycles them on scroll.
+2. **Two elements.** The reference wall carries many elements over several screen heights and recycles them on scroll. The wheel-bearer is soft because its film frame is dark and motion-blurred.
 3. **Iridescence is approximate.** The reference runs a separate fluid simulation and masks by fresnel and bake shadow range. Ours tints by surface direction where the speed channel is active.
 4. **Scroll.** The reference uses virtual scroll, reprojects the field, deforms the wall with scroll speed and has a fast-scroll mode. Ours scrolls natively and the wall leaves with the hero.
 5. **After the opening.** The reference continues with a large statement whose text is occluded by raised sculpture (text rendered in WebGL), a film window, and a centred statement. Ours still has the milestone-01 sections.
@@ -46,7 +48,7 @@ Milestone 02: the opening wall rebuilt on the reference's architecture. Still a 
 
 ## Next work, in order
 
-1. Raise sculpture quality: thicker volumes, more elements (horses, wheel, banner, lotus, conch, arrows) composed across the wall. Best route is a real 3D model (image-to-3D generation or sculpting) rendered to height and bakes by the existing pipeline; the pipeline accepts any height field.
+1. Raise sculpture quality and add elements across the wall. Adding one is: pick a frame or image, run `estimate_depth.py`, save a 16-bit depth PNG and a luminance PNG into `docs/relief-sources/`, add an entry to `elements.json`, rebuild. Sharper sources give sharper sculpture: once image generation is available, generate clean white-plaster sculpture renders of each subject (chariot, horses, wheel-bearer, conch, bow, lotus, banners) and use those instead of dark film frames. A true 3D model rendered to height is better still.
 2. Extend the wall over several screens and add scroll coupling (field reprojection, scroll-speed deformation).
 3. Rebuild the section after the opening on the reference's pattern, including text occluded by the sculpture.
 4. Intro loader; menu transition.
@@ -65,8 +67,8 @@ npm run format:check
 Rebuilding the relief needs Python with numpy, pillow, opencv-python-headless, scipy and onnxruntime, plus the model `onnx-community/depth-anything-v2-large` (`onnx/model.onnx`, 1.3 GB, not committed):
 
 ```sh
-python3 scripts/relief/estimate_depth.py model.onnx docs/artwork/kurukshetra-original.png depth.npy 1526
-python3 scripts/relief/build_relief.py depth.npy docs/artwork/kurukshetra-original.png public/relief preview.png
+python3 scripts/relief/estimate_depth.py model.onnx SOURCE.png depth.npy 1526   # only for a new element
+python3 scripts/relief/build_relief.py scripts/relief/elements.json public/relief preview.png
 ```
 
 The fallback image is `preview.png` resized to 1920×960 WebP.

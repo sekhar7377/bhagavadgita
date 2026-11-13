@@ -1,7 +1,9 @@
-"""Turn an estimated depth map of the original Kurukṣetra artwork into the
-bas-relief data the opening wall renders.
+"""Turn estimated depth maps into the bas-relief data the opening wall renders.
 
-Usage: python3 scripts/relief/build_relief.py DEPTH.npy ARTWORK.png OUT_DIR [PREVIEW.png]
+Usage: python3 scripts/relief/build_relief.py scripts/relief/elements.json OUT_DIR [PREVIEW.png]
+
+The manifest lists each sculpture: its 16-bit depth map, a luminance image for
+fine carving, how to separate it from its scene, and where it sits on the wall.
 
 Writes into OUT_DIR:
   kurukshetra-height.png   R,G = 16-bit height (hi, lo), half resolution
@@ -9,8 +11,8 @@ Writes into OUT_DIR:
   plaster.webp            tileable mineral texture (G is sampled)
   noise.png               tileable smooth noise used by the reveal field
 
-Everything is derived from this project's own generated artwork. No reference
-site model, texture or film frame is used.
+Sources are the project's generated artwork and frames from footage the
+project owner supplied. No reference-site model or texture is used.
 """
 
 import sys
@@ -18,10 +20,15 @@ import numpy as np
 import cv2
 from PIL import Image
 
-depth_path, art_path, out_dir = sys.argv[1:4]
-preview_path = sys.argv[4] if len(sys.argv) > 4 else None
+import json
+import os
 
-W, H = 2304, 1152  # wall canvas, 2:1
+manifest_path, out_dir = sys.argv[1:3]
+preview_path = sys.argv[3] if len(sys.argv) > 3 else None
+manifest = json.load(open(manifest_path))
+root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(manifest_path))))
+
+W, H = manifest["wall"]  # wall canvas, 2:1
 LIGHT = np.array([-0.55, 0.62])  # direction toward the light in wall space (x right, y up)
 LIGHT /= np.linalg.norm(LIGHT)
 
@@ -30,68 +37,87 @@ def blur(a, s):
     return cv2.GaussianBlur(a, (0, 0), s, borderType=cv2.BORDER_REFLECT)
 
 
-# --- 1. subject separation -------------------------------------------------
-d = np.load(depth_path).astype(np.float32)
-d = np.clip(d, 0, None)
-h0, w0 = d.shape
-art = np.asarray(Image.open(art_path).convert("L"), np.float32) / 255
+def sculpt(spec):
+    """One element: separate the subject from its scene and model it as relief."""
+    # --- subject separation
+    d = cv2.imread(os.path.join(root, spec["depth"]), cv2.IMREAD_UNCHANGED).astype(np.float32)
+    d = d / d.max() * 400
+    h0, w0 = d.shape
+    art = Image.open(os.path.join(root, spec["luma"])).convert("L").resize((w0, h0), Image.LANCZOS)
+    art = np.asarray(art, np.float32) / 255
+    if spec["separation"] == "ground":
+        # The ground plane's inverse depth grows towards the bottom of the
+        # frame. Estimate it per row from the right-hand fifth, where only
+        # terrain is visible, then keep what stands clearly in front of it.
+        ground_row = np.median(d[:, int(w0 * 0.80) :], axis=1)
+        ground_row = np.maximum.accumulate(blur(ground_row[:, None], 9)[:, 0])
+        ground = ground_row[:, None] * np.ones((1, w0), np.float32)
+        mask = np.clip((d - ground * 1.06 - 16) / 14, 0, 1)
+    else:
+        # A figure against open sky: everything nearer than the haze.
+        level = spec["threshold"] * 400
+        mask = np.clip((d - level) / 14, 0, 1)
+    # Drop small disconnected islands (distant banners, debris, terrain bumps).
+    n, labels, stats, _ = cv2.connectedComponentsWithStats((mask > 0.5).astype(np.uint8), 8)
+    keep = np.zeros_like(mask)
+    largest = max(stats[i, cv2.CC_STAT_AREA] for i in range(1, n))
+    floor = 2500 if spec["separation"] == "ground" else largest * 0.5
+    for i in range(1, n):
+        if stats[i, cv2.CC_STAT_AREA] >= floor:
+            keep[labels == i] = 1
+    mask = mask * cv2.dilate(keep, np.ones((5, 5), np.uint8))
+    # Let the sculpture sink back into the wall where the source frame cuts
+    # it, instead of ending on a hard edge.
+    yy = np.linspace(0, 1, h0, dtype=np.float32)[:, None]
+    start, span = spec["sink"]["bottom"]
+    sink = 1 - np.clip((yy - start) / span, 0, 1) ** 1.5
+    if spec["sink"].get("top", 0) > 0:
+        top = np.clip(yy / spec["sink"]["top"], 0, 1)
+        sink = sink * top * top * (3 - 2 * top)
+    if spec["sink"]["left"] > 0:
+        xx = np.linspace(0, 1, w0, dtype=np.float32)[None, :]
+        left = np.clip((xx - 0.005) / spec["sink"]["left"], 0, 1)
+        sink = sink * left * left * (3 - 2 * left)
 
-# The ground plane's inverse depth grows towards the bottom of the frame.
-# Estimate it per row from the right-hand third, where only terrain is visible,
-# then keep what stands clearly in front of that plane.
-ground_row = np.median(d[:, int(w0 * 0.80) :], axis=1)
-ground_row = np.maximum.accumulate(blur(ground_row[:, None], 9)[:, 0])
-ground = ground_row[:, None] * np.ones((1, w0), np.float32)
-excess = d - ground * 1.06 - 16
-mask = np.clip(excess / 14, 0, 1)
-# Drop small disconnected islands (distant banners, terrain bumps).
-n, labels, stats, _ = cv2.connectedComponentsWithStats((mask > 0.5).astype(np.uint8), 8)
-keep = np.zeros_like(mask)
-for i in range(1, n):
-    if stats[i, cv2.CC_STAT_AREA] > 2500:
-        keep[labels == i] = 1
-mask = mask * cv2.dilate(keep, np.ones((5, 5), np.uint8))
-# Let the sculpture sink back into the wall along the bottom edge instead of
-# ending on a hard cut where the chariot meets the terrain.
-yy = np.linspace(0, 1, h0, dtype=np.float32)[:, None]
-sink = 1 - np.clip((yy - 0.86) / 0.13, 0, 1) ** 1.5
-xx = np.linspace(0, 1, w0, dtype=np.float32)[None, :]
-left = np.clip((xx - 0.005) / 0.11, 0, 1)
-sink = sink * left * left * (3 - 2 * left)
+    # --- bas-relief compression
+    # Relative depth keeps the big forms; local detail is amplified so
+    # carving reads at shallow depth (the classic bas-relief trade).
+    unit = 1024.0 / h0  # filter sizes were tuned on a 1024px-tall source
+    dn = d / np.percentile(d[mask > 0.5], 99.5)
+    low = blur(dn, 22 / unit)
+    mid = blur(dn, 5 / unit) - low
+    fine = dn - blur(dn, 5 / unit)
+    lum_detail = blur(art, 1.0) - blur(art, 5 / unit)
+    # Forms are inflated from their silhouettes so they turn away from the
+    # viewer at the rim like modelled plaster, not a flat plate.
+    solid = (mask > 0.5).astype(np.uint8)
+    inside_dist = cv2.distanceTransform(solid, cv2.DIST_L2, 5) * unit
+    pillow = np.sqrt(np.clip(1 - (1 - np.clip(inside_dist / 64.0, 0, 1)) ** 2, 0, 1))
+    rim = np.sqrt(np.clip(1 - (1 - np.clip(inside_dist / 9.0, 0, 1)) ** 2, 0, 1))
+    # Big volumes come from the scene's own depth at two scales, so wheel,
+    # canopy, riders and horses each swell as separate bodies.
+    body = blur(dn, 9 / unit) - blur(dn, 60 / unit)
+    form = np.clip(low, 0, 1.1) ** 0.75
+    height = (0.10 + 0.34 * pillow) * rim + rim * (0.50 * form + 1.5 * np.clip(body, -0.2, 0.4))
+    height += rim**0.5 * (2.0 * mid + 2.6 * fine + 0.10 * lum_detail)
+    soft = blur(mask, 1.2)
+    return np.clip(height, 0, None) * np.clip(soft * 1.3, 0, 1) * sink
 
-# --- 2. bas-relief compression ---------------------------------------------
-# Relative depth keeps the big forms; local detail is amplified so carving
-# reads at shallow depth (the classic bas-relief trade).
-dn = d / np.percentile(d[mask > 0.5], 99.5)
-low = blur(dn, 22)
-mid = blur(dn, 5) - low
-fine = dn - blur(dn, 5)
-lum_detail = blur(art, 1.0) - blur(art, 5)
-# Forms are inflated from their silhouettes so they turn away from the viewer
-# at the rim like modelled plaster, instead of standing up as a flat plate.
-solid = (mask > 0.5).astype(np.uint8)
-inside_dist = cv2.distanceTransform(solid, cv2.DIST_L2, 5)
-pillow = np.sqrt(np.clip(1 - (1 - np.clip(inside_dist / 64.0, 0, 1)) ** 2, 0, 1))
-rim = np.sqrt(np.clip(1 - (1 - np.clip(inside_dist / 9.0, 0, 1)) ** 2, 0, 1))
-# Big volumes come from the scene's own depth at two scales, so the wheel,
-# canopy, riders and horses each swell as separate bodies.
-body = blur(dn, 9) - blur(dn, 60)
-form = np.clip(low, 0, 1.1) ** 0.75
-height = (0.10 + 0.34 * pillow) * rim + rim * (0.50 * form + 1.5 * np.clip(body, -0.2, 0.4))
-height += rim**0.5 * (2.0 * mid + 2.6 * fine + 0.10 * lum_detail)
-soft = blur(mask, 1.2)
-height = np.clip(height, 0, None) * np.clip(soft * 1.3, 0, 1) * sink
 
-# --- 3. place on the wall --------------------------------------------------
-scale = 0.84 * H / h0
-sw, sh = int(round(w0 * scale)), int(round(h0 * scale))
-placed = cv2.resize(height, (sw, sh), interpolation=cv2.INTER_CUBIC)
+# --- place every element on the wall -----------------------------------------
 wall = np.zeros((H, W), np.float32)
-ox = int(W * 0.50 - sw * 0.35)
-oy = int(H * 0.005)
-x0, y0 = max(ox, 0), max(oy, 0)
-x1, y1 = min(ox + sw, W), min(oy + sh, H)
-wall[y0:y1, x0:x1] = placed[y0 - oy : y1 - oy, x0 - ox : x1 - ox]
+for spec in manifest["elements"]:
+    height = sculpt(spec)
+    h0, w0 = height.shape
+    scale = spec["height"] * H / h0
+    sw, sh = int(round(w0 * scale)), int(round(h0 * scale))
+    interpolation = cv2.INTER_CUBIC if scale > 1 else cv2.INTER_AREA
+    placed = cv2.resize(height / height.max() * spec["gain"], (sw, sh), interpolation=interpolation)
+    ox = int(W * spec["anchor"][0] - sw * spec["pivot"][0])
+    oy = int(H * spec["anchor"][1] - sh * spec["pivot"][1])
+    x0, y0 = max(ox, 0), max(oy, 0)
+    x1, y1 = min(ox + sw, W), min(oy + sh, H)
+    wall[y0:y1, x0:x1] = np.maximum(wall[y0:y1, x0:x1], placed[y0 - oy : y1 - oy, x0 - ox : x1 - ox])
 wall = np.clip(blur(wall, 0.7), 0, None)
 wall /= wall.max()
 
@@ -101,7 +127,7 @@ wall /= wall.max()
 # shadow and sky occlusion; the shader cross-fades those stages as the field
 # raises the geometry. Values are in the wall's tone space: flat plaster = REST.
 REST = 0.54504
-DEPTH_TEXELS = float(sys.argv[5]) if len(sys.argv) > 5 else 0.9 / 16.08 * W
+DEPTH_TEXELS = 0.9 / 16.08 * W
 STEPS = 46
 STEP = 2.0
 

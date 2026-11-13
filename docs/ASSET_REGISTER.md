@@ -80,7 +80,7 @@ The user re-supplied footage as five files under 32 MiB. All were downloaded and
 | R5 | Kalki 2898 AD opening (57.5 s) | Same file as V01 |
 | R6 | Screen Recording 2026-11-13 211601.mp4 (28.8 s) | **Recording of the reference website** on the user's GPU: opening reveal, scroll to statement, film window, centred statement |
 
-R1–R5 are commercial film footage with credits, subtitles and recognisable performers. They are used as art direction only. No frame from them is in the site or the repository. R6 is evidence of reference behaviour; two cropped frames are kept in `docs/reference-study/2026-11-13-b/`.
+R1–R5 are commercial film footage with credits, subtitles and recognisable performers. The project owner decided they may be used as source material, with credits and captions removed. See G03 below for what is used. R6 is evidence of reference behaviour; two cropped frames are kept in `docs/reference-study/2026-11-13-b/`.
 
 The user also supplied a still of the reference studio's sculpture under dark dramatic light (birds, flowers, vines in thick high relief). It sets the target for sculptural volume. Not stored in the repository.
 
@@ -93,3 +93,9 @@ The user also supplied a still of the reference studio's sculpture under dark dr
 - Build: `scripts/relief/build_relief.py`. Outputs in `public/relief/`: `kurukshetra-height.png` (16-bit height in R,G; 1152×576), `kurukshetra-stage1..5.webp` (baked lighting at 20–100% extrusion; 2304×1152), `kurukshetra-fallback.webp`, `plaster.webp` and `noise.png` (procedural, tileable).
 - No reference-site model or texture and no film frame is used. The reference's plaster texture was downloaded only to compare statistics and was not kept.
 - Limits: anatomy and fine form are as good as a depth estimate of a 1536×1024 image allows. Not hand-sculpted.
+
+### G03 — wheel-bearer relief element
+
+- Source: R5 at 30.2 s, cropped to x 700–1420 of the 1920×800 active picture (no credit text inside the crop).
+- Kept in the repository: `docs/relief-sources/wheelbearer-depth.png` (16-bit depth) and `wheelbearer-luma.png` (greyscale crop, used only for fine surface detail). `docs/relief-sources/chariot-depth.png` is the chariot's depth from A01.
+- Placed right of the chariot by `scripts/relief/elements.json`. The figure is soft because the source frame is dark and motion-blurred.
