@@ -67,7 +67,7 @@ export function mountFloatingType(elements: Iterable<HTMLElement>) {
         const local = Math.min(1, Math.max(0, enter * 1.3 - index * 0.13));
         const eased = 1 - Math.pow(1 - local, 3);
         // Lines spread apart slightly away from centre and gather at it.
-        const drift = offset * (index - middle) * 26;
+        const drift = offset * (index - middle) * 14;
         const breathe = Math.sin(time * 0.6 + index * 0.9) * 1.6;
         const rise = (1 - eased) * (56 + index * 14);
         line.style.transform = `translate3d(0, ${(rise + drift + breathe).toFixed(2)}px, 0)`;

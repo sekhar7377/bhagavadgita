@@ -121,3 +121,17 @@ The user also supplied a still of the reference studio's sculpture under dark dr
 - Output 1774×887: `docs/references/scene2-falling-bow-chatgpt.png`. Inspected: no text. Depth (GPU, 1022) → `docs/relief-sources/scene2-depth.png`, `scene2-luma.png`.
 - Rejected first attempt, kept for record: `docs/references/scene2-arjuna-grief-chatgpt.png` (same wide composition as scene 1).
 - Film window: `public/art/kurukshetra.webp` re-encoded from the user's own painting `docs/references/chariot-chatgpt-subject.png`.
+
+### G07 — scenes 3–6 and the battle scene, ChatGPT plaster renders (14 November 2026)
+
+All in the same ChatGPT conversation as G05/G06 (user's account, browser), each with a camera chosen to differ from every earlier panel. 1774×887 each, inspected: no text or lettering. Built with `scripts/relief/make_scene.sh` (GPU depth at 1022, `full` separation, paint 1.0).
+
+| Scene | File | Moment | Camera |
+| --- | --- | --- | --- |
+| scene3 | `docs/references/scene3-teaching-chatgpt.png` | Ch. 2, the teaching begins | low angle from the chariot floor, canopy as halo |
+| scene4 | `docs/references/scene4-lamp-chatgpt.png` | Ch. 6, the steady lamp (symbolic) | frontal, lamp centre, figures either side, lotus pond |
+| scene5 | `docs/references/scene5-universal-form-chatgpt.png` | Ch. 11, the universal form | monumental frontal, tiny Arjuna below |
+| scene6 | `docs/references/scene6-clarity-chatgpt.png` | Ch. 18, clarity | from behind and below, Arjuna lifting the bow |
+| battle | `docs/references/battle-conches-chatgpt.png` | Ch. 1, the conches sound | low, inside the charge, diagonal |
+
+The battle render used three image inputs: two frames from the user's recordings R7 (`Screen Recording 2026-11-13 202451.mp4`, the opening charge; credit line in the sky inpainted) and R8 (`…202649.mp4`, golden chariots and a flying arrow; cropped to a text-free centre strip), plus `chariot-battlefield-chatgpt.png` for chariot design and carving style. The frames are reference inputs only and are not stored in Git.

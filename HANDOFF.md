@@ -1,6 +1,6 @@
 # Session handoff — start here
 
-Last updated: 13 November 2026 (third session, run locally on the user's Windows PC). Project: **Bhagavad Gītā — The Stillness Before Action**.
+Last updated: 14 November 2026 (third session, run locally on the user's Windows PC). Project: **Bhagavad Gītā — The Stillness Before Action**.
 
 ## User intent (persistent)
 
@@ -63,8 +63,9 @@ The user asked for the whole site to be one continuous experience like the refer
 - No-WebGL fallback: `html.relief-fallback` shows each scene's baked `NAME-fallback.webp` as its section background.
 - New scene: generate the plaster render, then `sh scripts/relief/make_scene.sh sceneN docs/references/<file>.png` (GPU depth, manifest, bake, fallback), then add a `<section class="scene scene--left|right|centre" data-scene="sceneN">` with a `data-float` statement.
 
-**The six scenes (story order, each a distinct camera; see Scene variety rule)**
+**The seven scenes (story order, each a distinct camera; see Scene variety rule)**
 1. `kurukshetra`: the chariot between the armies, wide (hero).
+1b. `battle`: Ch. 1, the conches sound: low in the middle of the charge, Krishna and Arjuna blowing conches, horses leaping, elephants, banners, arrows. Made from two of the user's Kalki recording frames (credits painted out / cropped away, kept outside Git) plus our scene 1 plaster panel for continuity. The user asked for battle scenes to use their recordings.
 2. `scene2`: Ch. 1, the bow lowers: close, on the chariot.
 3. `scene3`: Ch. 2, the teaching begins: low angle from the chariot floor, canopy as halo.
 4. `scene4`: Ch. 6, the steady lamp: symbolic, a still flame between teacher and student, lotus pond.
