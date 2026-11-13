@@ -11,6 +11,7 @@
     <title>Bhagavad Gītā — The Stillness Before Action</title>
   </head>
   <body>
+    <div id="relief" aria-hidden="true"></div>
     <a class="skip-link" href="#story">Skip to the story</a>
     <header class="site-header">
       <a
@@ -29,8 +30,12 @@
       </button>
     </header>
     <main>
-      <section class="hero" id="beginning" aria-labelledby="hero-title">
-        <div id="relief" aria-hidden="true"></div>
+      <section
+        class="hero"
+        id="beginning"
+        data-scene="kurukshetra"
+        aria-labelledby="hero-title"
+      >
         <span class="cursor-dot" aria-hidden="true"></span>
         <div class="hero-band">
           <p class="hero-identity">BHAGAVAD GĪTĀ</p>
@@ -42,16 +47,31 @@
           <span class="hero-dots" aria-hidden="true"></span
         ></a>
       </section>
+      <section
+        class="scene scene--right"
+        id="conches"
+        data-scene="battle"
+        aria-labelledby="conches-title"
+      >
+        <p class="scene-meta">
+          <span>CHAPTER 1 · ARJUNA VIṢĀDA YOGA</span
+          ><span>THE CONCHES SOUND</span>
+        </p>
+        <h2 id="conches-title" class="scene-statement" data-float>
+          Across the field,<br />conch answers conch.<br /><em
+            >The sound fills earth and sky,<br />and both armies are ready.</em
+          >
+        </h2>
+      </section>
       <section class="story" id="story" aria-labelledby="story-title">
-        <div class="scene-wall">
-          <div class="scene-relief" id="relief-scene2" aria-hidden="true"></div>
+        <div class="scene-wall" data-scene="scene2">
           <div class="section-meta">
             <span>THE FIELD OF QUESTIONS</span
             ><span>PROLOGUE / KURUKṢETRA</span>
           </div>
           <div class="story-copy">
             <span class="chapter-mark" aria-hidden="true">I.</span>
-            <h2 id="story-title">
+            <h2 id="story-title" data-float>
               Before the battle begins,<br />a warrior lays down his bow.<br /><em
                 >A conversation changes<br />the way he sees.</em
               >
@@ -91,6 +111,67 @@
         </div>
       </section>
       <section
+        class="scene scene--right"
+        id="teaching"
+        data-scene="scene3"
+        aria-labelledby="teaching-title"
+      >
+        <p class="scene-meta">
+          <span>CHAPTER 2 · SĀṄKHYA YOGA</span><span>THE TEACHING BEGINS</span>
+        </p>
+        <h2 id="teaching-title" class="scene-statement" data-float>
+          What is born will pass.<br />What sees it does not.<br /><em
+            >Krishna begins with the Self,<br />and only then the battle.</em
+          >
+        </h2>
+      </section>
+      <section
+        class="scene scene--left"
+        id="lamp"
+        data-scene="scene4"
+        aria-labelledby="lamp-title"
+      >
+        <p class="scene-meta">
+          <span>CHAPTER 6 · DHYĀNA YOGA</span><span>THE STEADY LAMP</span>
+        </p>
+        <h2 id="lamp-title" class="scene-statement" data-float>
+          A mind held steady<br />is a flame where no wind moves.<br /><em
+            >Attention, practised,<br />becomes a kind of freedom.</em
+          >
+        </h2>
+      </section>
+      <section
+        class="scene scene--centre"
+        id="universal-form"
+        data-scene="scene5"
+        aria-labelledby="form-title"
+      >
+        <p class="scene-meta">
+          <span>CHAPTER 11 · VIŚVARŪPA DARŚANA YOGA</span
+          ><span>THE UNIVERSAL FORM</span>
+        </p>
+        <h2 id="form-title" class="scene-statement" data-float>
+          Arjuna asks to see.<br />What he sees has no edge.<br /><em
+            >Every face, every world,<br />held in a single form.</em
+          >
+        </h2>
+      </section>
+      <section
+        class="scene scene--left"
+        id="clarity"
+        data-scene="scene6"
+        aria-labelledby="clarity-title"
+      >
+        <p class="scene-meta">
+          <span>CHAPTER 18 · MOKṢA SANNYĀSA YOGA</span><span>CLARITY</span>
+        </p>
+        <h2 id="clarity-title" class="scene-statement" data-float>
+          The field is the same.<br />His understanding has changed.<br /><em
+            >He lifts the bow, not in anger,<br />but with a clear mind.</em
+          >
+        </h2>
+      </section>
+      <section
         class="reflection"
         id="reflection"
         aria-labelledby="reflection-title"
@@ -115,9 +196,10 @@
         <p>An exploration of attention, action, and understanding.</p>
       </div>
       <p class="editorial-note">
-        This opening is an artistic interpretation of the dialogue’s setting.
-        All prose is original editorial writing, not a translation or quotation
-        from the Sanskrit text.
+        These scenes are an artistic interpretation of the dialogue and its
+        setting. All prose is original editorial writing, not a translation or
+        quotation from the Sanskrit text. Chapter names follow the traditional
+        titles.
       </p>
       <span class="footer-credit">THE STILLNESS BEFORE ACTION</span>
     </footer>
@@ -131,10 +213,15 @@
       <div class="menu-content">
         <p class="eyebrow" id="navigation-title">A WAY INTO THE STILLNESS</p>
         <nav aria-label="Main navigation">
-          <a href="#beginning"><span>01</span>The beginning</a
-          ><a href="#story"><span>02</span>The battlefield</a
-          ><a href="#reflection"><span>03</span>A moment to consider</a
-          ><a href="#about"><span>04</span>About this experience</a>
+          <a href="#beginning"><span>01</span>The beginning</a>
+          <a href="#conches"><span>02</span>The conches sound</a>
+          <a href="#story"><span>03</span>The battlefield</a>
+          <a href="#teaching"><span>04</span>The teaching begins</a>
+          <a href="#lamp"><span>05</span>The steady lamp</a>
+          <a href="#universal-form"><span>06</span>The universal form</a>
+          <a href="#clarity"><span>07</span>Clarity</a>
+          <a href="#reflection"><span>08</span>A moment to consider</a>
+          <a href="#about"><span>09</span>About this experience</a>
         </nav>
         <p>A conversation, across centuries.<br />A question, still our own.</p>
       </div>

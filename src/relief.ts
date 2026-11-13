@@ -48,6 +48,7 @@ const fieldFragment = /* glsl */ `
   uniform vec2 uVelocity;
   uniform vec2 uAuto;
   uniform float uAutoActive;
+  uniform float uShift;
   varying vec2 vUv;
 
   vec4 stamp(vec2 velocity, vec2 centre) {
@@ -60,7 +61,11 @@ const fieldFragment = /* glsl */ `
   }
 
   void main() {
-    vec4 data = texture2D(tPrevious, vUv);
+    // Reproject: when the page scrolls, the carving moves up the screen, so
+    // the history moves with it instead of sliding off the sculpture.
+    vec2 from = vUv - vec2(0.0, uShift);
+    vec4 data = texture2D(tPrevious, from);
+    data *= step(0.0, from.y) * step(from.y, 1.0);
     float friction = 1.0 / uDissipation - 1.0;
     data *= 1.0 / (1.0 + uStep * friction);
 
@@ -88,6 +93,8 @@ const wallVertex = /* glsl */ `
   uniform float uDepth;
   uniform float uStill;
   uniform float uReveal;
+  uniform float uBoost;
+  uniform float uScrollWorld;
   varying vec2 vUv;
   varying vec3 vWorld;
 
@@ -97,13 +104,14 @@ const wallVertex = /* glsl */ `
     vec2 screenUv = (undeformed.xy / undeformed.w + 1.0) * 0.5;
     vec4 field = texture2D(tField, screenUv);
     float extrude = mix(field.b, field.a, 0.5);
-    extrude = max(extrude, max(uStill * 0.5, uReveal * 0.5));
+    extrude = max(extrude, max(uStill * 0.5, uReveal * 0.5)) + uBoost * 0.5;
     float inside = step(0.0, uv.x) * step(uv.x, 1.0) * step(0.0, uv.y) * step(uv.y, 1.0);
     float height = texture2D(tHeight, uv).r * inside;
     vec3 carved = position;
     carved.z += height * uDepth * mix(0.05, 1.0, min(extrude, 1.0));
     carved.xy *= 1.004;
-    vWorld = position;
+    // Plaster grain is fixed to the wall, so it travels with the scroll.
+    vWorld = (modelMatrix * vec4(position, 1.0)).xyz + vec3(0.0, uScrollWorld, 0.0);
     gl_Position = projectionMatrix * modelViewMatrix * vec4(carved, 1.0);
   }
 `;
@@ -123,6 +131,7 @@ const wallFragment = /* glsl */ `
   uniform float uStill;
   uniform float uReveal;
   uniform float uReady;
+  uniform float uBoost;
   varying vec2 vUv;
   varying vec3 vWorld;
 
@@ -136,6 +145,8 @@ const wallFragment = /* glsl */ `
     vec2 screenUv = gl_FragCoord.xy / uResolution;
     vec4 field = texture2D(tField, screenUv) * 2.0;
     float extrude = mix(field.b, field.a, 0.5);
+    // Fast scrolling swells the geometry (vertex shader) but does not light up
+    // carving that attention has not reached, so shading ignores uBoost.
     extrude = max(extrude, max(uStill, uReveal)) * uReady;
 
     // Lighting was baked offline at five extrusion depths. The field walks
@@ -221,7 +232,29 @@ async function loadHeight(url: string, signal: AbortSignal) {
   return texture;
 }
 
-export function mountRelief(container: HTMLElement, sceneName = "kurukshetra") {
+export type SceneSpec = {
+  /** Asset prefix in /relief: NAME-height.png, NAME-stage1..5.webp. */
+  name: string;
+  /** The page element the carving is centred on; it scrolls with the page. */
+  anchor: HTMLElement;
+};
+
+type SceneState = {
+  spec: SceneSpec;
+  status: "idle" | "loading" | "ready" | "failed";
+  mesh: THREE.Mesh;
+  material: THREE.ShaderMaterial;
+  uniforms: Record<string, THREE.IUniform>;
+  abort?: AbortController;
+};
+
+/**
+ * One continuous wall for the whole page, as in the reference: a single
+ * fixed canvas, one shared reveal field, and one carved panel per scene laid
+ * along the scroll. Panels load when they approach and are released when far
+ * away. The first scene drives the container's ready/plain state.
+ */
+export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
   const noop = { dispose() {}, setPaused(_: boolean) {}, reveal() {} };
   let renderer: THREE.WebGLRenderer;
   try {
@@ -240,13 +273,10 @@ export function mountRelief(container: HTMLElement, sceneName = "kurukshetra") {
   let paused = reducedMotion.matches;
   let disposed = false;
   let contextLost = false;
-  let visible = true;
-  let ready = false;
   let frame = 0;
   let lastTime = 0;
   let elapsed = 0;
   let reveal = 0;
-  const abort = new AbortController();
 
   container.dataset.reliefState = "loading";
   delete container.dataset.fallback;
@@ -277,17 +307,16 @@ export function mountRelief(container: HTMLElement, sceneName = "kurukshetra") {
     targetOptions,
   );
   const loader = new THREE.TextureLoader();
-  const data = (url: string, repeat: boolean) => {
-    const texture = loader.load(url, () => render());
+  const data = (url: string, repeat: boolean, onLoad?: () => void) => {
+    // The frame loop redraws continuously, so a finished load needs no
+    // render call of its own (and may arrive before render exists).
+    const texture = loader.load(url, () => onLoad?.());
     texture.colorSpace = THREE.NoColorSpace;
     if (repeat) texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
     return texture;
   };
   const noise = data("/relief/noise.png", true);
   const plaster = data("/relief/plaster.webp", true);
-  const stages = [1, 2, 3, 4, 5].map((index) =>
-    data(`/relief/${sceneName}-stage${index}.webp`, false),
-  );
   const blank = new THREE.DataTexture(
     new Uint16Array([0]),
     1,
@@ -309,6 +338,7 @@ export function mountRelief(container: HTMLElement, sceneName = "kurukshetra") {
     uVelocity: { value: new THREE.Vector2() },
     uAuto: { value: new THREE.Vector2(-1, -1) },
     uAutoActive: { value: 0 },
+    uShift: { value: 0 },
   };
   const fieldMaterial = new THREE.ShaderMaterial({
     uniforms: fieldUniforms,
@@ -327,34 +357,39 @@ export function mountRelief(container: HTMLElement, sceneName = "kurukshetra") {
   const fieldCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
   // --- wall ---------------------------------------------------------------
-  const wallUniforms = {
+  // Uniforms every panel shares (same objects, so one update reaches all).
+  const shared = {
     tField: { value: read.texture },
-    tHeight: { value: blank as THREE.Texture },
-    tStage1: { value: stages[0] },
-    tStage2: { value: stages[1] },
-    tStage3: { value: stages[2] },
-    tStage4: { value: stages[3] },
-    tStage5: { value: stages[4] },
     tPlaster: { value: plaster },
-    uTexel: { value: new THREE.Vector2(1 / 1152, 1 / 576) },
     uResolution: { value: new THREE.Vector2(1, 1) },
     uDepth: { value: DEPTH },
     uStill: { value: paused ? 1 : 0 },
     uReveal: { value: 0 },
-    uReady: { value: 0 },
+    uBoost: { value: 0 },
+    uScrollWorld: { value: 0 },
   };
-  const wallMaterial = new THREE.ShaderMaterial({
-    uniforms: wallUniforms,
-    vertexShader: wallVertex,
-    fragmentShader: wallFragment,
+  const makeUniforms = () => ({
+    ...shared,
+    tHeight: { value: blank as THREE.Texture },
+    tStage1: { value: blank as THREE.Texture },
+    tStage2: { value: blank as THREE.Texture },
+    tStage3: { value: blank as THREE.Texture },
+    tStage4: { value: blank as THREE.Texture },
+    tStage5: { value: blank as THREE.Texture },
+    uTexel: { value: new THREE.Vector2(1 / 1152, 1 / 576) },
+    uReady: { value: 0 },
   });
+  const makeMaterial = (uniforms: Record<string, THREE.IUniform>) =>
+    new THREE.ShaderMaterial({
+      uniforms,
+      vertexShader: wallVertex,
+      fragmentShader: wallFragment,
+    });
+
   const scene = new THREE.Scene();
-  const sculpture = new THREE.Mesh(
-    new THREE.PlaneGeometry(WALL_W, WALL_H, 448, 224),
-    wallMaterial,
-  );
-  // The surrounding plaster continues the same material past the carving so
-  // narrow and very wide viewports never see an edge.
+  const panelGeometry = new THREE.PlaneGeometry(WALL_W, WALL_H, 448, 224);
+  // Bare plaster behind every panel, fixed to the camera; its grain scrolls
+  // through uScrollWorld so the whole page reads as one wall.
   const surroundGeometry = new THREE.PlaneGeometry(WALL_W * 5, WALL_H * 5);
   const surroundUv = surroundGeometry.getAttribute("uv");
   for (let i = 0; i < surroundUv.count; i++)
@@ -363,10 +398,22 @@ export function mountRelief(container: HTMLElement, sceneName = "kurukshetra") {
       (surroundUv.getX(i) - 0.5) * 5 + 0.5,
       (surroundUv.getY(i) - 0.5) * 5 + 0.5,
     );
-  const surround = new THREE.Mesh(surroundGeometry, wallMaterial);
+  const surroundMaterial = makeMaterial(makeUniforms());
+  const surround = new THREE.Mesh(surroundGeometry, surroundMaterial);
   surround.position.z = -0.002;
   surround.renderOrder = -1;
-  scene.add(surround, sculpture);
+  surround.frustumCulled = false;
+  scene.add(surround);
+
+  const scenes: SceneState[] = specs.map((spec) => {
+    const uniforms = makeUniforms();
+    const material = makeMaterial(uniforms);
+    const mesh = new THREE.Mesh(panelGeometry, material);
+    mesh.visible = false;
+    scene.add(mesh);
+    return { spec, status: "idle", mesh, material, uniforms };
+  });
+
   const camera = new THREE.PerspectiveCamera(CAMERA_FOV, 2, 5, 30);
   camera.position.set(0, 0, CAMERA_DISTANCE);
 
@@ -376,40 +423,99 @@ export function mountRelief(container: HTMLElement, sceneName = "kurukshetra") {
     renderer.render(scene, camera);
   };
 
-  let bounds = container.getBoundingClientRect();
+  const releaseScene = (state: SceneState) => {
+    state.abort?.abort();
+    const u = state.uniforms;
+    for (const key of [
+      "tHeight",
+      "tStage1",
+      "tStage2",
+      "tStage3",
+      "tStage4",
+      "tStage5",
+    ]) {
+      if (u[key].value !== blank) u[key].value.dispose();
+      u[key].value = blank;
+    }
+    u.uReady.value = 0;
+    state.status = "idle";
+  };
+
+  const loadScene = (state: SceneState, first: boolean) => {
+    state.status = "loading";
+    const abort = new AbortController();
+    state.abort = abort;
+    const name = state.spec.name;
+    const u = state.uniforms;
+    [1, 2, 3, 4, 5].forEach((index) => {
+      u[`tStage${index}`].value = data(
+        `/relief/${name}-stage${index}.webp`,
+        false,
+      );
+    });
+    loadHeight(`/relief/${name}-height.png`, abort.signal)
+      .then((texture) => {
+        if (disposed || abort.signal.aborted) return texture.dispose();
+        u.tHeight.value = texture;
+        u.uTexel.value.set(1 / texture.image.width, 1 / texture.image.height);
+        u.uReady.value = 1;
+        state.status = "ready";
+        if (first && !contextLost) container.dataset.reliefState = "ready";
+        render();
+      })
+      .catch(() => {
+        if (disposed || abort.signal.aborted) return;
+        // The plaster wall still renders; the page stays fully readable.
+        state.status = "failed";
+        if (first) container.dataset.reliefState = "plain";
+      });
+  };
+
+  // World units per CSS pixel at the wall plane, for the current camera.
+  let worldPerPixel = 1;
+  let viewHeight = window.innerHeight;
   const resize = () => {
-    bounds = container.getBoundingClientRect();
-    const width = Math.max(1, bounds.width);
-    const height = Math.max(1, bounds.height);
+    const width = Math.max(1, window.innerWidth);
+    const height = Math.max(1, window.innerHeight);
+    viewHeight = height;
     const aspect = width / height;
     camera.aspect = aspect;
-    if (aspect >= 1) {
-      // Cover the 2:1 wall; keep the chariot inside ultra-wide frames.
-      camera.zoom = Math.max(1, aspect / 2.15);
-      camera.position.x = 0;
-      camera.position.y = 0;
-    } else {
-      // Portrait: step back so the whole chariot sits below the title band.
-      camera.zoom = 0.44 + 0.26 * aspect;
-      camera.position.x = 0.15;
-      camera.position.y = 0.65 + (0.13 * WALL_H) / camera.zoom;
-    }
+    // Cover the 2:1 panel on landscape screens; on portrait step back so a
+    // panel shows whole across the width.
+    camera.zoom =
+      aspect >= 1 ? Math.max(1, aspect / 2.15) : 0.44 + 0.26 * aspect;
     camera.updateProjectionMatrix();
+    const visible =
+      (2 *
+        CAMERA_DISTANCE *
+        Math.tan(THREE.MathUtils.degToRad(CAMERA_FOV / 2))) /
+      camera.zoom;
+    worldPerPixel = visible / height;
     renderer.setSize(width, height, false);
-    renderer.getDrawingBufferSize(wallUniforms.uResolution.value);
+    renderer.getDrawingBufferSize(shared.uResolution.value);
     fieldUniforms.uAspect.value = aspect;
+    place();
     render();
   };
-  const resizeObserver = new ResizeObserver(resize);
-  resizeObserver.observe(container);
-  const intersection = new IntersectionObserver(
-    ([entry]) => {
-      visible = entry.isIntersecting;
-      if (visible) staleInput = true;
-    },
-    { rootMargin: "80px" },
-  );
-  intersection.observe(container);
+  window.addEventListener("resize", resize);
+
+  // Lay every panel at its anchor's current position on screen.
+  let lastScroll = window.scrollY;
+  let scrollSpeed = 0;
+  const place = () => {
+    shared.uScrollWorld.value = window.scrollY * worldPerPixel;
+    scenes.forEach((state, index) => {
+      const rect = state.spec.anchor.getBoundingClientRect();
+      const offset = rect.top + rect.height / 2 - viewHeight / 2;
+      state.mesh.position.y = -offset * worldPerPixel;
+      const distance = Math.abs(offset) / viewHeight;
+      state.mesh.visible = distance < 1.2 && state.status === "ready";
+      if (distance < 1.6 && state.status === "idle")
+        loadScene(state, index === 0);
+      else if (distance > 3 && state.status !== "idle" && index !== 0)
+        releaseScene(state);
+    });
+  };
 
   // --- user input -----------------------------------------------------------
   const target = new THREE.Vector2(-1, -1);
@@ -418,10 +524,9 @@ export function mountRelief(container: HTMLElement, sceneName = "kurukshetra") {
   let hasPointer = false;
   let staleInput = true;
   const onPointer = (event: PointerEvent) => {
-    bounds = container.getBoundingClientRect();
     target.set(
-      (event.clientX - bounds.left) / bounds.width,
-      1 - (event.clientY - bounds.top) / bounds.height,
+      event.clientX / window.innerWidth,
+      1 - event.clientY / window.innerHeight,
     );
     if (!hasPointer || staleInput) {
       fieldUniforms.uPointer.value.copy(target);
@@ -511,7 +616,8 @@ export function mountRelief(container: HTMLElement, sceneName = "kurukshetra") {
     render();
     renderer.domElement.style.visibility = "visible";
     delete container.dataset.fallback;
-    container.dataset.reliefState = ready ? "ready" : "loading";
+    container.dataset.reliefState =
+      scenes[0]?.status === "ready" ? "ready" : "loading";
   };
   renderer.domElement.addEventListener("webglcontextlost", onContextLost);
   renderer.domElement.addEventListener(
@@ -519,30 +625,24 @@ export function mountRelief(container: HTMLElement, sceneName = "kurukshetra") {
     onContextRestored,
   );
 
-  loadHeight(`/relief/${sceneName}-height.png`, abort.signal)
-    .then((texture) => {
-      if (disposed) return texture.dispose();
-      wallUniforms.tHeight.value = texture;
-      wallUniforms.uTexel.value.set(
-        1 / texture.image.width,
-        1 / texture.image.height,
-      );
-      wallUniforms.uReady.value = 1;
-      ready = true;
-      if (!contextLost) container.dataset.reliefState = "ready";
-      render();
-    })
-    .catch(() => {
-      // The plaster wall still renders; the page stays fully readable.
-      if (!disposed) container.dataset.reliefState = "plain";
-    });
-
   function tick(now: number) {
     if (disposed) return;
     const dtMs = Math.min(64, now - (lastTime || now));
     lastTime = now;
-    if (visible && !document.hidden && !contextLost) {
+    if (!document.hidden && !contextLost) {
       const dt = dtMs / 1000;
+      const scrollNow = window.scrollY;
+      const delta = scrollNow - lastScroll;
+      lastScroll = scrollNow;
+      place();
+      // Fast scrolling swells the whole visible carving, then it settles.
+      const speed = Math.min(
+        1,
+        Math.abs(delta) / Math.max(1, viewHeight * 0.05),
+      );
+      scrollSpeed +=
+        (speed - scrollSpeed) * (speed > scrollSpeed ? 0.25 : 0.06);
+      shared.uBoost.value = paused ? 0 : scrollSpeed * 0.18;
       if (!paused) {
         elapsed += dt;
         const step = Math.min(dtMs, 32) / 16;
@@ -562,17 +662,18 @@ export function mountRelief(container: HTMLElement, sceneName = "kurukshetra") {
           fieldUniforms.uVelocity.value.set(0, 0);
         }
         advanceAutomatic(dt);
+        fieldUniforms.uShift.value = delta / viewHeight;
         fieldUniforms.uStep.value = step;
         fieldUniforms.uTime.value = elapsed;
         fieldUniforms.tPrevious.value = read.texture;
         renderer.setRenderTarget(write);
         renderer.render(fieldScene, fieldCamera);
         [read, write] = [write, read];
-        wallUniforms.tField.value = read.texture;
+        shared.tField.value = read.texture;
       }
       if (reveal > 0) {
         reveal = Math.max(0, reveal - dt * 0.18);
-        wallUniforms.uReveal.value = reveal;
+        shared.uReveal.value = reveal;
       }
       render();
     }
@@ -582,24 +683,22 @@ export function mountRelief(container: HTMLElement, sceneName = "kurukshetra") {
   frame = requestAnimationFrame(tick);
 
   return {
-    /** Paused shows the whole carving at rest instead of an empty wall. */
+    /** Paused shows every carving at rest instead of an empty wall. */
     setPaused(value: boolean) {
       paused = value;
       staleInput = true;
-      wallUniforms.uStill.value = paused ? 1 : 0;
+      shared.uStill.value = paused ? 1 : 0;
       render();
     },
     reveal() {
       reveal = 1;
-      wallUniforms.uReveal.value = 1;
+      shared.uReveal.value = 1;
       render();
     },
     dispose() {
       disposed = true;
-      abort.abort();
       cancelAnimationFrame(frame);
-      resizeObserver.disconnect();
-      intersection.disconnect();
+      window.removeEventListener("resize", resize);
       window.removeEventListener("pointermove", onPointer);
       window.removeEventListener("pointerdown", onPointer);
       renderer.domElement.removeEventListener(
@@ -610,16 +709,18 @@ export function mountRelief(container: HTMLElement, sceneName = "kurukshetra") {
         "webglcontextrestored",
         onContextRestored,
       );
+      scenes.forEach((state) => {
+        releaseScene(state);
+        state.material.dispose();
+      });
       read.dispose();
       write.dispose();
-      sculpture.geometry.dispose();
+      panelGeometry.dispose();
       surroundGeometry.dispose();
+      surroundMaterial.dispose();
       fieldQuad.geometry.dispose();
       fieldMaterial.dispose();
-      wallMaterial.dispose();
-      const height = wallUniforms.tHeight.value;
-      for (const texture of [noise, plaster, ...stages, blank, height])
-        texture.dispose();
+      for (const texture of [noise, plaster, blank]) texture.dispose();
       renderer.dispose();
       renderer.domElement.remove();
     },

@@ -4,23 +4,47 @@ import "@fontsource/tinos/latin-400-italic.css";
 import "@fontsource/arimo/latin-ext-400.css";
 import "@fontsource/arimo/latin-400.css";
 import "./style.css";
+import Lenis from "lenis";
 import { mountRelief } from "./relief";
+import { mountFloatingType } from "./float";
 
+// One wall for the whole page: every [data-scene] section anchors a carved
+// panel on a single fixed canvas, in story order.
 const host = document.querySelector<HTMLElement>("#relief")!;
+const sceneAnchors = [
+  ...document.querySelectorAll<HTMLElement>("[data-scene]"),
+];
+for (const anchor of sceneAnchors)
+  anchor.style.setProperty(
+    "--fallback",
+    `url("/relief/${anchor.dataset.scene}-fallback.webp")`,
+  );
 let relief: ReturnType<typeof mountRelief> | undefined;
 try {
-  relief = mountRelief(host);
+  relief = mountRelief(
+    host,
+    sceneAnchors.map((anchor) => ({ name: anchor.dataset.scene!, anchor })),
+  );
 } catch {
   host.dataset.fallback = "true";
 }
-// Scene 2: the wall continues behind the statement with its own carving.
-const sceneHost = document.querySelector<HTMLElement>("#relief-scene2")!;
-let sceneRelief: ReturnType<typeof mountRelief> | undefined;
-try {
-  sceneRelief = mountRelief(sceneHost, "scene2");
-} catch {
-  sceneHost.dataset.fallback = "true";
-}
+const markFallback = () =>
+  document.documentElement.classList.toggle(
+    "relief-fallback",
+    host.dataset.fallback === "true",
+  );
+markFallback();
+new MutationObserver(markFallback).observe(host, {
+  attributes: true,
+  attributeFilter: ["data-fallback"],
+});
+
+// Smooth, weighted scrolling like the reference; the document still scrolls
+// natively underneath, so keyboard, anchors and assistive tech keep working.
+let lenis: Lenis | undefined;
+const floating = mountFloatingType(
+  document.querySelectorAll<HTMLElement>("[data-float]"),
+);
 // No visible motion control: the operating-system preference decides. With
 // reduced motion the whole carving is shown at rest instead of animating.
 const motionPreference = matchMedia("(prefers-reduced-motion: reduce)");
@@ -28,7 +52,12 @@ let paused = motionPreference.matches;
 function setMotion(value: boolean) {
   paused = value;
   relief?.setPaused(value);
-  sceneRelief?.setPaused(value);
+  floating.setPaused(value);
+  if (value) {
+    lenis?.destroy();
+    lenis = undefined;
+  } else if (!lenis)
+    lenis = new Lenis({ autoRaf: true, lerp: 0.085, anchors: true });
   document.documentElement.classList.toggle("motion-paused", value);
 }
 motionPreference.addEventListener("change", (event) =>
@@ -77,7 +106,7 @@ menuButton.addEventListener("click", () => {
   document.documentElement.classList.add("menu-open");
   menuButton.setAttribute("aria-expanded", "true");
   relief?.setPaused(true);
-  sceneRelief?.setPaused(true);
+  lenis?.stop();
 });
 let pendingDestination: HTMLElement | null = null;
 function closeMenu() {
@@ -88,13 +117,14 @@ dialog.addEventListener("close", () => {
   document.documentElement.classList.remove("menu-open");
   menuButton.setAttribute("aria-expanded", "false");
   relief?.setPaused(paused);
-  sceneRelief?.setPaused(paused);
+  lenis?.start();
   const destination = pendingDestination;
   pendingDestination = null;
   if (destination) {
     destination.setAttribute("tabindex", "-1");
     destination.focus({ preventScroll: true });
-    destination.scrollIntoView({ behavior: paused ? "instant" : "smooth" });
+    if (lenis) lenis.scrollTo(destination);
+    else destination.scrollIntoView({ behavior: "instant" });
   } else menuButton.focus({ preventScroll: true });
 });
 dialog.querySelectorAll<HTMLAnchorElement>("a").forEach((link) => {
@@ -127,6 +157,7 @@ if (artwork.complete && artwork.naturalWidth === 0) artworkFailed();
 if (import.meta.hot)
   import.meta.hot.dispose(() => {
     relief?.dispose();
-    sceneRelief?.dispose();
+    lenis?.destroy();
+    floating.dispose();
     observer.disconnect();
   });

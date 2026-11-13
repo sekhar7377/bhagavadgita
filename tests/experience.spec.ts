@@ -27,7 +27,7 @@ test("opening renders real WebGL and menu supports keyboard and section navigati
     page.getByRole("button", { name: "Menu", exact: true }),
   ).toBeFocused();
   await page.getByRole("button", { name: "Menu", exact: true }).click();
-  await page.getByRole("link", { name: "02 The battlefield" }).click();
+  await page.getByRole("link", { name: "03 The battlefield" }).click();
   await expect(page).toHaveURL(/#story$/);
   await expect(page.getByRole("dialog")).not.toBeVisible();
   await expect(page.locator("#story")).toBeFocused();

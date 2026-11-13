@@ -48,6 +48,32 @@ Milestone 02: the opening wall rebuilt on the reference's architecture. Still a 
 7. **Performance is unmeasured on real hardware.** Everything here ran on SwiftShader. Tests take minutes for that reason.
 8. The automatic path uses a hand-written jitter, not GSAP's `rough` ease.
 
+## Milestone 03: one continuous wall, six Gītā scenes (14 November 2026)
+
+The user asked for the whole site to be one continuous experience like the reference (not separate sections), with moving type, telling famous scenes of the Gītā. Live inspection of the reference confirmed: **one full-screen WebGL canvas, document overflow hidden, wheel-driven virtual scroll**; the wall and its carvings glide through that single canvas.
+
+**Architecture now**
+- `#relief` is a single `position: fixed` canvas behind the whole page (`src/relief.ts`, `mountRelief(container, scenes)`). Every `[data-scene]` element anchors one carved 2:1 panel; each frame the panel is placed at its anchor's on-screen centre (`place()`), so the wall scrolls exactly with the DOM.
+- One shared reveal field; it is **reprojected on scroll** (`uShift` in the field shader) so revealed carving stays attached to the sculpture.
+- Plaster grain is pinned to the wall (`uScrollWorld`), so bare wall between scenes scrolls continuously.
+- Fast scrolling swells the geometry slightly (`uBoost`, vertex only; shading ignores it so it never lights unrevealed carving).
+- Panels load when within 1.6 screens and are released beyond 3 screens (the opening panel is never released). The opening panel drives `data-relief-state` (ready / plain), which the tests use.
+- Smooth weighted scrolling with **Lenis 1.3.4** (`lerp 0.085`, `anchors: true`) over native scroll, so keyboard, anchors and assistive tech still work. Disabled under reduced motion.
+- **Floating type** (`src/float.ts`): `[data-float]` headings are split into `.line` spans at `<br>`; lines rise in with a stagger as they enter, spread apart slightly away from screen centre and breathe gently. Disabled under reduced motion.
+- No-WebGL fallback: `html.relief-fallback` shows each scene's baked `NAME-fallback.webp` as its section background.
+- New scene: generate the plaster render, then `sh scripts/relief/make_scene.sh sceneN docs/references/<file>.png` (GPU depth, manifest, bake, fallback), then add a `<section class="scene scene--left|right|centre" data-scene="sceneN">` with a `data-float` statement.
+
+**The six scenes (story order, each a distinct camera; see Scene variety rule)**
+1. `kurukshetra`: the chariot between the armies, wide (hero).
+2. `scene2`: Ch. 1, the bow lowers: close, on the chariot.
+3. `scene3`: Ch. 2, the teaching begins: low angle from the chariot floor, canopy as halo.
+4. `scene4`: Ch. 6, the steady lamp: symbolic, a still flame between teacher and student, lotus pond.
+5. `scene5`: Ch. 11, the universal form: monumental, ordered faces and arms, tiny Arjuna below.
+6. `scene6`: Ch. 18, clarity: from behind and below, Arjuna upright lifting the bow, armies clear.
+All statements are original editorial copy with traditional chapter titles; no verse is quoted or invented.
+
+**Still missing against the reference**: carving rising *over* letters (needs text drawn in WebGL); loader with sound prompt; menu transition; header mark after scroll; the dark closing section is still milestone-01 styling.
+
 ## Scenes (session 3, 14 November 2026)
 
 - **Scene 1, opening wall** (`scripts/relief/elements.json`, outputs `public/relief/kurukshetra-*`): the ChatGPT chariot-and-battlefield panel plus the wheel-bearer. Elements with `"paint": 1` show the render's own shading as they rise (`paint_tone` in `build_relief.py`), so revealed carving keeps the render's full detail; depth still drives the geometry and cast-shadow bake. The user asked for this after seeing the depth-only bake lose detail.
