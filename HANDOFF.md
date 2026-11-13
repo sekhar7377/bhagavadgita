@@ -10,7 +10,9 @@ Do not republish or reconfigure the cloud environment. User already published it
 
 ## Latest steering — do this before further building
 
-User explicitly asked to inspect https://immersive-g.com/ FIRST, especially cursor flow/artwork reveal, seeking exact interaction fidelity, and analyze the supplied visuals. Pause UI expansion. Live inspection is currently blocked by the environment proxy (curl CONNECT 403; Chromium ERR_TUNNEL_CONNECTION_FAILED). A network-only draft adding immersive-g.com and www.immersive-g.com was saved; no scripts, repo membership, or publication changed. Tool reports requires_publish=true; user must review/save settings and publish the environment to persist it. Recheck live access after their settings change. Do not claim the inherited source audit is a new observation. Read docs/REFERENCE_ANALYSIS.md.
+User explicitly asked to inspect https://immersive-g.com/ FIRST, especially cursor flow/artwork reveal, seeking exact interaction fidelity, and analyze supplied visuals. UI expansion was paused. Network initially blocked the site; after user said “continue,” environment revision 2 allowed access (HTTPS 200). Live inspection and public-code verification are now completed to the scope in `docs/REFERENCE_ANALYSIS.md`. Read that file and `docs/reference-study/` images before building more. Actual settled captures show rest, sweep, stationary coverage and opposite-side stroke. Early recordings were loader-contaminated and must not be used as evidence. Software Chromium selected the site's low-detail model; no high-end performance or exact-match claim.
+
+Next priority: replace the approximate interaction and composition with the measured reference behavior, and produce a detailed original chariot/figures/horses relief from user references. Do not present simple symbols as equivalent. The current typography/identity placement also differs (reference's 28px opening sentence and horizontal identity/sentence/scroll band at 1150×720). No further UI changes were made during the reference study.
 
 ## What exists now
 
@@ -48,7 +50,7 @@ See `docs/VALIDATION.md` for final results and known limits. Tests cover WebGL o
 
 ## Next work, in order
 
-1. Complete LIVE reference inspection when network access is applied. Compare rest, slow sweep, fast stroke, stationary pointer, exit/decay, independent automatic movement, scroll and resize at matched viewport sizes. Record evidence before more UI. Then get user feedback on the opening's pacing and art direction.
+1. Use the completed live reference study to reconstruct the opening. Add GPU RGBA feedback field, tuned lag/noise/coverage/shading, sparse horizontal composition and detailed representative Gītā sculpture. Further controlled exit/decay, resized/mobile and matched-performance tests remain. Keep the exact-fidelity gate open until visual motion comparisons pass.
 2. Improve relief quality toward actual sculpted chariot/figures, sourced from the provided visual references. Use `docs/references/` immediately; obtain compressed excerpts/stills for V04–V07 when needed. They were NOT inspected.
 3. Build GPU field feedback and validate trail persistence, pointer speed, stationary input, no-input decay, independent autonomous path and scroll recycling. Add measured frame-time evidence on representative hardware, not claims from software-rendered Chromium.
 4. Establish character/style reference sheet and scene composition before producing eighteen artworks. Current A01 is provisional, not the locked character bible.

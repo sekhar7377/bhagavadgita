@@ -15,7 +15,7 @@ First functional test run caught a deferred dialog-close focus race and an image
 
 ## Not verified / not complete
 
-- Live reference: curl CONNECT returned 403; Chromium returned ERR_TUNNEL_CONNECTION_FAILED. No live motion fidelity claim is made. New network draft adds immersive-g.com and www.immersive-g.com; saving the draft is not runtime access or publication.
+- Live reference was initially blocked (CONNECT 403); after network revision 2, HTTPS and Chromium access succeeded. See REFERENCE_ANALYSIS.md for actual live/source findings and screenshot evidence. No final motion-fidelity claim is made.
 - No matched reference/local motion recording, physical GPU/device frame-time test, 30/60/120Hz equivalence, production GPU feedback field, detailed figurative sculpture or packed shade bake.
 - Four uploaded videos exceeded 32MiB transfer limit and were not inspected. Raw clips not cleaned/integrated.
 - No full scripture edition, chapter reader, audio, deployment or cloud publication.
