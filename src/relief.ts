@@ -1,350 +1,502 @@
 import * as THREE from "three";
 
 /**
- * Original procedural bas-relief study, not a production character sculpture.
- * Every motif is sampled into the mesh's height attribute. A persistent field
- * changes actual vertex depth, and lighting follows the deformed surface gradient.
- * No image, opacity mask, or pointer spotlight substitutes for the geometry.
+ * Opening wall: an original Kurukṣetra bas-relief that rises out of plaster
+ * where attention has recently passed.
+ *
+ * - Height data comes from `public/relief/kurukshetra-height.png`, built by
+ *   `scripts/relief/build_relief.py` from this project's own artwork.
+ * - A persistent 256×256 RGBA feedback field (ping-pong render targets) stores
+ *   signed velocity (R,G), a nonlinear speed response (B) and coverage (A).
+ * - The same field scales real vertex depth and, at twice the strength, walks
+ *   through five lighting stages baked offline at 20–100% extrusion, so
+ *   carving becomes legible before it reaches full depth.
+ * - An independent automatic input keeps discovering the wall in short bursts.
+ *
+ * The behaviour and constants follow the study in docs/REFERENCE_ANALYSIS.md.
+ * All code, geometry and textures here are original to this project.
  */
-export function mountRelief(container: HTMLElement) {
-  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  let paused = reducedMotion.matches;
-  let disposed = false;
-  let contextLost = false;
-  let frame = 0;
-  let lastTime = 0;
-  let elapsed = 0;
-  let fullReveal = 0;
-  let visible = true;
-  let pointerActive = false;
-  const pointer = new THREE.Vector2(0.5, 0.5);
-  const fieldWidth = 160;
-  const fieldHeight = 104;
-  const values = new Float32Array(fieldWidth * fieldHeight);
-  const bytes = new Uint8Array(values.length);
-  let renderer: THREE.WebGLRenderer;
 
+const FIELD_SIZE = 256;
+const FALLOFF = 0.38 * 0.5;
+const DISSIPATION = 0.953;
+const POINTER_EASE = 0.4;
+const WALL_W = 16.08;
+const WALL_H = 8.04;
+const DEPTH = 0.62;
+const CAMERA_DISTANCE = 15;
+const CAMERA_FOV = 30;
+
+const quadVertex = /* glsl */ `
+  varying vec2 vUv;
+  void main() {
+    vUv = uv;
+    gl_Position = vec4(position.xy, 0.0, 1.0);
+  }
+`;
+
+const fieldFragment = /* glsl */ `
+  precision highp float;
+  uniform sampler2D tPrevious;
+  uniform sampler2D tNoise;
+  uniform float uFalloff;
+  uniform float uDissipation;
+  uniform float uStep;
+  uniform float uAspect;
+  uniform float uTime;
+  uniform vec2 uPointer;
+  uniform vec2 uVelocity;
+  uniform vec2 uAuto;
+  uniform float uAutoActive;
+  varying vec2 vUv;
+
+  vec4 stamp(vec2 velocity, vec2 centre) {
+    vec2 offset = vUv - centre;
+    offset.x *= uAspect;
+    velocity *= 50.0;
+    float speed = 1.0 - pow(1.0 - min(1.0, length(velocity)), 2.0);
+    float falloff = smoothstep(uFalloff, 0.0, length(offset));
+    return vec4(velocity, speed, 1.0) * falloff;
+  }
+
+  void main() {
+    vec4 data = texture2D(tPrevious, vUv);
+    float friction = 1.0 / uDissipation - 1.0;
+    data *= 1.0 / (1.0 + uStep * friction);
+
+    vec2 noiseUv = vUv * vec2(uAspect, 1.0);
+    float drift = uTime * 0.01;
+    float broad = smoothstep(0.4, 1.0, texture2D(tNoise, noiseUv * 0.35 + drift).g);
+    float fine = 0.15 + 0.85 * smoothstep(0.4, 1.0, texture2D(tNoise, noiseUv * 0.8 + drift).g);
+
+    data += stamp(uVelocity, uPointer) * fine * uStep;
+
+    vec4 automatic = stamp(vec2(1.0), uAuto) * 3.0 * uAutoActive;
+    automatic.a = automatic.b;
+    automatic.rg = vec2(0.0);
+    data += automatic * broad * uStep;
+
+    data = min(data, vec4(1.0));
+    data.rgb = max(data.rgb, vec3(-1.0));
+    gl_FragColor = data;
+  }
+`;
+
+const wallVertex = /* glsl */ `
+  uniform sampler2D tField;
+  uniform sampler2D tHeight;
+  uniform float uDepth;
+  uniform float uStill;
+  uniform float uReveal;
+  varying vec2 vUv;
+  varying vec3 vWorld;
+
+  void main() {
+    vUv = uv;
+    vec4 undeformed = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    vec2 screenUv = (undeformed.xy / undeformed.w + 1.0) * 0.5;
+    vec4 field = texture2D(tField, screenUv);
+    float extrude = mix(field.b, field.a, 0.5);
+    extrude = max(extrude, max(uStill * 0.5, uReveal * 0.5));
+    float inside = step(0.0, uv.x) * step(uv.x, 1.0) * step(0.0, uv.y) * step(uv.y, 1.0);
+    float height = texture2D(tHeight, uv).r * inside;
+    vec3 carved = position;
+    carved.z += height * uDepth * mix(0.05, 1.0, min(extrude, 1.0));
+    carved.xy *= 1.004;
+    vWorld = position;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(carved, 1.0);
+  }
+`;
+
+const wallFragment = /* glsl */ `
+  precision highp float;
+  uniform sampler2D tField;
+  uniform sampler2D tStage1;
+  uniform sampler2D tStage2;
+  uniform sampler2D tStage3;
+  uniform sampler2D tStage4;
+  uniform sampler2D tStage5;
+  uniform sampler2D tPlaster;
+  uniform sampler2D tHeight;
+  uniform vec2 uResolution;
+  uniform vec2 uTexel;
+  uniform float uStill;
+  uniform float uReveal;
+  uniform float uReady;
+  varying vec2 vUv;
+  varying vec3 vWorld;
+
+  const float REST = 0.54504;
+
+  vec3 hueToRgb(float hue) {
+    return clamp(abs(fract(hue + vec3(0.0, 2.0 / 3.0, 1.0 / 3.0)) * 6.0 - 3.0) - 1.0, 0.0, 1.0);
+  }
+
+  void main() {
+    vec2 screenUv = gl_FragCoord.xy / uResolution;
+    vec4 field = texture2D(tField, screenUv) * 2.0;
+    float extrude = mix(field.b, field.a, 0.5);
+    extrude = max(extrude, max(uStill, uReveal)) * uReady;
+
+    // Lighting was baked offline at five extrusion depths. The field walks
+    // through those stages in 0.2 intervals, so shade always belongs to the
+    // depth the geometry currently has.
+    float inside = step(0.0, vUv.x) * step(vUv.x, 1.0) * step(0.0, vUv.y) * step(vUv.y, 1.0);
+    float o = REST;
+    o = mix(o, texture2D(tStage1, vUv).g, smoothstep(0.0, 0.2, extrude) * inside);
+    o = mix(o, texture2D(tStage2, vUv).g, smoothstep(0.2, 0.4, extrude) * inside);
+    o = mix(o, texture2D(tStage3, vUv).g, smoothstep(0.4, 0.6, extrude) * inside);
+    o = mix(o, texture2D(tStage4, vUv).g, smoothstep(0.6, 0.8, extrude) * inside);
+    o = mix(o, texture2D(tStage5, vUv).g, smoothstep(0.8, 1.0, extrude) * inside);
+
+    float plaster = texture2D(tPlaster, vWorld.xy / 10.0).g;
+    float wash = mix(1.0, 0.5, length(screenUv - vec2(0.0, 0.8)));
+    float tone = o * plaster + wash * 0.7 * 0.17;
+    tone = tone * 0.6 + 0.4;
+    vec3 color = vec3(tone);
+
+    // While plaster is moving, shadowed rims pick up a faint iridescence
+    // whose hue follows the direction the surface faces. It fades with the
+    // field's speed channel, so a settled carving is neutral grey again.
+    float moving = smoothstep(0.02, 0.7, field.b * 0.5) * inside * uReady;
+    if (moving > 0.001) {
+      float hl = texture2D(tHeight, vUv - vec2(uTexel.x, 0.0)).r;
+      float hr = texture2D(tHeight, vUv + vec2(uTexel.x, 0.0)).r;
+      float hd = texture2D(tHeight, vUv - vec2(0.0, uTexel.y)).r;
+      float hu = texture2D(tHeight, vUv + vec2(0.0, uTexel.y)).r;
+      vec2 facing = vec2(hr - hl, hu - hd);
+      float rim = smoothstep(0.004, 0.05, length(facing));
+      float shade = smoothstep(0.42, 0.2, o);
+      float hue = atan(facing.y, facing.x) / 6.2831853 + 0.28;
+      vec3 tint = mix(vec3(1.0), hueToRgb(hue), 0.5);
+      color = mix(color, color * tint * 1.06, max(rim * 0.5, shade) * moving * 0.3);
+    }
+    gl_FragColor = vec4(color, 1.0);
+  }
+`;
+
+type Segment = {
+  from: THREE.Vector2;
+  to: THREE.Vector2;
+  duration: number;
+  eased: boolean;
+  jitter: number[];
+};
+
+async function loadHeight(url: string, signal: AbortSignal) {
+  const response = await fetch(url, { signal });
+  if (!response.ok) throw new Error(`height ${response.status}`);
+  const bitmap = await createImageBitmap(await response.blob(), {
+    colorSpaceConversion: "none",
+    premultiplyAlpha: "none",
+  });
+  const canvas = document.createElement("canvas");
+  canvas.width = bitmap.width;
+  canvas.height = bitmap.height;
+  const context = canvas.getContext("2d", { willReadFrequently: true })!;
+  context.drawImage(bitmap, 0, 0);
+  const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
+  const data = new Uint16Array(canvas.width * canvas.height);
+  // Rows are flipped so that v = 0 is the bottom of the wall.
+  for (let y = 0; y < canvas.height; y++) {
+    const source = (canvas.height - 1 - y) * canvas.width * 4;
+    const target = y * canvas.width;
+    for (let x = 0; x < canvas.width; x++) {
+      const value =
+        (pixels[source + x * 4] * 256 + pixels[source + x * 4 + 1]) / 65535;
+      data[target + x] = THREE.DataUtils.toHalfFloat(value);
+    }
+  }
+  bitmap.close();
+  const texture = new THREE.DataTexture(
+    data,
+    canvas.width,
+    canvas.height,
+    THREE.RedFormat,
+    THREE.HalfFloatType,
+  );
+  texture.minFilter = THREE.LinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+  texture.needsUpdate = true;
+  return texture;
+}
+
+export function mountRelief(container: HTMLElement) {
+  const noop = { dispose() {}, setPaused(_: boolean) {}, reveal() {} };
+  let renderer: THREE.WebGLRenderer;
   try {
     renderer = new THREE.WebGLRenderer({
       antialias: true,
       alpha: false,
-      powerPreference: "low-power",
+      powerPreference: "high-performance",
     });
   } catch {
     container.dataset.reliefState = "unavailable";
     container.dataset.fallback = "true";
-    return { dispose() {}, setPaused() {}, reveal() {} };
+    return noop;
   }
 
-  container.dataset.reliefState = "ready";
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  let paused = reducedMotion.matches;
+  let disposed = false;
+  let contextLost = false;
+  let visible = true;
+  let ready = false;
+  let frame = 0;
+  let lastTime = 0;
+  let elapsed = 0;
+  let reveal = 0;
+  const abort = new AbortController();
+
+  container.dataset.reliefState = "loading";
   delete container.dataset.fallback;
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.65));
-  renderer.setClearColor("#e9e6dd");
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setClearColor("#c8c8c8");
+  renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
   renderer.domElement.setAttribute("aria-hidden", "true");
   renderer.domElement.style.cssText =
     "display:block;width:100%;height:100%;pointer-events:none";
   container.appendChild(renderer.domElement);
-  const texture = new THREE.DataTexture(
-    bytes,
-    fieldWidth,
-    fieldHeight,
-    THREE.RedFormat,
-    THREE.UnsignedByteType,
-  );
-  texture.minFilter = THREE.LinearFilter;
-  texture.magFilter = THREE.LinearFilter;
-  texture.generateMipmaps = false;
-  texture.needsUpdate = true;
 
-  const worldWidth = 15.5;
-  const worldHeight = 10;
-  const geometry = new THREE.PlaneGeometry(worldWidth, worldHeight, 310, 200);
-  const positions = geometry.getAttribute("position");
-  const sculpt = new Float32Array(positions.count);
-  const incisions = new Float32Array(positions.count);
-  const gauss = (d: number, width: number) =>
-    Math.exp(-(d * d) / (width * width));
-  const segmentDistance = (
-    x: number,
-    y: number,
-    ax: number,
-    ay: number,
-    bx: number,
-    by: number,
-  ) => {
-    const dx = bx - ax,
-      dy = by - ay;
-    const t = Math.max(
-      0,
-      Math.min(1, ((x - ax) * dx + (y - ay) * dy) / (dx * dx + dy * dy)),
-    );
-    return Math.hypot(x - ax - t * dx, y - ay - t * dy);
+  // --- persistent field ---------------------------------------------------
+  const floatTargets =
+    renderer.capabilities.isWebGL2 &&
+    renderer.extensions.has("EXT_color_buffer_float");
+  const targetOptions: THREE.RenderTargetOptions = {
+    type: floatTargets ? THREE.HalfFloatType : THREE.UnsignedByteType,
+    format: THREE.RGBAFormat,
+    minFilter: THREE.LinearFilter,
+    magFilter: THREE.LinearFilter,
+    depthBuffer: false,
+    stencilBuffer: false,
   };
+  let read = new THREE.WebGLRenderTarget(FIELD_SIZE, FIELD_SIZE, targetOptions);
+  let write = new THREE.WebGLRenderTarget(
+    FIELD_SIZE,
+    FIELD_SIZE,
+    targetOptions,
+  );
+  const loader = new THREE.TextureLoader();
+  const data = (url: string, repeat: boolean) => {
+    const texture = loader.load(url, () => render());
+    texture.colorSpace = THREE.NoColorSpace;
+    if (repeat) texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    return texture;
+  };
+  const noise = data("/relief/noise.png", true);
+  const plaster = data("/relief/plaster.webp", true);
+  const stages = [1, 2, 3, 4, 5].map((index) =>
+    data(`/relief/kurukshetra-stage${index}.webp`, false),
+  );
+  const blank = new THREE.DataTexture(
+    new Uint16Array([0]),
+    1,
+    1,
+    THREE.RedFormat,
+    THREE.HalfFloatType,
+  );
+  blank.needsUpdate = true;
 
-  function wheel(x: number, y: number) {
-    const dx = x - 4.35,
-      dy = y + 2.42;
-    const r = Math.hypot(dx, dy),
-      a = Math.atan2(dy, dx);
-    let h = 0.23 * gauss(r - 2.47, 0.13) + 0.32 * gauss(r - 2.2, 0.17);
-    h += 0.12 * gauss(r - 1.97, 0.055) + 0.09 * gauss(r - 2.68, 0.045);
-    h += 0.34 * gauss(r, 0.36) + 0.15 * gauss(r - 0.52, 0.09);
-    if (r > 0.36 && r < 2.22) {
-      const spokeDistance = (Math.abs(Math.sin(a * 6)) * r) / 6;
-      const end =
-        Math.min(1, (r - 0.36) / 0.18) * Math.min(1, (2.22 - r) / 0.16);
-      h += 0.23 * gauss(spokeDistance, 0.065) * end;
-      h += 0.07 * gauss(spokeDistance, 0.125) * end;
-    }
-    // Radial bead carving within the wheel's outside band.
-    h +=
-      0.06 * gauss(r - 2.43, 0.1) * Math.pow(Math.max(0, Math.cos(a * 56)), 4);
-    return h;
-  }
+  const fieldUniforms = {
+    tPrevious: { value: read.texture },
+    tNoise: { value: noise },
+    uFalloff: { value: FALLOFF },
+    uDissipation: { value: DISSIPATION },
+    uStep: { value: 1 },
+    uAspect: { value: 1 },
+    uTime: { value: 0 },
+    uPointer: { value: new THREE.Vector2(-1, -1) },
+    uVelocity: { value: new THREE.Vector2() },
+    uAuto: { value: new THREE.Vector2(-1, -1) },
+    uAutoActive: { value: 0 },
+  };
+  const fieldMaterial = new THREE.ShaderMaterial({
+    uniforms: fieldUniforms,
+    vertexShader: quadVertex,
+    fragmentShader: fieldFragment,
+    depthTest: false,
+    depthWrite: false,
+  });
+  const fieldScene = new THREE.Scene();
+  const fieldQuad = new THREE.Mesh(
+    new THREE.PlaneGeometry(2, 2),
+    fieldMaterial,
+  );
+  fieldQuad.frustumCulled = false;
+  fieldScene.add(fieldQuad);
+  const fieldCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
-  function lotus(x: number, y: number) {
-    const dx = x + 4.05,
-      dy = y - 2.44;
-    const r = Math.hypot(dx, dy),
-      a = Math.atan2(dy, dx);
-    let h = 0;
-    for (let ring = 0; ring < 2; ring++) {
-      const count = ring === 0 ? 9 : 7;
-      const offset = ring === 0 ? 0.15 : 0.42;
-      const length = ring === 0 ? 1.5 : 0.95;
-      for (let j = 0; j < count; j++) {
-        const angle = (j / count) * Math.PI * 2 + offset;
-        const along = dx * Math.cos(angle) + dy * Math.sin(angle);
-        const across = -dx * Math.sin(angle) + dy * Math.cos(angle);
-        if (along > 0 && along < length) {
-          const shape = Math.sin((Math.PI * along) / length);
-          const width = 0.38 * Math.pow(shape, 0.8);
-          const petal = Math.max(
-            0,
-            1 - Math.pow(across / Math.max(width, 0.001), 2),
-          );
-          h = Math.max(h, petal * shape * (ring ? 0.45 : 0.32));
-          // The central incised vein stays shallower than the rounded petal.
-          if (Math.abs(across) < 0.025) h -= 0.016 * shape;
-        }
-      }
-    }
-    h += 0.3 * gauss(r, 0.29);
-    h += 0.025 * gauss(r - 0.16, 0.05) * (1 + Math.cos(a * 8));
-    return h;
-  }
-
-  function bow(x: number, y: number) {
-    // A carved recurve bow in the left margin, with a fine taut string.
-    const by = y + 1.05;
-    const bowX = -4.75 - 0.74 * Math.cos(by * 0.7) + 0.12 * Math.cos(by * 2.1);
-    const endFade = Math.max(0, Math.min(1, (3.05 - Math.abs(by)) / 0.24));
-    let h = 0.24 * gauss(x - bowX, 0.088) * endFade;
-    h += 0.075 * gauss(x - bowX, 0.18) * endFade;
-    h += 0.045 * gauss(x + 4.15, 0.021) * endFade;
-    h +=
-      0.04 *
-      gauss(x - bowX, 0.12) *
-      gauss(by, 0.48) *
-      (0.5 + 0.5 * Math.cos(by * 68));
-    return h;
-  }
-
-  function leaves(x: number, y: number) {
-    let h = 0;
-    // A restrained botanical frieze meets the lotus at the top edge.
-    const branch = -2.4 + 0.28 * (y - 3.1) * (y - 3.1);
-    h += 0.07 * gauss(x - branch, 0.045) * gauss(y - 4.3, 1.2);
-    for (let j = 0; j < 5; j++) {
-      const cy = 3.1 + j * 0.46;
-      const side = j % 2 ? 1 : -1;
-      const cx = -2.4 + 0.28 * (cy - 3.1) * (cy - 3.1);
-      const dx = (x - cx) * side,
-        dy = y - cy;
-      const u = dx * 0.84 + dy * 0.54;
-      const v = -dx * 0.54 + dy * 0.84;
-      const envelope = Math.max(
-        0,
-        1 - Math.pow((u - 0.38) / 0.47, 2) - Math.pow(v / 0.15, 2),
-      );
-      h += 0.18 * envelope;
-    }
-    return h;
-  }
-
-  function conch(x: number, y: number) {
-    const dx = x - 4.9,
-      dy = y - 3.45;
-    const u = dx * 0.85 - dy * 0.53,
-      v = dx * 0.53 + dy * 0.85;
-    const q = Math.pow((u + 0.25) / 1.12, 2) + Math.pow(v / 0.63, 2);
-    let h = 0.28 * Math.pow(Math.max(0, 1 - q), 0.75);
-    const r = Math.hypot(u + 0.55, v);
-    const angle = Math.atan2(v, u + 0.55);
-    h +=
-      0.08 *
-      gauss(r - (0.12 + (angle + Math.PI) * 0.042), 0.055) *
-      Math.max(0, 1 - q);
-    const tip = segmentDistance(u, v, 0.35, 0, 1.12, -0.14);
-    h += 0.18 * gauss(tip, 0.13);
-    return h;
-  }
-
-  for (let i = 0; i < positions.count; i++) {
-    const x = positions.getX(i),
-      y = positions.getY(i);
-    const raw =
-      wheel(x, y) + lotus(x, y) + bow(x, y) + leaves(x, y) + conch(x, y);
-    // Small tool marks are modeled, not a surface photo texture.
-    const mark =
-      Math.sin(x * 91 + Math.sin(y * 32)) * Math.sin(y * 67 + x * 12);
-    const grain =
-      Math.sin(x * 219.3 + y * 97.1) * Math.sin(x * 73.7 - y * 173.3);
-    sculpt[i] = raw * (1 + mark * 0.008) + grain * 0.0003;
-    incisions[i] = Math.min(raw * 1.9, 1);
-  }
-  for (let i = 0; i < positions.count; i++) positions.setZ(i, sculpt[i]);
-  geometry.computeVertexNormals();
-  for (let i = 0; i < positions.count; i++) positions.setZ(i, 0);
-  geometry.setAttribute("aSculpt", new THREE.BufferAttribute(sculpt, 1));
-  geometry.setAttribute("aCarving", new THREE.BufferAttribute(incisions, 1));
-
-  const uniforms = {
-    uField: { value: texture },
+  // --- wall ---------------------------------------------------------------
+  const wallUniforms = {
+    tField: { value: read.texture },
+    tHeight: { value: blank as THREE.Texture },
+    tStage1: { value: stages[0] },
+    tStage2: { value: stages[1] },
+    tStage3: { value: stages[2] },
+    tStage4: { value: stages[3] },
+    tStage5: { value: stages[4] },
+    tPlaster: { value: plaster },
+    uTexel: { value: new THREE.Vector2(1 / 1152, 1 / 576) },
+    uResolution: { value: new THREE.Vector2(1, 1) },
+    uDepth: { value: DEPTH },
     uStill: { value: paused ? 1 : 0 },
     uReveal: { value: 0 },
+    uReady: { value: 0 },
   };
-  const material = new THREE.ShaderMaterial({
-    uniforms,
-    vertexShader: `
-      uniform sampler2D uField;
-      uniform float uStill;
-      uniform float uReveal;
-      attribute float aSculpt;
-      attribute float aCarving;
-      varying vec3 vNormal;
-      varying vec2 vSurface;
-      varying float vCarving;
-      varying float vAmount;
-      void main() {
-        float field = texture2D(uField, uv).r;
-        float amount = max(max(smoothstep(0.01, 0.82, field), uStill * 0.78), uReveal);
-        float depth = 0.11 + 0.89 * amount;
-        vec3 carved = position;
-        carved.z += aSculpt * depth;
-        vec4 view = modelViewMatrix * vec4(carved, 1.0);
-        vec2 texel = vec2(1.0 / 160.0, 1.0 / 104.0);
-        float left = smoothstep(0.01, 0.82, texture2D(uField, uv - vec2(texel.x, 0.0)).r);
-        float right = smoothstep(0.01, 0.82, texture2D(uField, uv + vec2(texel.x, 0.0)).r);
-        float bottom = smoothstep(0.01, 0.82, texture2D(uField, uv - vec2(0.0, texel.y)).r);
-        float top = smoothstep(0.01, 0.82, texture2D(uField, uv + vec2(0.0, texel.y)).r);
-        vec2 gradient = vec2((right - left) / (2.0 * texel.x * 15.5), (top - bottom) / (2.0 * texel.y * 10.0));
-        float fieldActive = step(max(uStill * 0.78, uReveal), smoothstep(0.01, 0.82, field));
-        vec2 slope = -normal.xy / max(normal.z, 0.01) * depth + aSculpt * 0.89 * gradient * fieldActive;
-        vNormal = normalMatrix * normalize(vec3(-slope, 1.0));
-        vSurface = position.xy;
-        vCarving = aCarving;
-        vAmount = depth;
-        gl_Position = projectionMatrix * view;
-      }
-    `,
-    fragmentShader: `
-      varying vec3 vNormal;
-      varying vec2 vSurface;
-      varying float vCarving;
-      varying float vAmount;
-      float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123); }
-      void main() {
-        vec3 normal = normalize(vNormal);
-        if (!gl_FrontFacing) normal = -normal;
-        vec3 light = normalize(vec3(-0.67, 0.74, 0.77));
-        float diffuse = max(0.0, dot(normal, light));
-        float grain = (hash(vSurface * 145.0) - 0.5) * 0.018;
-        float broad = sin(vSurface.x * 1.5 + sin(vSurface.y * 1.2)) * 0.006;
-        float shade = 0.78 + diffuse * 0.36;
-        float cavity = 1.0 - vCarving * vAmount * 0.035;
-        vec3 plaster = vec3(0.916, 0.903, 0.868);
-        vec3 color = plaster * shade * cavity + grain + broad;
-        gl_FragColor = vec4(color, 1.0);
-      }
-    `,
+  const wallMaterial = new THREE.ShaderMaterial({
+    uniforms: wallUniforms,
+    vertexShader: wallVertex,
+    fragmentShader: wallFragment,
   });
   const scene = new THREE.Scene();
-  const mesh = new THREE.Mesh(geometry, material);
-  scene.add(mesh);
-  const camera = new THREE.OrthographicCamera(-7.75, 7.75, 5, -5, 0.1, 40);
-  camera.position.z = 15;
+  const sculpture = new THREE.Mesh(
+    new THREE.PlaneGeometry(WALL_W, WALL_H, 448, 224),
+    wallMaterial,
+  );
+  // The surrounding plaster continues the same material past the carving so
+  // narrow and very wide viewports never see an edge.
+  const surroundGeometry = new THREE.PlaneGeometry(WALL_W * 5, WALL_H * 5);
+  const surroundUv = surroundGeometry.getAttribute("uv");
+  for (let i = 0; i < surroundUv.count; i++)
+    surroundUv.setXY(
+      i,
+      (surroundUv.getX(i) - 0.5) * 5 + 0.5,
+      (surroundUv.getY(i) - 0.5) * 5 + 0.5,
+    );
+  const surround = new THREE.Mesh(surroundGeometry, wallMaterial);
+  surround.position.z = -0.002;
+  surround.renderOrder = -1;
+  scene.add(surround, sculpture);
+  const camera = new THREE.PerspectiveCamera(CAMERA_FOV, 2, 5, 30);
+  camera.position.set(0, 0, CAMERA_DISTANCE);
 
-  let box = container.getBoundingClientRect();
+  const render = () => {
+    if (disposed || contextLost) return;
+    renderer.setRenderTarget(null);
+    renderer.render(scene, camera);
+  };
+
+  let bounds = container.getBoundingClientRect();
   const resize = () => {
-    box = container.getBoundingClientRect();
-    const width = Math.max(1, box.width),
-      height = Math.max(1, box.height);
+    bounds = container.getBoundingClientRect();
+    const width = Math.max(1, bounds.width);
+    const height = Math.max(1, bounds.height);
     const aspect = width / height;
-    // Preserve the carving's proportions. Mobile uses the wheel and lotus
-    // portions of the wall rather than squeezing the entire desktop scene.
-    const halfH = 5;
-    const halfW = halfH * aspect;
-    camera.left = -halfW;
-    camera.right = halfW;
-    camera.top = halfH;
-    camera.bottom = -halfH;
-    camera.position.x = aspect < 0.8 ? 2.3 : 0;
+    camera.aspect = aspect;
+    if (aspect >= 1) {
+      // Cover the 2:1 wall; keep the chariot inside ultra-wide frames.
+      camera.zoom = Math.max(1, aspect / 2.15);
+      camera.position.x = 0;
+      camera.position.y = 0;
+    } else {
+      // Portrait: step back so the whole chariot sits below the title band.
+      camera.zoom = 0.44 + 0.26 * aspect;
+      camera.position.x = 0.15;
+      camera.position.y = 0.65 + (0.13 * WALL_H) / camera.zoom;
+    }
     camera.updateProjectionMatrix();
     renderer.setSize(width, height, false);
+    renderer.getDrawingBufferSize(wallUniforms.uResolution.value);
+    fieldUniforms.uAspect.value = aspect;
     render();
   };
-  const render = () => {
-    if (!disposed && !contextLost) renderer.render(scene, camera);
-  };
-  const observer = new ResizeObserver(resize);
-  observer.observe(container);
+  const resizeObserver = new ResizeObserver(resize);
+  resizeObserver.observe(container);
   const intersection = new IntersectionObserver(
     ([entry]) => {
       visible = entry.isIntersecting;
+      if (visible) staleInput = true;
     },
     { rootMargin: "80px" },
   );
   intersection.observe(container);
 
-  function stamp(u: number, v: number, power: number, radius: number) {
-    const cx = u * fieldWidth,
-      cy = v * fieldHeight;
-    const rx = radius * fieldWidth,
-      ry = (radius * fieldHeight * worldWidth) / worldHeight;
-    const left = Math.max(0, Math.floor(cx - rx * 2));
-    const right = Math.min(fieldWidth - 1, Math.ceil(cx + rx * 2));
-    const bottom = Math.max(0, Math.floor(cy - ry * 2));
-    const top = Math.min(fieldHeight - 1, Math.ceil(cy + ry * 2));
-    for (let y = bottom; y <= top; y++) {
-      for (let x = left; x <= right; x++) {
-        const d = Math.pow((x - cx) / rx, 2) + Math.pow((y - cy) / ry, 2);
-        const index = y * fieldWidth + x;
-        values[index] = Math.min(1, values[index] + Math.exp(-d * 2) * power);
-      }
-    }
-  }
-
+  // --- user input -----------------------------------------------------------
+  const target = new THREE.Vector2(-1, -1);
+  const previous = new THREE.Vector2(-1, -1);
+  const rawVelocity = new THREE.Vector2();
+  let hasPointer = false;
+  let staleInput = true;
   const onPointer = (event: PointerEvent) => {
-    if (event.pointerType === "touch") return;
-    const bounds = container.getBoundingClientRect();
-    const ndcX = ((event.clientX - bounds.left) / bounds.width) * 2 - 1;
-    const ndcY = 1 - ((event.clientY - bounds.top) / bounds.height) * 2;
-    const worldX = camera.position.x + ndcX * camera.right;
-    const worldY = ndcY * camera.top;
-    pointer.set(
-      (worldX + worldWidth / 2) / worldWidth,
-      (worldY + worldHeight / 2) / worldHeight,
+    bounds = container.getBoundingClientRect();
+    target.set(
+      (event.clientX - bounds.left) / bounds.width,
+      1 - (event.clientY - bounds.top) / bounds.height,
     );
-    pointerActive = true;
+    if (!hasPointer || staleInput) {
+      fieldUniforms.uPointer.value.copy(target);
+      previous.copy(target);
+      hasPointer = true;
+      staleInput = false;
+    }
   };
-  const leave = () => {
-    pointerActive = false;
+  window.addEventListener("pointermove", onPointer, { passive: true });
+  window.addEventListener("pointerdown", onPointer, { passive: true });
+
+  // --- automatic input ------------------------------------------------------
+  let segments: Segment[] = [];
+  let segmentTime = 0;
+  let pause = 0.6;
+  const between = (a: number, b: number) => a + (b - a) * Math.random();
+  const planAutomaticPath = () => {
+    segments = [];
+    const count = Math.floor(Math.random() * 3) + 1;
+    let start: THREE.Vector2 | null = null;
+    for (let i = 0; i < count; i++) {
+      const eased = i !== count - 1 && Math.random() < 0.7;
+      const duration = eased ? between(0.8, 1) : between(0.7, 0.8);
+      const from: THREE.Vector2 =
+        start ??
+        new THREE.Vector2((Math.random() - 0.5) * 2, (Math.random() - 0.5) * 2);
+      const angle = from.angle() + (Math.random() - 0.5) * 2 * Math.PI * 0.8;
+      const radius = between(0.7, 0.9);
+      const to = new THREE.Vector2(
+        Math.cos(angle) * radius,
+        Math.sin(angle) * radius,
+      );
+      const points = Math.max(2, Math.floor(duration * 12));
+      const strength = eased ? 3 : 2;
+      const jitter = Array.from({ length: points + 1 }, (_, index) =>
+        index === 0 || index === points
+          ? 0
+          : ((Math.random() - 0.5) * strength) / points,
+      );
+      segments.push({ from, to, duration, eased, jitter });
+      start = to;
+    }
+    segmentTime = 0;
   };
-  // Listen on the parent so DOM headings do not punch holes in the reveal.
-  const inputSurface = container.parentElement || container;
-  inputSurface.addEventListener("pointermove", onPointer);
-  inputSurface.addEventListener("pointerleave", leave);
+  const advanceAutomatic = (dt: number) => {
+    if (!segments.length) {
+      pause -= dt;
+      fieldUniforms.uAutoActive.value = 0;
+      if (pause <= 0) planAutomaticPath();
+      return;
+    }
+    const segment = segments[0];
+    segmentTime += dt;
+    const linear = Math.min(1, segmentTime / segment.duration);
+    // A hand-drawn, slightly uneven progression rather than a mechanical glide.
+    const scaled = linear * (segment.jitter.length - 1);
+    const index = Math.min(segment.jitter.length - 2, Math.floor(scaled));
+    const wobble =
+      segment.jitter[index] +
+      (segment.jitter[index + 1] - segment.jitter[index]) * (scaled - index);
+    const base = segment.eased ? 1 - (1 - linear) * (1 - linear) : linear;
+    const progress = Math.min(1, Math.max(0, base + wobble));
+    fieldUniforms.uAuto.value.set(
+      (segment.from.x + (segment.to.x - segment.from.x) * progress) / 2 + 0.5,
+      (segment.from.y + (segment.to.y - segment.from.y) * progress) / 2 + 0.5,
+    );
+    fieldUniforms.uAutoActive.value = 1;
+    if (linear >= 1) {
+      segments.shift();
+      segmentTime = 0;
+      if (!segments.length) pause = between(1, 3);
+    }
+  };
+
+  // --- lifecycle ------------------------------------------------------------
   const onContextLost = (event: Event) => {
     event.preventDefault();
     contextLost = true;
@@ -355,14 +507,11 @@ export function mountRelief(container: HTMLElement) {
   const onContextRestored = () => {
     if (disposed) return;
     contextLost = false;
-    texture.needsUpdate = true;
-    material.needsUpdate = true;
-    // Three.js restores its GPU resources before this listener runs. Paint
-    // first so the fallback is not replaced by an uninitialized canvas.
+    staleInput = true;
     render();
     renderer.domElement.style.visibility = "visible";
     delete container.dataset.fallback;
-    container.dataset.reliefState = "ready";
+    container.dataset.reliefState = ready ? "ready" : "loading";
   };
   renderer.domElement.addEventListener("webglcontextlost", onContextLost);
   renderer.domElement.addEventListener(
@@ -370,29 +519,61 @@ export function mountRelief(container: HTMLElement) {
     onContextRestored,
   );
 
-  // First view has a partially legible wheel and lotus, leaving a quiet center.
-  stamp(0.79, 0.27, 0.7, 0.12);
-  stamp(0.23, 0.75, 0.48, 0.11);
+  loadHeight("/relief/kurukshetra-height.png", abort.signal)
+    .then((texture) => {
+      if (disposed) return texture.dispose();
+      wallUniforms.tHeight.value = texture;
+      wallUniforms.uTexel.value.set(
+        1 / texture.image.width,
+        1 / texture.image.height,
+      );
+      wallUniforms.uReady.value = 1;
+      ready = true;
+      if (!contextLost) container.dataset.reliefState = "ready";
+      render();
+    })
+    .catch(() => {
+      // The plaster wall still renders; the page stays fully readable.
+      if (!disposed) container.dataset.reliefState = "plain";
+    });
+
   function tick(now: number) {
     if (disposed) return;
-    const dt = Math.min(0.05, (now - (lastTime || now)) / 1000);
+    const dtMs = Math.min(64, now - (lastTime || now));
     lastTime = now;
-    if (visible && !document.hidden && !paused && !contextLost) {
+    if (visible && !document.hidden && !contextLost) {
+      const dt = dtMs / 1000;
       if (!paused) {
         elapsed += dt;
-        const decay = Math.exp(-dt * 0.26);
-        for (let i = 0; i < values.length; i++) values[i] *= decay;
-        // Autonomous path runs even while pointer input is present.
-        const autoU = 0.5 + 0.34 * Math.sin(elapsed * 0.13 + 1.8);
-        const autoV = 0.5 + 0.31 * Math.cos(elapsed * 0.18 + 0.7);
-        stamp(autoU, autoV, dt * 0.65, 0.105);
-        if (pointerActive) stamp(pointer.x, pointer.y, dt * 3.4, 0.09);
-        fullReveal = Math.max(0, fullReveal - dt * 0.13);
+        const step = Math.min(dtMs, 32) / 16;
+        if (hasPointer && !staleInput) {
+          rawVelocity.copy(target).sub(previous).multiplyScalar(step);
+          previous.copy(target);
+          const settle = rawVelocity.lengthSq() > 0 ? 0.1 : 0.04;
+          fieldUniforms.uPointer.value.lerp(
+            target,
+            1 - Math.pow(1 - POINTER_EASE, step),
+          );
+          fieldUniforms.uVelocity.value.lerp(
+            rawVelocity,
+            1 - Math.pow(1 - settle, step),
+          );
+        } else {
+          fieldUniforms.uVelocity.value.set(0, 0);
+        }
+        advanceAutomatic(dt);
+        fieldUniforms.uStep.value = step;
+        fieldUniforms.uTime.value = elapsed;
+        fieldUniforms.tPrevious.value = read.texture;
+        renderer.setRenderTarget(write);
+        renderer.render(fieldScene, fieldCamera);
+        [read, write] = [write, read];
+        wallUniforms.tField.value = read.texture;
       }
-      uniforms.uReveal.value = fullReveal;
-      for (let i = 0; i < bytes.length; i++)
-        bytes[i] = Math.round(values[i] * 255);
-      texture.needsUpdate = true;
+      if (reveal > 0) {
+        reveal = Math.max(0, reveal - dt * 0.18);
+        wallUniforms.uReveal.value = reveal;
+      }
       render();
     }
     frame = requestAnimationFrame(tick);
@@ -401,24 +582,26 @@ export function mountRelief(container: HTMLElement) {
   frame = requestAnimationFrame(tick);
 
   return {
+    /** Paused shows the whole carving at rest instead of an empty wall. */
     setPaused(value: boolean) {
-      // The application owns preference changes; an explicit Resume wins.
       paused = value;
-      uniforms.uStill.value = paused ? 1 : 0;
+      staleInput = true;
+      wallUniforms.uStill.value = paused ? 1 : 0;
       render();
     },
     reveal() {
-      fullReveal = 1;
-      uniforms.uReveal.value = 1;
+      reveal = 1;
+      wallUniforms.uReveal.value = 1;
       render();
     },
     dispose() {
       disposed = true;
+      abort.abort();
       cancelAnimationFrame(frame);
-      observer.disconnect();
+      resizeObserver.disconnect();
       intersection.disconnect();
-      inputSurface.removeEventListener("pointermove", onPointer);
-      inputSurface.removeEventListener("pointerleave", leave);
+      window.removeEventListener("pointermove", onPointer);
+      window.removeEventListener("pointerdown", onPointer);
       renderer.domElement.removeEventListener(
         "webglcontextlost",
         onContextLost,
@@ -427,9 +610,16 @@ export function mountRelief(container: HTMLElement) {
         "webglcontextrestored",
         onContextRestored,
       );
-      geometry.dispose();
-      material.dispose();
-      texture.dispose();
+      read.dispose();
+      write.dispose();
+      sculpture.geometry.dispose();
+      surroundGeometry.dispose();
+      fieldQuad.geometry.dispose();
+      fieldMaterial.dispose();
+      wallMaterial.dispose();
+      const height = wallUniforms.tHeight.value;
+      for (const texture of [noise, plaster, ...stages, blank, height])
+        texture.dispose();
       renderer.dispose();
       renderer.domElement.remove();
     },

@@ -66,3 +66,30 @@ Create original ivory-stone artwork with V01/V03 as visual reference, with no le
 ### G01 — original procedural sculpture
 
 `src/relief.ts` creates wheel, lotus, bow and conch relief numerically. No external relief model or reference-site mesh is copied. This is provisional symbolic geometry, not final figurative Krishna/Arjuna sculpture. Pointer field is a CPU-updated texture; final GPU feedback-field and detailed model production remain outstanding.
+
+## Second-session intake — 13 November 2026
+
+The user re-supplied footage as five files under 32 MiB. All were downloaded and inspected by contact sheet (20 frames each).
+
+| ID | File | Content |
+| --- | --- | --- |
+| R1 | Screen Recording 2026-11-13 202451.mp4 (28.7 s) | Film opening credits: battlefield tableaux, chariots, wheel held aloft, arrows. Credits in most frames |
+| R2 | Screen Recording 2026-11-13 202649.mp4 (23.4 s) | Chariot and horses, fallen elephant, soldiers, fire in grass. Credits and subtitles |
+| R3 | Screen Recording 2026-11-13 202850.mp4 (28.8 s) | Aftermath field, banners, figure against the sun, close portrait |
+| R4 | Screen Recording 2026-11-13 202951.mp4 (26.8 s) | Confrontation, figures in white, wide aftermath. Subtitles |
+| R5 | Kalki 2898 AD opening (57.5 s) | Same file as V01 |
+| R6 | Screen Recording 2026-11-13 211601.mp4 (28.8 s) | **Recording of the reference website** on the user's GPU: opening reveal, scroll to statement, film window, centred statement |
+
+R1–R5 are commercial film footage with credits, subtitles and recognisable performers. They are used as art direction only. No frame from them is in the site or the repository. R6 is evidence of reference behaviour; two cropped frames are kept in `docs/reference-study/2026-11-13-b/`.
+
+The user also supplied a still of the reference studio's sculpture under dark dramatic light (birds, flowers, vines in thick high relief). It sets the target for sculptural volume. Not stored in the repository.
+
+## Integrated production assets — milestone 02
+
+### G02 — Kurukṣetra bas-relief (replaces G01)
+
+- Source: A01 (`docs/artwork/kurukshetra-original.png`), this project's own generated image.
+- Depth: Depth Anything V2 Large, ONNX on CPU, input 1526×1022.
+- Build: `scripts/relief/build_relief.py`. Outputs in `public/relief/`: `kurukshetra-height.png` (16-bit height in R,G; 1152×576), `kurukshetra-stage1..5.webp` (baked lighting at 20–100% extrusion; 2304×1152), `kurukshetra-fallback.webp`, `plaster.webp` and `noise.png` (procedural, tileable).
+- No reference-site model or texture and no film frame is used. The reference's plaster texture was downloaded only to compare statistics and was not kept.
+- Limits: anatomy and fine form are as good as a depth estimate of a 1536×1024 image allows. Not hand-sculpted.

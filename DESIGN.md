@@ -13,9 +13,9 @@ colors:
   rule: "#b9bcb0"
 typography:
   display:
-    fontFamily: "'Cormorant Garamond', Georgia, serif"
+    fontFamily: "'Tinos', 'Times New Roman', Times, serif"
   utility:
-    fontFamily: "'DM Sans', Arial, sans-serif"
+    fontFamily: "'Arimo', 'Helvetica Neue', Helvetica, Arial, sans-serif"
 rounded:
   DEFAULT: "0px"
 spacing:
@@ -50,7 +50,7 @@ Stone is the opening substrate; paper is the prose surface. Ink and muted supply
 
 ## Typography
 
-Cormorant Garamond provides editorial cadence, with restrained italic emphasis. DM Sans is for quiet, precise utilities. Fonts are self-hosted through pinned Fontsource packages. The heading is 42–68px on desktop, 48px with deliberate wrapping on phones. Body content is English. Sanskrit corpus rendering and verified chapter names belong to later milestones; no unverified Sanskrit verse is displayed.
+Tinos (Times-compatible) carries the editorial voice and Arimo (Helvetica-compatible) the utilities, chosen to sit as close as open fonts allow to the reference's licensed PSTimes and Helvetica Neue. Fonts are self-hosted through pinned Fontsource packages. The opening sentence is 28px up to 1440px wide, then 1.944vw up to 37.24px, as measured on the reference; utilities are 14px. Body content is English. Sanskrit corpus rendering and verified chapter names belong to later milestones; no unverified Sanskrit verse is displayed.
 
 ## Layout
 

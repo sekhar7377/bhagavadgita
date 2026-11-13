@@ -87,3 +87,19 @@ These observations plus live source verification are sufficient to reject the cu
 The menu link navigates to `/the-studio/` and begins a pale-to-dark sculptural transition. This software browser produced prolonged intermediate frames; a settled final menu comparison is not claimed in this study. The supplied source audit describes the intended dark menu. Do not treat the captured intermediate text artifacts as target typography.
 
 Current-instance network access is verified. No agent publication was performed. Future environment publication/restoration is a separate product action, not established by successful browsing or Git pushes.
+
+## Second study — 13 November 2026 (milestone 02)
+
+Read from the live public script (`/assets/entry.DyxL_KXi.js`) and measured in Chromium at 1440×810.
+
+**Field shader, as written by the studio.** `stamp = vec4(velocity×50, 1−(1−min(1,|v|))², 1) × smoothstep(falloff, 0, distance) × alpha`. Each update: previous × `1/(1+step×(1/0.953−1))`, plus the pointer stamp × fine noise (0.15 + 0.85·smoothstep(0.4, 1, noise at ×0.8)), plus an automatic stamp with velocity (1,1), ×3, alpha replaced by speed, velocity zeroed, × broad noise (smoothstep(0.4, 1, noise at ×0.35)); clamp to 1. Config: mouseEase 0.4, dissipation 0.953, falloff 0.38 (halved), alpha 1. Pointer velocity is the per-tick change in normalised position × step.
+
+**Relief shader.** Vertex: `extrude = mix(B, A, 0.5)`, `z *= mix(0.05, 1, extrude)`, `xy *= 1.004`, sampled at the undeformed screen position. Fragment: field ×2, same mix; `o = 0.54504` then five `mix` steps to bake levels over 0.2 intervals; plaster at `position.xy / 10`; `+ gradient × 0.7 × 0.17`; `× 0.6 + 0.4` on desktop. Camera fov 30, distance 15.
+
+**Automatic path.** 1–3 segments; each starts where the last ended (first start random in [−1, 1]²), ends at radius 0.7–0.9 on a randomised angle; duration 0.8–1.0 s (eased, rough strength 3) or 0.7–0.8 s (linear, rough strength 2); then the input is parked off-screen for 1–3 s.
+
+**Opening layout at 1440×810.** 12-column grid, 16px padding and gap. Logo x 134.7, 180px wide. Sentence: PSTimes 28px, line-height 1.2, x 490.7, y 385.4. Scroll cue: Helvetica Neue 14px, x 1084, opacity 0.6. Menu label: x 1364.7, y 40.3. Corner link: x 40, y 754.6. Colour `#030303`. No scrollbar; no hamburger icon; no motion control.
+
+**From the user's real-GPU recording (R6).** Wall about 196 grey, median 190; raised plaster up to about 220; deepest shade about 125. Raised forms are soft and voluminous with wide soft shadow. Faint green, pink and yellow fringes appear on shadowed rims while plaster is moving. A small dot trails the pointer. After scrolling: a large left-aligned statement whose letters are hidden where sculpture rises in front of them; a logo mark joins the Menu label; a film window; a centred statement.
+
+The software-renderer captures showed lower highlights than the real-GPU recording. Where they disagree, the recording is the target.

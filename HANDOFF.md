@@ -1,65 +1,76 @@
 # Session handoff — start here
 
-Last updated: 13 November 2026. Project: **Bhagavad Gītā — The Stillness Before Action**.
+Last updated: 13 November 2026 (second session). Project: **Bhagavad Gītā — The Stillness Before Action**.
 
 ## User intent (persistent)
 
-Build a carefully crafted, immersive Gītā experience **one milestone at a time**. User delegates building decisions and will give feedback. Keep completed work in Git and maintain this file so another model can pick up without repeating discovery. Supplied footage guides the visual language; production imagery should have no captions/letters. Original generated visuals are welcome. Current user request overrides the embedded master prompt's demand to finish everything in one session.
+Build an immersive Gītā experience **one milestone at a time**, matching the craft level of https://immersive-g.com/ in every detail: the cursor-driven reveal, the 3D realism of the wall sculpture, typography, spacing, micro-details. The user repeated this several times and is explicit:
 
-Do not republish or reconfigure the cloud environment. User already published it and asked not to reapply previous setup changes. Application Git pushes are separately authorized by the latest request.
+- Go back to the reference and compare after every piece of work. Do not judge by eye from memory.
+- **Do not invent extras.** The reference has no pause-motion control, no menu icon, no eyebrow or subtitle in the opening; those were removed. Add nothing the reference does not have unless the content needs it.
+- The reference's public code may be read to learn mechanisms and values. Do not ship its assets, models, textures, fonts or compiled code.
+- Supplied film footage guides art direction. Production imagery must carry no captions, credits or lettering.
 
-## Latest steering — do this before further building
-
-User next asked to split and analyze the four oversized recordings (V04–V07). Checked all workspace video paths: those originals are not mounted locally. A fresh V04 transfer failed before download with `file exceeds the executor transfer limit of 32 MiB`. Available attachment tools expose no range download or remote splitting. No parts were created and no new analysis of those four is claimed. Resume intake when originals are accessible through a direct downloadable link or smaller uploads; then split locally with ffmpeg and inspect each segment. Do not repeat unchanged failed downloads.
-
-User explicitly asked to inspect https://immersive-g.com/ FIRST, especially cursor flow/artwork reveal, seeking exact interaction fidelity, and analyze supplied visuals. UI expansion was paused. Network initially blocked the site; after user said “continue,” environment revision 2 allowed access (HTTPS 200). Live inspection and public-code verification are now completed to the scope in `docs/REFERENCE_ANALYSIS.md`. Read that file and `docs/reference-study/` images before building more. Actual settled captures show rest, sweep, stationary coverage and opposite-side stroke. Early recordings were loader-contaminated and must not be used as evidence. Software Chromium selected the site's low-detail model; no high-end performance or exact-match claim.
-
-Next priority: replace the approximate interaction and composition with the measured reference behavior, and produce a detailed original chariot/figures/horses relief from user references. Do not present simple symbols as equivalent. The current typography/identity placement also differs (reference's 28px opening sentence and horizontal identity/sentence/scroll band at 1150×720). No further UI changes were made during the reference study.
+Do not republish or reconfigure the cloud environment.
 
 ## What exists now
 
-Milestone 01: functional opening prototype, not the final full experience.
-- Vite + strict TypeScript + Three.js; self-hosted Cormorant Garamond and DM Sans.
-- Ivory symbolic bas-relief: original wheel, bow, lotus, conch; actual vertex displacement driven by persistent pointer field; autonomous reveal and coherent normals. Desktop pointer reveals, mobile composes/crops motifs and retains native scrolling. Pause/reduced-motion and WebGL fallback.
-- Editorial opening and prologue, original generated cinematic battlefield image guided by supplied chariot reference, reflection section, dark accessible dialog menu, working section links, source/editorial disclaimer.
-- No fake chapter routes, sound toggle, Sanskrit verses or translated quotes.
-- `AGENTS.md` carries continuation rules. `DESIGN.md` documents visual direction/tokens. `docs/CREATIVE_BRIEF.md` condenses the complete vision; `docs/SOURCE_BRIEF.txt` preserves only the creative document.
-- Input pasted text contained unrelated account/session bootstrap data after the brief. It was intentionally excluded. NEVER commit the unfiltered original input.
-- `docs/ASSET_REGISTER.md` records all seven references and provenance. Three videos inspected, four blocked by the download tool's 32MiB cap. Two extracted reference frames and the generated original image are retained under docs for fresh-clone continuity.
+Milestone 02: the opening wall rebuilt on the reference's architecture. Still a single page; no chapters, reader, audio or loader.
 
-## Architecture and deliberate scope
+- **Sculpture.** `scripts/relief/estimate_depth.py` runs Depth Anything V2 Large (ONNX, CPU) on the project's own artwork `docs/artwork/kurukshetra-original.png`. `scripts/relief/build_relief.py` separates chariot, riders and horses from terrain, compresses and inflates the forms into a bas-relief height field, places it on a 2304×1152 wall, and **bakes lighting offline at five extrusion depths** (20–100%): soft key light, cast shadow, sky occlusion, bounce. Outputs live in `public/relief/` (about 700 KB total).
+- **Reveal field.** `src/relief.ts` keeps a 256×256 RGBA ping-pong field: R/G velocity, B nonlinear speed, A coverage. Constants and stamp/decay maths follow the reference's public shader: falloff 0.38×0.5, dissipation 0.953 per 16 ms step, pointer ease 0.4, velocity ease 0.1 moving / 0.04 resting, noise stamp 0.15 + 0.85, automatic input ×3 with coverage = speed. Automatic path: 1–3 segments of 0.7–1.0 s, then a 1–3 s pause.
+- **Wall shader.** Vertex depth = height × mix(0.05, 1, avg(B, A)). Fragment samples the field at twice the strength and cross-fades the five baked stages over 0.2 intervals, starting from the constant 0.54504; then plaster texture, screen wash, `tone × 0.6 + 0.4`. Camera: perspective, fov 30, distance 15.
+- **Micro-details from the user's real-GPU recording:** faint iridescent tint on shadowed rims while plaster moves (an approximation, see gaps), and a 4px dot trailing the pointer.
+- **Layout.** Measured from the live reference at 1440×810 and reproduced: 12-column grid, 16px padding and gap; identity from column 2, 28px serif sentence from column 5, 14px scroll cue from column 10 at 60% opacity; Menu label 40px from the top-right; corner link 40px from the bottom-left; text colour `#030303`; no scrollbar. Stacks below 1024px.
+- **Fonts.** Tinos and Arimo (open, metric-compatible with Times and Helvetica), self-hosted. The reference's PSTimes and Helvetica Neue are licensed and were not copied.
+- **Reduced motion.** No visible control. With the OS preference set, the carving is shown fully raised and still.
+- **Fallbacks.** No WebGL: static baked image. Height data fails: plain plaster wall, page fully usable.
+- Prologue, generated battlefield image, reflection, footer and dialog menu are unchanged from milestone 01 apart from the fonts.
 
-Source brief prefers Nuxt/Vue/TypeScript for the eventual full routed experience. This first interaction spike uses Vite/TypeScript to isolate the rendering and prove mechanics with minimal framework overhead. `mountRelief` is framework-independent and can migrate into a Vue component. Decide the routed app architecture before chapter implementation; don't treat the current spike as an invisible change to the full brief.
+## Evidence
 
-The relief is **not** the source brief's final quality gate: original procedural symbols, single-channel CPU texture, no detailed character mesh, no packed multi-state shading bake, no GPU ping-pong field, no scroll recycling. It demonstrates real movement-dependent geometry. Do not report full Immersive Garden fidelity. The initial prototype preceded live inspection; the subsequent live study is recorded in `docs/REFERENCE_ANALYSIS.md`.
+`docs/reference-study/2026-11-13-b/` holds reference captures (software renderer at 1440×810, plus two frames from the user's real-GPU recording), ours, and a side-by-side. Measured tones, reference vs ours: wall 196 / 196, median 190 / 191, deepest shade about 125 / 124, brightest plaster about 220 / 226.
+
+`scripts/reference/capture-reference.cjs` and `capture-ours.cjs` reproduce the captures (global Playwright; the reference script needs `HTTPS_PROXY`).
+
+## Known gaps against the reference — be honest about these
+
+1. **Sculpture quality.** The reference is a hand-sculpted high-relief model: thick rounded volumes, undercuts, overlapping birds, flowers and vines across the whole wall. Ours is one chariot derived from a depth estimate of a 1536×1024 image: finer and flatter, with softer anatomy. This is the largest gap. See the user's supplied still (dark dramatic render of the studio's sculpture) for the target feel.
+2. **One element.** The reference wall carries many elements over several screen heights and recycles them on scroll.
+3. **Iridescence is approximate.** The reference runs a separate fluid simulation and masks by fresnel and bake shadow range. Ours tints by surface direction where the speed channel is active.
+4. **Scroll.** The reference uses virtual scroll, reprojects the field, deforms the wall with scroll speed and has a fast-scroll mode. Ours scrolls natively and the wall leaves with the hero.
+5. **After the opening.** The reference continues with a large statement whose text is occluded by raised sculpture (text rendered in WebGL), a film window, and a centred statement. Ours still has the milestone-01 sections.
+6. **Intro loader, sound, menu transition, header logo after scroll, animated corner icon** are not built.
+7. **Performance is unmeasured on real hardware.** Everything here ran on SwiftShader. Tests take minutes for that reason.
+8. The automatic path uses a hand-written jitter, not GSAP's `rough` ease.
+
+## Next work, in order
+
+1. Raise sculpture quality: thicker volumes, more elements (horses, wheel, banner, lotus, conch, arrows) composed across the wall. Best route is a real 3D model (image-to-3D generation or sculpting) rendered to height and bakes by the existing pipeline; the pipeline accepts any height field.
+2. Extend the wall over several screens and add scroll coupling (field reprojection, scroll-speed deformation).
+3. Rebuild the section after the opening on the reference's pattern, including text occluded by the sculpture.
+4. Intro loader; menu transition.
+5. Then the earlier plan: character sheet, Nuxt routing decision, one chapter slice, verified Sanskrit edition and reusable translation (never fabricate verses).
 
 ## Run
 
 ```sh
-cd /workspace/bhagavadgita
 npm ci
 npm run dev -- --port 5173
 npm run build
-npm test
+npm test            # about 4 minutes on a software renderer
 npm run format:check
 ```
 
-Node 24.22.1/npm 11.9.0 used. Dependencies pinned in package-lock.json. System Chromium `/usr/bin/chromium` is installed; Playwright config accepts `CHROMIUM_PATH` override. No backend, secrets or external runtime requests required. Development server started at port 5173 in this session; processes may not survive future sessions. No deployment performed.
+Rebuilding the relief needs Python with numpy, pillow, opencv-python-headless, scipy and onnxruntime, plus the model `onnx-community/depth-anything-v2-large` (`onnx/model.onnx`, 1.3 GB, not committed):
 
-## Verification
+```sh
+python3 scripts/relief/estimate_depth.py model.onnx docs/artwork/kurukshetra-original.png depth.npy 1526
+python3 scripts/relief/build_relief.py depth.npy docs/artwork/kurukshetra-original.png public/relief preview.png
+```
 
-See `docs/VALIDATION.md` for final results and known limits. Tests cover WebGL opening, menu focus/Escape/navigation, mobile overflow, reduced-motion control, WebGL failure and missing-artwork recovery. Desktop before/after pointer screenshots demonstrated relief change. First test pass found and fixed asynchronous modal focus restoration and early image-error event races. Do not count early failing runs as final results.
+The fallback image is `preview.png` resized to 1920×960 WebP.
 
-## Next work, in order
+## Git
 
-1. Use the completed live reference study to reconstruct the opening. Add GPU RGBA feedback field, tuned lag/noise/coverage/shading, sparse horizontal composition and detailed representative Gītā sculpture. Further controlled exit/decay, resized/mobile and matched-performance tests remain. Keep the exact-fidelity gate open until visual motion comparisons pass.
-2. Improve relief quality toward actual sculpted chariot/figures, sourced from the provided visual references. Use `docs/references/` immediately; obtain compressed excerpts/stills for V04–V07 when needed. They were NOT inspected.
-3. Build GPU field feedback and validate trail persistence, pointer speed, stationary input, no-input decay, independent autonomous path and scroll recycling. Add measured frame-time evidence on representative hardware, not claims from software-rendered Chromium.
-4. Establish character/style reference sheet and scene composition before producing eighteen artworks. Current A01 is provisional, not the locked character bible.
-5. Settle Nuxt routed architecture. Build one full chapter vertical slice with chapter detail, meaning view, menu and a small verified reader before expanding to 18 chapters.
-6. Choose a legally reusable translation and verified Sanskrit edition; reconcile 700 vs 701 numbering. Never fabricate verses. Then implement /chapters, /chapters/01–18, meaning routes, /read and /about progressively.
-7. Audio and film are later tasks. No uploaded video has been cleaned or integrated; don't imply otherwise. Production artwork now is original generation without visible lettering.
-
-## Git continuity
-
-Repository origin: `https://github.com/sekhar7377/bhagavadgita.git`. Started empty (unborn local `work`, no remote branches). Commit completed milestone and push current work to remote `main` without force; verify remote SHA. For future sessions read `git log -3 --oneline`, `git status`, and this handoff before editing. Keep exact final commit state in Git itself, not a self-referential commit hash in this file.
+Origin `https://github.com/sekhar7377/bhagavadgita.git`. This session's work is on branch `claude/festive-hamilton-s0cee2`; `main` holds milestone 01. Read `git log -5 --oneline` and `git status` before editing. Never force-push.

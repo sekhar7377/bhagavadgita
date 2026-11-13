@@ -1,7 +1,8 @@
-import "@fontsource/cormorant-garamond/latin-ext-400.css";
-import "@fontsource/cormorant-garamond/latin-400.css";
-import "@fontsource/cormorant-garamond/latin-400-italic.css";
-import "@fontsource/dm-sans/latin-400.css";
+import "@fontsource/tinos/latin-ext-400.css";
+import "@fontsource/tinos/latin-400.css";
+import "@fontsource/tinos/latin-400-italic.css";
+import "@fontsource/arimo/latin-ext-400.css";
+import "@fontsource/arimo/latin-400.css";
 import "./style.css";
 import { mountRelief } from "./relief";
 
@@ -12,24 +13,53 @@ try {
 } catch {
   host.dataset.fallback = "true";
 }
+// No visible motion control: the operating-system preference decides. With
+// reduced motion the whole carving is shown at rest instead of animating.
 const motionPreference = matchMedia("(prefers-reduced-motion: reduce)");
 let paused = motionPreference.matches;
-const motion = document.querySelector<HTMLButtonElement>(".motion-toggle")!;
 function setMotion(value: boolean) {
   paused = value;
   relief?.setPaused(value);
-  motion.setAttribute("aria-pressed", String(value));
-  motion.querySelector(".motion-label")!.textContent = value
-    ? "Resume motion"
-    : "Pause motion";
-  motion.querySelector(".motion-symbol")!.classList.toggle("is-paused", value);
   document.documentElement.classList.toggle("motion-paused", value);
 }
-motion.addEventListener("click", () => setMotion(!paused));
 motionPreference.addEventListener("change", (event) =>
   setMotion(event.matches),
 );
 setMotion(paused);
+
+// Trailing dot: follows the pointer over the opening wall with a soft lag.
+const dot = document.querySelector<HTMLElement>(".cursor-dot")!;
+const hero = document.querySelector<HTMLElement>(".hero")!;
+const dotTarget = { x: 0, y: 0, active: false };
+const dotPosition = { x: 0, y: 0 };
+let dotFrame = 0;
+function moveDot() {
+  dotPosition.x += (dotTarget.x - dotPosition.x) * 0.06;
+  dotPosition.y += (dotTarget.y - dotPosition.y) * 0.06;
+  dot.style.transform = `translate(${dotPosition.x}px, ${dotPosition.y}px)`;
+  const settled =
+    Math.abs(dotTarget.x - dotPosition.x) +
+      Math.abs(dotTarget.y - dotPosition.y) <
+    0.2;
+  dotFrame = settled ? 0 : requestAnimationFrame(moveDot);
+}
+hero.addEventListener("pointermove", (event) => {
+  if (event.pointerType !== "mouse" || paused) return;
+  const bounds = hero.getBoundingClientRect();
+  dotTarget.x = event.clientX - bounds.left;
+  dotTarget.y = event.clientY - bounds.top;
+  if (!dotTarget.active) {
+    dotTarget.active = true;
+    dotPosition.x = dotTarget.x;
+    dotPosition.y = dotTarget.y;
+    dot.style.opacity = "1";
+  }
+  if (!dotFrame) dotFrame = requestAnimationFrame(moveDot);
+});
+hero.addEventListener("pointerleave", () => {
+  dotTarget.active = false;
+  dot.style.opacity = "0";
+});
 
 const dialog = document.querySelector<HTMLDialogElement>("#navigation")!;
 const menuButton = document.querySelector<HTMLButtonElement>(".menu-toggle")!;
