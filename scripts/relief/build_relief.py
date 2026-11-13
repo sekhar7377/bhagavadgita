@@ -53,15 +53,38 @@ def sculpt(spec):
         ground_row = np.maximum.accumulate(blur(ground_row[:, None], 9)[:, 0])
         ground = ground_row[:, None] * np.ones((1, w0), np.float32)
         mask = np.clip((d - ground * 1.06 - 16) / 14, 0, 1)
+    elif spec["separation"] == "wall":
+        # A plaster render: the subject is carved out of a flat wall. Fit a
+        # plane to the frame's border (only bare wall there), then keep what
+        # stands in front of it. The estimator's plane is slightly tilted, so
+        # a fitted plane beats a single threshold.
+        yy_, xx_ = np.mgrid[0:h0, 0:w0].astype(np.float32)
+        b = max(4, int(min(h0, w0) * 0.03))
+        border = np.zeros((h0, w0), bool)
+        border[:b], border[-b:], border[:, :b], border[:, -b:] = True, True, True, True
+        A = np.stack([xx_[border], yy_[border], np.ones(border.sum(), np.float32)], 1)
+        coef, *_ = np.linalg.lstsq(A, d[border], rcond=None)
+        plane = coef[0] * xx_ + coef[1] * yy_ + coef[2]
+        rise = d - plane
+        level = spec.get("threshold", 0.08) * np.percentile(rise, 99.5)
+        mask = np.clip((rise - level) / (level * 0.6 + 1e-3), 0, 1)
     else:
         # A figure against open sky: everything nearer than the haze.
         level = spec["threshold"] * 400
         mask = np.clip((d - level) / 14, 0, 1)
+    if "crop" in spec:
+        # Fractions [x0, y0, x1, y1] of the source to keep: cuts away wall
+        # corners and ledges a render shows at its edges.
+        x0, y0, x1, y1 = spec["crop"]
+        box = np.zeros_like(mask)
+        box[int(y0 * h0) : int(y1 * h0), int(x0 * w0) : int(x1 * w0)] = 1
+        mask = mask * box
     # Drop small disconnected islands (distant banners, debris, terrain bumps).
     n, labels, stats, _ = cv2.connectedComponentsWithStats((mask > 0.5).astype(np.uint8), 8)
     keep = np.zeros_like(mask)
     largest = max(stats[i, cv2.CC_STAT_AREA] for i in range(1, n))
-    floor = 2500 if spec["separation"] == "ground" else largest * 0.5
+    # Plaster renders keep thin detached parts (bow tips, reins, arrows).
+    floor = {"ground": 2500, "wall": largest * 0.01}.get(spec["separation"], largest * 0.5)
     for i in range(1, n):
         if stats[i, cv2.CC_STAT_AREA] >= floor:
             keep[labels == i] = 1
@@ -108,6 +131,9 @@ def sculpt(spec):
 wall = np.zeros((H, W), np.float32)
 for spec in manifest["elements"]:
     height = sculpt(spec)
+    if spec.get("flip"):
+        # Mirror a reused element so repeats across the wall don't read as copies.
+        height = height[:, ::-1]
     h0, w0 = height.shape
     scale = spec["height"] * H / h0
     sw, sh = int(round(w0 * scale)), int(round(h0 * scale))
