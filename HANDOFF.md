@@ -10,6 +10,8 @@ Do not republish or reconfigure the cloud environment. User already published it
 
 ## Latest steering — do this before further building
 
+User next asked to split and analyze the four oversized recordings (V04–V07). Checked all workspace video paths: those originals are not mounted locally. A fresh V04 transfer failed before download with `file exceeds the executor transfer limit of 32 MiB`. Available attachment tools expose no range download or remote splitting. No parts were created and no new analysis of those four is claimed. Resume intake when originals are accessible through a direct downloadable link or smaller uploads; then split locally with ffmpeg and inspect each segment. Do not repeat unchanged failed downloads.
+
 User explicitly asked to inspect https://immersive-g.com/ FIRST, especially cursor flow/artwork reveal, seeking exact interaction fidelity, and analyze supplied visuals. UI expansion was paused. Network initially blocked the site; after user said “continue,” environment revision 2 allowed access (HTTPS 200). Live inspection and public-code verification are now completed to the scope in `docs/REFERENCE_ANALYSIS.md`. Read that file and `docs/reference-study/` images before building more. Actual settled captures show rest, sweep, stationary coverage and opposite-side stroke. Early recordings were loader-contaminated and must not be used as evidence. Software Chromium selected the site's low-detail model; no high-end performance or exact-match claim.
 
 Next priority: replace the approximate interaction and composition with the measured reference behavior, and produce a detailed original chariot/figures/horses relief from user references. Do not present simple symbols as equivalent. The current typography/identity placement also differs (reference's 28px opening sentence and horizontal identity/sentence/scroll band at 1150×720). No further UI changes were made during the reference study.
@@ -29,7 +31,7 @@ Milestone 01: functional opening prototype, not the final full experience.
 
 Source brief prefers Nuxt/Vue/TypeScript for the eventual full routed experience. This first interaction spike uses Vite/TypeScript to isolate the rendering and prove mechanics with minimal framework overhead. `mountRelief` is framework-independent and can migrate into a Vue component. Decide the routed app architecture before chapter implementation; don't treat the current spike as an invisible change to the full brief.
 
-The relief is **not** the source brief's final quality gate: original procedural symbols, single-channel CPU texture, no detailed character mesh, no packed multi-state shading bake, no GPU ping-pong field, no scroll recycling. It demonstrates real movement-dependent geometry. Do not report full Immersive Garden fidelity. Live reference site was not inspected this session; relied on user-supplied audit and footage.
+The relief is **not** the source brief's final quality gate: original procedural symbols, single-channel CPU texture, no detailed character mesh, no packed multi-state shading bake, no GPU ping-pong field, no scroll recycling. It demonstrates real movement-dependent geometry. Do not report full Immersive Garden fidelity. The initial prototype preceded live inspection; the subsequent live study is recorded in `docs/REFERENCE_ANALYSIS.md`.
 
 ## Run
 
