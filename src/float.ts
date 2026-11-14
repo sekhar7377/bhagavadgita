@@ -30,7 +30,9 @@ function splitLines(element: HTMLElement) {
   element.innerHTML = lines
     .map((line) => line.trim())
     .filter(Boolean)
-    .map((line) => `<span class="line">${line}</span>`)
+    // A space between lines keeps the words apart for screen readers and
+    // text selection (each line is a block, so it never shows).
+    .map((line) => `<span class="line">${line} </span>`)
     .join("");
   return [...element.querySelectorAll<HTMLElement>(".line")];
 }

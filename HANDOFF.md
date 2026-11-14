@@ -234,6 +234,25 @@ Told as later tradition: the fish seen in oil (the text has a turning machine wi
 
 ChatGPT automation helpers live in the page as `window.__gen(prompt)` / `__send()` / `__busy()`. They are not stored anywhere and must be re-injected in a new tab. The Send button's aria-label is exactly "Send".
 
+## Milestone 07: chapters as their own walls (14 November 2026)
+
+The user asked for Parts I and II to become their own section with a header painting, like Kurukṣetra. The site is now three pages:
+
+- `/` (`index.html`) holds the cold open and title (wheel), then **"The chapters of the wall"**: two numbered colour-painting cards.
+  - I: **Hastināpura**, `public/art/hastinapura.webp`. A new ChatGPT colour painting matched to the Kurukṣetra painting: Devavrata's vow at dawn on the Gaṅgā, Hastināpura across the river, Satyavatī and her father in a boat.
+  - II: **Kurukṣetra**.
+- `/hastinapura/` (`hastinapura/index.html`) holds Parts I and II of the Ādi Parva.
+  - Its h1 is "The throne nobody could keep." on the `hastinapura` panel.
+  - It ends with a "Next · Kurukṣetra" gateway, and its menu has Next and Back links.
+  - Loader identity: HASTINĀPURA.
+- `/kurukshetra/`: unchanged.
+
+Future chapters follow the same pattern: their own `NAME/index.html` (add it to `vite.config.ts` inputs), a numbered card with a colour header painting on the home page, and a Next gateway at the end of the previous chapter.
+
+Fix: `float.ts` now puts a space after each split line, so headings read "The throne nobody could keep." rather than running the words together for screen readers.
+
+Commits: use the repository's configured git identity (plain `git commit`); a privacy hook blocks passing an email on the command line.
+
 ## Public site (GitHub Pages)
 
 The user asked to make the site public. It is live at **https://sekhar7377.github.io/bhagavadgita/**.

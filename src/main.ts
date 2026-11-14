@@ -222,7 +222,7 @@ const observer = new IntersectionObserver(
   ([entry]) => header.classList.toggle("past-hero", !entry.isIntersecting),
   { threshold: 0.05 },
 );
-observer.observe(document.querySelector(".cold-open, .hero")!);
+observer.observe(document.querySelector(".cold-open, .hero, main > section")!);
 // Keep missing artwork from collapsing the reserved exhibition window.
 const artwork = document.querySelector<HTMLImageElement>(".battlefield img");
 function artworkFailed() {

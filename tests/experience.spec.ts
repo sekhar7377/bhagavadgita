@@ -27,9 +27,9 @@ test("opening renders real WebGL and menu supports keyboard and section navigati
     page.getByRole("button", { name: "Menu", exact: true }),
   ).toBeFocused();
   await page.getByRole("button", { name: "Menu", exact: true }).click();
-  await page.getByRole("link", { name: "06 A hundred and one" }).click();
-  await expect(page).toHaveURL(/#hundred$/);
-  await expect(page.locator("#hundred")).toBeFocused();
+  await page.getByRole("link", { name: "02 The chapters of the wall" }).click();
+  await expect(page).toHaveURL(/#chapters$/);
+  await expect(page.locator("#chapters")).toBeFocused();
   expect(errors).toEqual([]);
 });
 
@@ -76,7 +76,7 @@ test("narrow screen remains readable, has no horizontal overflow, and honours re
   // The reference has no motion control, so neither does this opening.
   await expect(page.getByRole("button", { name: /motion/i })).toHaveCount(0);
   await page.getByRole("link", { name: "Scroll to begin" }).click();
-  await expect(page).toHaveURL(/#part-1$/);
+  await expect(page).toHaveURL(/#chapters$/);
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= window.innerWidth,
@@ -269,7 +269,7 @@ test("the Kurukshetra painting opens the Kurukshetra wall", async ({
 });
 
 test("a story branch opens its own carved scene", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/hastinapura/");
   await page
     .locator("#loader.is-done")
     .waitFor({ state: "attached", timeout: 30000 });
@@ -279,4 +279,23 @@ test("a story branch opens its own carved scene", async ({ page }) => {
   await branch.locator("summary").click();
   await expect(branch).toHaveAttribute("open", "");
   await expect(page.locator("#ekalavya-title")).toBeVisible();
+});
+
+test("the Hastinapura painting opens the Adi Parva wall", async ({ page }) => {
+  await page.goto("/");
+  await page
+    .locator("#loader.is-done")
+    .waitFor({ state: "attached", timeout: 30000 });
+  const card = page.getByRole("link", { name: /Enter Hastināpura/ });
+  await card.scrollIntoViewIfNeeded();
+  await card.click();
+  await expect(page).toHaveURL(/\/hastinapura\/$/);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    "The throne nobody could keep.",
+  );
+  await expect(page.locator("#relief")).toHaveAttribute(
+    "data-relief-state",
+    "ready",
+    { timeout: 30000 },
+  );
 });

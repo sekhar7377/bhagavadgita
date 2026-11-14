@@ -1248,3 +1248,36 @@ html.is-loading body {
     columns: 1;
   }
 }
+
+/* --- home: the chapters of the wall ---------------------------------------- */
+.chapters {
+  padding: 16svh var(--gutter) 20svh;
+  color: #030303;
+}
+.chapters > .eyebrow {
+  text-align: center;
+  margin: 0 0 40px;
+}
+.chapter-list {
+  display: grid;
+  gap: 14svh;
+  width: min(86%, 1180px);
+  margin: 0 auto;
+}
+.chapter-card {
+  position: relative;
+  width: 100%;
+}
+.chapter-number {
+  position: absolute;
+  top: -34px;
+  left: 0;
+  font-family: var(--font-display);
+  font-size: 22px;
+  opacity: 0.45;
+}
+@media (max-width: 1023px) {
+  .chapter-list {
+    width: 100%;
+  }
+}

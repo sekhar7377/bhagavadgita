@@ -166,3 +166,7 @@ All 1774×887, made in the same ChatGPT conversation, each with its own camera. 
 | hut        | `docs/references/hut-chatgpt.png`        | share it equally                       | from inside, through the door |
 | ekalavya   | `docs/references/ekalavya-chatgpt.png`   | branch A, the offering                 | side-on, kneeling height      |
 | altar      | `docs/references/altar-chatgpt.png`      | branch B, born from the altar          | frontal, symmetrical          |
+
+### G11 — Hastināpura chapter header painting (14 November 2026)
+
+`docs/references/hastinapura-header-chatgpt.png` (1536×1024), made in ChatGPT (user's account, same conversation) with `chariot-chatgpt-subject.png` attached so colour grading and finish match the Kurukṣetra header. It shows Devavrata's vow on the Gaṅgā at dawn, Hastināpura across the river, and Satyavatī and her father in a boat. Inspected: no text or watermark. Delivered as `public/art/hastinapura.webp`.
