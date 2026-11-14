@@ -4,15 +4,15 @@ Inspected 13 November 2026. This is an intake record, not a claim that footage i
 
 ## Intake status
 
-| ID | Supplied file | Sediment file ID | Status |
-| --- | --- | --- | --- |
+| ID  | Supplied file                                                          | Sediment file ID                        | Status                                                                           |
+| --- | ---------------------------------------------------------------------- | --------------------------------------- | -------------------------------------------------------------------------------- |
 | V01 | Kalki 2898 Ad Movie Opening Scene … GizmoPixelParody (1080p, h264).mp4 | `file_0000000065e082089e6b0871f2a9d218` | Downloaded; inspected 12 sampled frames and a full-resolution frame at 7 seconds |
-| V02 | Screen Recording 2026-11-13 192337.mp4 | `file_0000000010708211bc2821a518fe0aae` | Downloaded; inspected contact sheet and extracted first frame |
-| V03 | Screen Recording 2026-11-13 192807.mp4 | `file_000000000e4082088b666ebce0ff4405` | Downloaded; inspected its single source frame |
-| V04 | Screen Recording 2026-11-13 192933.mp4 | `file_0000000091bc8211a33cd323d620fb22` | Transfer blocked: exceeds executor tool's 32 MiB limit; content not inspected |
-| V05 | Screen Recording 2026-11-13 192452.mp4 | `file_00000000ef6882088ee225139f88cafe` | Transfer blocked: exceeds executor tool's 32 MiB limit; content not inspected |
-| V06 | Screen Recording 2026-11-13 192623.mp4 | `file_00000000bcd48208b28429e785d79e95` | Transfer blocked: exceeds executor tool's 32 MiB limit; content not inspected |
-| V07 | Screen Recording 2026-11-13 193216.mp4 | `file_00000000c59082088d0ee885a69ca4dd` | Transfer blocked: exceeds executor tool's 32 MiB limit; content not inspected |
+| V02 | Screen Recording 2026-11-13 192337.mp4                                 | `file_0000000010708211bc2821a518fe0aae` | Downloaded; inspected contact sheet and extracted first frame                    |
+| V03 | Screen Recording 2026-11-13 192807.mp4                                 | `file_000000000e4082088b666ebce0ff4405` | Downloaded; inspected its single source frame                                    |
+| V04 | Screen Recording 2026-11-13 192933.mp4                                 | `file_0000000091bc8211a33cd323d620fb22` | Transfer blocked: exceeds executor tool's 32 MiB limit; content not inspected    |
+| V05 | Screen Recording 2026-11-13 192452.mp4                                 | `file_00000000ef6882088ee225139f88cafe` | Transfer blocked: exceeds executor tool's 32 MiB limit; content not inspected    |
+| V06 | Screen Recording 2026-11-13 192623.mp4                                 | `file_00000000bcd48208b28429e785d79e95` | Transfer blocked: exceeds executor tool's 32 MiB limit; content not inspected    |
+| V07 | Screen Recording 2026-11-13 193216.mp4                                 | `file_00000000c59082088d0ee885a69ca4dd` | Transfer blocked: exceeds executor tool's 32 MiB limit; content not inspected    |
 
 ## Observations and production choices
 
@@ -71,14 +71,14 @@ Create original ivory-stone artwork with V01/V03 as visual reference, with no le
 
 The user re-supplied footage as five files under 32 MiB. All were downloaded and inspected by contact sheet (20 frames each).
 
-| ID | File | Content |
-| --- | --- | --- |
-| R1 | Screen Recording 2026-11-13 202451.mp4 (28.7 s) | Film opening credits: battlefield tableaux, chariots, wheel held aloft, arrows. Credits in most frames |
-| R2 | Screen Recording 2026-11-13 202649.mp4 (23.4 s) | Chariot and horses, fallen elephant, soldiers, fire in grass. Credits and subtitles |
-| R3 | Screen Recording 2026-11-13 202850.mp4 (28.8 s) | Aftermath field, banners, figure against the sun, close portrait |
-| R4 | Screen Recording 2026-11-13 202951.mp4 (26.8 s) | Confrontation, figures in white, wide aftermath. Subtitles |
-| R5 | Kalki 2898 AD opening (57.5 s) | Same file as V01 |
-| R6 | Screen Recording 2026-11-13 211601.mp4 (28.8 s) | **Recording of the reference website** on the user's GPU: opening reveal, scroll to statement, film window, centred statement |
+| ID  | File                                            | Content                                                                                                                       |
+| --- | ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| R1  | Screen Recording 2026-11-13 202451.mp4 (28.7 s) | Film opening credits: battlefield tableaux, chariots, wheel held aloft, arrows. Credits in most frames                        |
+| R2  | Screen Recording 2026-11-13 202649.mp4 (23.4 s) | Chariot and horses, fallen elephant, soldiers, fire in grass. Credits and subtitles                                           |
+| R3  | Screen Recording 2026-11-13 202850.mp4 (28.8 s) | Aftermath field, banners, figure against the sun, close portrait                                                              |
+| R4  | Screen Recording 2026-11-13 202951.mp4 (26.8 s) | Confrontation, figures in white, wide aftermath. Subtitles                                                                    |
+| R5  | Kalki 2898 AD opening (57.5 s)                  | Same file as V01                                                                                                              |
+| R6  | Screen Recording 2026-11-13 211601.mp4 (28.8 s) | **Recording of the reference website** on the user's GPU: opening reveal, scroll to statement, film window, centred statement |
 
 R1–R5 are commercial film footage with credits, subtitles and recognisable performers. The project owner decided they may be used as source material, with credits and captions removed. See G03 below for what is used. R6 is evidence of reference behaviour; two cropped frames are kept in `docs/reference-study/2026-11-13-b/`.
 
@@ -126,12 +126,16 @@ The user also supplied a still of the reference studio's sculpture under dark dr
 
 All in the same ChatGPT conversation as G05/G06 (user's account, browser), each with a camera chosen to differ from every earlier panel. 1774×887 each, inspected: no text or lettering. Built with `scripts/relief/make_scene.sh` (GPU depth at 1022, `full` separation, paint 1.0).
 
-| Scene | File | Moment | Camera |
-| --- | --- | --- | --- |
-| scene3 | `docs/references/scene3-teaching-chatgpt.png` | Ch. 2, the teaching begins | low angle from the chariot floor, canopy as halo |
-| scene4 | `docs/references/scene4-lamp-chatgpt.png` | Ch. 6, the steady lamp (symbolic) | frontal, lamp centre, figures either side, lotus pond |
-| scene5 | `docs/references/scene5-universal-form-chatgpt.png` | Ch. 11, the universal form | monumental frontal, tiny Arjuna below |
-| scene6 | `docs/references/scene6-clarity-chatgpt.png` | Ch. 18, clarity | from behind and below, Arjuna lifting the bow |
-| battle | `docs/references/battle-conches-chatgpt.png` | Ch. 1, the conches sound | low, inside the charge, diagonal |
+| Scene  | File                                                | Moment                            | Camera                                                |
+| ------ | --------------------------------------------------- | --------------------------------- | ----------------------------------------------------- |
+| scene3 | `docs/references/scene3-teaching-chatgpt.png`       | Ch. 2, the teaching begins        | low angle from the chariot floor, canopy as halo      |
+| scene4 | `docs/references/scene4-lamp-chatgpt.png`           | Ch. 6, the steady lamp (symbolic) | frontal, lamp centre, figures either side, lotus pond |
+| scene5 | `docs/references/scene5-universal-form-chatgpt.png` | Ch. 11, the universal form        | monumental frontal, tiny Arjuna below                 |
+| scene6 | `docs/references/scene6-clarity-chatgpt.png`        | Ch. 18, clarity                   | from behind and below, Arjuna lifting the bow         |
+| battle | `docs/references/battle-conches-chatgpt.png`        | Ch. 1, the conches sound          | low, inside the charge, diagonal                      |
 
 The battle render used three image inputs: two frames from the user's recordings R7 (`Screen Recording 2026-11-13 202451.mp4`, the opening charge; credit line in the sky inpainted) and R8 (`…202649.mp4`, golden chariots and a flying arrow; cropped to a text-free centre strip), plus `chariot-battlefield-chatgpt.png` for chariot design and carving style. The frames are reference inputs only and are not stored in Git.
+
+### G08 — cold open wheel, ChatGPT plaster render (14 November 2026)
+
+`docs/references/wheel-coldopen-chatgpt.png`, 1774×887. Made in the same ChatGPT conversation, with `chariot-battlefield-chatgpt.png` attached for wheel design and carving style. Subject: a shattered ornate chariot wheel half-buried in churned battlefield earth, with arrows, a torn banner, a bow, and a far smoking field with a low sun. Inspected: no text, people or watermark. Built with `make_scene.sh wheel` (GPU depth at 1022, `full`, paint 1.0) into `public/relief/wheel-*`.

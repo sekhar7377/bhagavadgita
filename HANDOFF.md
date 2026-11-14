@@ -105,6 +105,26 @@ The user recorded the live reference site (`C:\Users\velpu\Videos\Screen Recordi
 
 The user said the Gītā wall is a small part of a larger "World of Mahabharata" site and asked for the whole epic narrated like a film (Hollywood restraint plus Rajamouli's elevation and interval), then built **one scene at a time** the same way. The narration is `docs/MAHABHARATA_TREATMENT.md`: prologue (Vyāsa dictating), Acts I–VII mapped to the parvas, about 70 scenes, each with camera, light, carving, sound and draft words, with Critical Edition vs. tradition marked. The Gītā wall becomes Act V, Day One, unchanged. Proposed site structure (not yet approved or built): `/` = Prologue + Act I wall, one continuous wall per act after that, a dark interval screen after Act II. **Next action: on the user's go-ahead, build P1 "The cave" as the first new panel** (ChatGPT render with the studio still and our plaster panel attached → `make_scene.sh` → section), then continue in treatment order.
 
+## Milestone 04: the main header, cold open Frame 1 (14 November 2026)
+
+The user supplied a cinematic script, "MAHABHARATA: THE EIGHTEEN ECLIPSES" (Rajamouli plus James Cameron), and asked for it as the site's main header in our existing design: the same wall, motion and visuals. Everything built before stays as the **Kurukṣetra section**. Only **Frame 1** of the script was supplied so far (the text ended there): "The Primordial Silence". It opens on black with a 40 Hz heartbeat and wind; one ember rises; scrolling pulls the camera back, macro to wide, revealing a shattered golden chariot wheel half-buried in mud.
+
+Adapted to our style:
+
+- `#beginning` is now `.cold-open`, a 320svh section with a sticky 100svh pin that anchors a new panel `wheel` (`docs/references/wheel-coldopen-chatgpt.png`, ChatGPT, same conversation, scene 1 panel attached for wheel design and carving style; inspected: no text, no people; `scripts/relief/wheel.json`).
+- `src/coldopen.ts` maps scroll progress through the section:
+  - Darkness (`.cold-open-dark`) lifts over 0.10–0.55.
+  - A 2D ember canvas runs: one ember climbs to the hub and hangs there, small ones drift up.
+  - The panel camera, through the new `SceneSpec.shot()` in `relief.ts`, scales 3.2 → 1 about the hub (uv 0.49, 0.53) with cubic easing.
+  - A per-panel `uLift` raises the wheel while the dark lifts, then rests at 25%.
+  - The title card lines (MAHĀBHĀRATA / "The Eighteen Eclipses." / Scroll to begin) rise in over 0.66–0.96, in the measured hero grid.
+  - `html.cold-dark` turns the header light while it is dark.
+- Sound: `sound.setMix(heart, drone)`. A 40 Hz lub-dub heartbeat with an 80 Hz overtone, about 52 bpm, plays in the dark; it fades over 0.35–0.75 while the tanpura drone fades in over 0.45–0.85. Wind is unchanged. (Sound starts only after a click, as before. Not listened to by the agent.)
+- The old hero is now `#kurukshetra` (identity KURUKṢETRA, h2 "The stillness before action.", link "Enter the Gītā"). The loader, header, footer, menu (now 10 items) and page title say MAHĀBHĀRATA — The Eighteen Eclipses.
+- Reduced motion: the cold open is a single screen with the title shown and no dark or embers.
+
+**Next:** further frames of the user's script (they will paste them) slot into the same pinned sequence before the title card. The section grows by about 100svh per frame. Each new subject is a new ChatGPT plaster panel or a second panel anchored inside the pin.
+
 ## Next work, in order (Gītā wall, before the scope change)
 
 1. **Story elements from the user's four screen recordings** (`C:\Users\velpu\Videos\Screen Recordings\Screen Recording 2026-11-13 202451/202649/202850/202951.mp4`, 23–29 s each, the film's opening, kept outside Git). The user said these are references and to generate our own visuals to bring the story to life. What they show: banners on poles over a battlefield; a field of arrows standing in the earth; the warrior leaping with a chariot wheel overhead; a fallen elephant with its tusk curving up; shields and swords in the dust; golden pavilion chariots and horse teams in a charge; the aftermath at sunset, with a lone bare-chested figure walking among the fallen and a white horse; a glowing light held up to the sky. Credits and subtitles are burned in throughout, so use frames only as image inputs, never directly. Generate each as a plaster element (pipeline below, frame as subject + studio still as style): (a) arrows-and-banners field, (b) fallen elephant, (c) lone figure and white horse at the aftermath. They belong on the screens below the opening once the wall extends (next item). The sunset aftermath frames also suit the later film window.

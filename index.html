@@ -6,9 +6,9 @@
     <meta name="theme-color" content="#cfcdc7" />
     <meta
       name="description"
-      content="Bhagavad Gītā — The stillness before action. An exploration of the moment between uncertainty and understanding."
+      content="Mahābhārata — The Eighteen Eclipses. The great epic carved into a living wall, beginning on the field of Kurukṣetra."
     />
-    <title>Bhagavad Gītā — The Stillness Before Action</title>
+    <title>Mahābhārata — The Eighteen Eclipses</title>
   </head>
   <body>
     <div id="relief" aria-hidden="true"></div>
@@ -17,10 +17,8 @@
          Clicking anywhere enables sound; it hides itself once loaded. -->
     <div class="loader" id="loader" role="status" aria-live="polite">
       <div class="loader-band">
-        <p class="loader-identity" aria-hidden="true">BHAGAVAD GĪTĀ</p>
-        <p class="loader-title" aria-hidden="true">
-          The stillness before action.
-        </p>
+        <p class="loader-identity" aria-hidden="true">MAHĀBHĀRATA</p>
+        <p class="loader-title" aria-hidden="true">The Eighteen Eclipses.</p>
         <span class="loader-count" aria-hidden="true">0</span>
         <button class="loader-sound" type="button">
           Click to enable sound
@@ -33,8 +31,8 @@
       <a
         class="wordmark"
         href="#beginning"
-        aria-label="Bhagavad Gītā, back to beginning"
-        >BHAGAVAD GĪTĀ<span>THE STILLNESS BEFORE ACTION</span></a
+        aria-label="Mahābhārata, back to beginning"
+        >MAHĀBHĀRATA<span>THE EIGHTEEN ECLIPSES</span></a
       >
       <button
         class="menu-toggle"
@@ -46,22 +44,42 @@
       </button>
     </header>
     <main>
+      <!-- Cold open: darkness, a single ember, then the camera pulls back to
+           a shattered chariot wheel and the title arrives (src/coldopen.ts). -->
+      <section class="cold-open" id="beginning" aria-labelledby="hero-title">
+        <div class="cold-open-pin cursor-zone" data-scene="wheel">
+          <span class="cursor-dot" aria-hidden="true"></span>
+          <div class="cold-open-dark" aria-hidden="true">
+            <span class="cold-open-cue">Scroll</span>
+          </div>
+          <canvas class="cold-open-embers" aria-hidden="true"></canvas>
+          <div class="hero-band title-card">
+            <p class="hero-identity" data-line>MAHĀBHĀRATA</p>
+            <h1 id="hero-title" data-line>The Eighteen Eclipses.</h1>
+            <a class="hero-scroll" href="#kurukshetra" data-line
+              >Scroll to begin</a
+            >
+          </div>
+          <a class="hero-corner" href="#about"
+            >About this experience
+            <span class="hero-dots" aria-hidden="true"></span
+          ></a>
+        </div>
+      </section>
       <section
-        class="hero"
-        id="beginning"
+        class="hero cursor-zone"
+        id="kurukshetra"
         data-scene="kurukshetra"
-        aria-labelledby="hero-title"
+        aria-labelledby="kurukshetra-title"
       >
         <span class="cursor-dot" aria-hidden="true"></span>
         <div class="hero-band">
-          <p class="hero-identity">BHAGAVAD GĪTĀ</p>
-          <h1 id="hero-title">The stillness before action.</h1>
-          <a class="hero-scroll" href="#story">Scroll to begin</a>
+          <p class="hero-identity">KURUKṢETRA</p>
+          <h2 id="kurukshetra-title" class="hero-title">
+            The stillness before action.
+          </h2>
+          <a class="hero-scroll" href="#story">Enter the Gītā</a>
         </div>
-        <a class="hero-corner" href="#about"
-          >About this experience
-          <span class="hero-dots" aria-hidden="true"></span
-        ></a>
       </section>
       <section
         class="scene scene--right"
@@ -208,8 +226,8 @@
     </main>
     <footer id="about">
       <div>
-        <a class="wordmark" href="#beginning">BHAGAVAD GĪTĀ</a>
-        <p>An exploration of attention, action, and understanding.</p>
+        <a class="wordmark" href="#beginning">MAHĀBHĀRATA</a>
+        <p>The great epic, carved into a living wall.</p>
       </div>
       <p class="editorial-note">
         These scenes are an artistic interpretation of the dialogue and its
@@ -217,7 +235,7 @@
         quotation from the Sanskrit text. Chapter names follow the traditional
         titles.
       </p>
-      <span class="footer-credit">THE STILLNESS BEFORE ACTION</span>
+      <span class="footer-credit">THE EIGHTEEN ECLIPSES</span>
     </footer>
     <button
       class="sound-toggle"
@@ -231,28 +249,29 @@
     </button>
     <dialog id="navigation" aria-labelledby="navigation-title">
       <div class="menu-top">
-        <span class="wordmark">BHAGAVAD GĪTĀ</span
+        <span class="wordmark">MAHĀBHĀRATA</span
         ><button class="menu-close" type="button">
           Close <span aria-hidden="true">×</span>
         </button>
       </div>
       <div class="menu-content">
-        <p class="eyebrow" id="navigation-title">A WAY INTO THE STILLNESS</p>
+        <p class="eyebrow" id="navigation-title">A WAY INTO THE EPIC</p>
         <nav aria-label="Main navigation">
-          <a href="#beginning"><span>01</span>The beginning</a>
-          <a href="#conches"><span>02</span>The conches sound</a>
-          <a href="#story"><span>03</span>The battlefield</a>
-          <a href="#teaching"><span>04</span>The teaching begins</a>
-          <a href="#lamp"><span>05</span>The steady lamp</a>
-          <a href="#universal-form"><span>06</span>The universal form</a>
-          <a href="#clarity"><span>07</span>Clarity</a>
-          <a href="#reflection"><span>08</span>A moment to consider</a>
-          <a href="#about"><span>09</span>About this experience</a>
+          <a href="#beginning"><span>01</span>The eighteen eclipses</a>
+          <a href="#kurukshetra"><span>02</span>Kurukṣetra</a>
+          <a href="#conches"><span>03</span>The conches sound</a>
+          <a href="#story"><span>04</span>The battlefield</a>
+          <a href="#teaching"><span>05</span>The teaching begins</a>
+          <a href="#lamp"><span>06</span>The steady lamp</a>
+          <a href="#universal-form"><span>07</span>The universal form</a>
+          <a href="#clarity"><span>08</span>Clarity</a>
+          <a href="#reflection"><span>09</span>A moment to consider</a>
+          <a href="#about"><span>10</span>About this experience</a>
         </nav>
         <p>A conversation, across centuries.<br />A question, still our own.</p>
       </div>
       <div class="menu-bottom">
-        BHAGAVAD GĪTĀ <span>THE STILLNESS BEFORE ACTION</span>
+        MAHĀBHĀRATA <span>THE EIGHTEEN ECLIPSES</span>
       </div>
     </dialog>
     <script type="module" src="/src/main.ts"></script>

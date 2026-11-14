@@ -93,6 +93,7 @@ const wallVertex = /* glsl */ `
   uniform float uDepth;
   uniform float uStill;
   uniform float uReveal;
+  uniform float uLift;
   uniform float uBoost;
   uniform float uScrollWorld;
   varying vec2 vUv;
@@ -104,7 +105,7 @@ const wallVertex = /* glsl */ `
     vec2 screenUv = (undeformed.xy / undeformed.w + 1.0) * 0.5;
     vec4 field = texture2D(tField, screenUv);
     float extrude = mix(field.b, field.a, 0.5);
-    extrude = max(extrude, max(uStill * 0.5, uReveal * 0.5)) + uBoost * 0.5;
+    extrude = max(extrude, max(uStill, max(uReveal, uLift)) * 0.5) + uBoost * 0.5;
     float inside = step(0.0, uv.x) * step(uv.x, 1.0) * step(0.0, uv.y) * step(uv.y, 1.0);
     float height = texture2D(tHeight, uv).r * inside;
     vec3 carved = position;
@@ -130,6 +131,7 @@ const wallFragment = /* glsl */ `
   uniform vec2 uTexel;
   uniform float uStill;
   uniform float uReveal;
+  uniform float uLift;
   uniform float uReady;
   uniform float uBoost;
   varying vec2 vUv;
@@ -147,7 +149,7 @@ const wallFragment = /* glsl */ `
     float extrude = mix(field.b, field.a, 0.5);
     // Fast scrolling swells the geometry (vertex shader) but does not light up
     // carving that attention has not reached, so shading ignores uBoost.
-    extrude = max(extrude, max(uStill, uReveal)) * uReady;
+    extrude = max(extrude, max(uStill, max(uReveal, uLift))) * uReady;
 
     // Lighting was baked offline at five extrusion depths. The field walks
     // through those stages in 0.2 intervals, so shade always belongs to the
@@ -237,6 +239,12 @@ export type SceneSpec = {
   name: string;
   /** The page element the carving is centred on; it scrolls with the page. */
   anchor: HTMLElement;
+  /**
+   * Optional camera for this panel, read every frame: scale (1 = the panel
+   * as laid out), the panel point (uv) kept at the anchor's centre, and a
+   * lift that raises this panel's carving as if attention were on it.
+   */
+  shot?: () => { scale: number; focusX: number; focusY: number; lift: number };
 };
 
 type SceneState = {
@@ -378,6 +386,7 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
     tStage5: { value: blank as THREE.Texture },
     uTexel: { value: new THREE.Vector2(1 / 1152, 1 / 576) },
     uReady: { value: 0 },
+    uLift: { value: 0 },
   });
   const makeMaterial = (uniforms: Record<string, THREE.IUniform>) =>
     new THREE.ShaderMaterial({
@@ -508,6 +517,15 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
       const rect = state.spec.anchor.getBoundingClientRect();
       const offset = rect.top + rect.height / 2 - viewHeight / 2;
       state.mesh.position.y = -offset * worldPerPixel;
+      const shot = state.spec.shot?.();
+      if (shot) {
+        // Keep the chosen point of the panel at the anchor's centre while
+        // scaling, so the camera appears to pull back from that point.
+        state.mesh.scale.set(shot.scale, shot.scale, Math.sqrt(shot.scale));
+        state.mesh.position.x = -(shot.focusX - 0.5) * WALL_W * shot.scale;
+        state.mesh.position.y -= (shot.focusY - 0.5) * WALL_H * shot.scale;
+        state.uniforms.uLift.value = shot.lift;
+      }
       const distance = Math.abs(offset) / viewHeight;
       state.mesh.visible = distance < 1.2 && state.status === "ready";
       if (distance < 1.6 && state.status === "idle")

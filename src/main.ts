@@ -9,6 +9,7 @@ import { mountRelief } from "./relief";
 import { mountFloatingType } from "./float";
 import { runLoader } from "./loader";
 import { createSound } from "./sound";
+import { mountColdOpen } from "./coldopen";
 
 // One wall for the whole page: every [data-scene] section anchors a carved
 // panel on a single fixed canvas, in story order.
@@ -21,11 +22,21 @@ for (const anchor of sceneAnchors)
     "--fallback",
     `url("/relief/${anchor.dataset.scene}-fallback.webp")`,
   );
+// The cold open drives its own panel's camera (scale, focus, lift).
+const reducedMotionQuery = matchMedia("(prefers-reduced-motion: reduce)");
+const coldOpen = mountColdOpen({
+  section: document.querySelector<HTMLElement>(".cold-open")!,
+  reducedMotion: () => reducedMotionQuery.matches,
+});
 let relief: ReturnType<typeof mountRelief> | undefined;
 try {
   relief = mountRelief(
     host,
-    sceneAnchors.map((anchor) => ({ name: anchor.dataset.scene!, anchor })),
+    sceneAnchors.map((anchor) => ({
+      name: anchor.dataset.scene!,
+      anchor,
+      shot: anchor.dataset.scene === "wheel" ? coldOpen.shot : undefined,
+    })),
   );
 } catch {
   host.dataset.fallback = "true";
@@ -90,12 +101,26 @@ runLoader({
     lenis?.start();
     soundToggle.hidden = false;
     // The carving surfaces once as the intro lifts, then settles back.
-    if (!paused) relief?.reveal();
+    // (The cold open starts in darkness, so the wall is not surfaced here.)
   },
 });
 lenis?.on("scroll", ({ velocity }: { velocity: number }) =>
   sound.setEnergy(Math.abs(velocity) / 45),
 );
+// In the dark there is only a heartbeat and wind; the drone arrives with
+// the title card and the heartbeat fades as the camera pulls back.
+let lastMix = -1;
+const mixFrame = () => {
+  const p = coldOpen.progress;
+  if (Math.abs(p - lastMix) > 0.005) {
+    lastMix = p;
+    const heart = 1 - Math.min(1, Math.max(0, (p - 0.35) / 0.4));
+    const drone = Math.min(1, Math.max(0, (p - 0.45) / 0.4));
+    sound.setMix(heart, drone);
+  }
+  requestAnimationFrame(mixFrame);
+};
+requestAnimationFrame(mixFrame);
 // The toggle turns light over the dark closing sections.
 const darkObserver = new IntersectionObserver(
   (entries) => {
@@ -113,39 +138,40 @@ document
   .querySelectorAll(".reflection, footer")
   .forEach((section) => darkObserver.observe(section));
 
-// Trailing dot: follows the pointer over the opening wall with a soft lag.
-const dot = document.querySelector<HTMLElement>(".cursor-dot")!;
-const hero = document.querySelector<HTMLElement>(".hero")!;
-const dotTarget = { x: 0, y: 0, active: false };
-const dotPosition = { x: 0, y: 0 };
-let dotFrame = 0;
-function moveDot() {
-  dotPosition.x += (dotTarget.x - dotPosition.x) * 0.06;
-  dotPosition.y += (dotTarget.y - dotPosition.y) * 0.06;
-  dot.style.transform = `translate(${dotPosition.x}px, ${dotPosition.y}px)`;
-  const settled =
-    Math.abs(dotTarget.x - dotPosition.x) +
-      Math.abs(dotTarget.y - dotPosition.y) <
-    0.2;
-  dotFrame = settled ? 0 : requestAnimationFrame(moveDot);
+// Trailing dot: follows the pointer over each opening screen with a soft lag.
+function trailDot(zone: HTMLElement) {
+  const dot = zone.querySelector<HTMLElement>(".cursor-dot");
+  if (!dot) return;
+  const target = { x: 0, y: 0, active: false };
+  const position = { x: 0, y: 0 };
+  let frame = 0;
+  const move = () => {
+    position.x += (target.x - position.x) * 0.06;
+    position.y += (target.y - position.y) * 0.06;
+    dot.style.transform = `translate(${position.x}px, ${position.y}px)`;
+    const settled =
+      Math.abs(target.x - position.x) + Math.abs(target.y - position.y) < 0.2;
+    frame = settled ? 0 : requestAnimationFrame(move);
+  };
+  zone.addEventListener("pointermove", (event) => {
+    if (event.pointerType !== "mouse" || paused) return;
+    const bounds = zone.getBoundingClientRect();
+    target.x = event.clientX - bounds.left;
+    target.y = event.clientY - bounds.top;
+    if (!target.active) {
+      target.active = true;
+      position.x = target.x;
+      position.y = target.y;
+      dot.style.opacity = "1";
+    }
+    if (!frame) frame = requestAnimationFrame(move);
+  });
+  zone.addEventListener("pointerleave", () => {
+    target.active = false;
+    dot.style.opacity = "0";
+  });
 }
-hero.addEventListener("pointermove", (event) => {
-  if (event.pointerType !== "mouse" || paused) return;
-  const bounds = hero.getBoundingClientRect();
-  dotTarget.x = event.clientX - bounds.left;
-  dotTarget.y = event.clientY - bounds.top;
-  if (!dotTarget.active) {
-    dotTarget.active = true;
-    dotPosition.x = dotTarget.x;
-    dotPosition.y = dotTarget.y;
-    dot.style.opacity = "1";
-  }
-  if (!dotFrame) dotFrame = requestAnimationFrame(moveDot);
-});
-hero.addEventListener("pointerleave", () => {
-  dotTarget.active = false;
-  dot.style.opacity = "0";
-});
+document.querySelectorAll<HTMLElement>(".cursor-zone").forEach(trailDot);
 
 const dialog = document.querySelector<HTMLDialogElement>("#navigation")!;
 const menuButton = document.querySelector<HTMLButtonElement>(".menu-toggle")!;
@@ -188,7 +214,7 @@ const observer = new IntersectionObserver(
   ([entry]) => header.classList.toggle("past-hero", !entry.isIntersecting),
   { threshold: 0.05 },
 );
-observer.observe(document.querySelector(".hero")!);
+observer.observe(document.querySelector(".cold-open")!);
 // Keep missing artwork from collapsing the reserved exhibition window.
 const artwork = document.querySelector<HTMLImageElement>(".battlefield img")!;
 function artworkFailed() {
@@ -207,6 +233,7 @@ if (import.meta.hot)
     relief?.dispose();
     lenis?.destroy();
     floating.dispose();
+    coldOpen.dispose();
     sound.dispose();
     darkObserver.disconnect();
     observer.disconnect();

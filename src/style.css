@@ -185,7 +185,8 @@ h2 {
   line-height: 1.2;
   white-space: nowrap;
 }
-h1 {
+h1,
+.hero-title {
   grid-column: 5 / 10;
   font-family: var(--font-display);
   font-size: 28px;
@@ -236,10 +237,12 @@ h1 {
   visibility: hidden;
 }
 @media (min-width: 1441px) {
-  h1 {
+  h1,
+  .hero-title {
     font-size: min(1.9444vw, 37.24px);
   }
-  .hero-band h1 {
+  .hero-band h1,
+  .hero-band .hero-title {
     grid-column: 4 / 10;
     padding-left: calc((100% + 16px) / 6);
   }
@@ -525,6 +528,7 @@ nav a span {
   }
   .hero-identity,
   h1,
+  .hero-title,
   .hero-scroll {
     grid-column: 1;
   }
@@ -895,5 +899,83 @@ html.is-loading body {
     visibility: hidden;
     opacity: 0;
     pointer-events: none;
+  }
+}
+
+/* --- cold open --------------------------------------------------------------
+   A tall section with a pinned screen: darkness and one ember first, then the
+   camera pulls back to the carved wheel and the title card arrives. */
+.cold-open {
+  position: relative;
+  height: 320svh;
+  color: #030303;
+}
+.cold-open-pin {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  min-height: 560px;
+  overflow: hidden;
+  isolation: isolate;
+}
+.cold-open-dark {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 60%, #0d0a08 0%, #030303 70%);
+  pointer-events: none;
+}
+.cold-open-embers {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.cold-open-cue {
+  position: absolute;
+  left: 50%;
+  bottom: 40px;
+  transform: translateX(-50%);
+  font-size: 14px;
+  line-height: 1.1;
+  color: #ece9e1;
+  opacity: 0.45;
+  animation: loader-breathe 2.4s ease-in-out infinite;
+}
+.title-card [data-line] {
+  --rest: 1;
+  opacity: calc(var(--in, 0) * var(--rest));
+  will-change: transform, opacity;
+}
+.title-card .hero-scroll {
+  --rest: 0.6;
+}
+.title-card .hero-scroll:hover,
+.title-card .hero-scroll:focus-visible {
+  --rest: 1;
+}
+.cold-open .hero-corner {
+  z-index: 1;
+}
+/* While the screen is dark the header turns light. */
+.site-header {
+  transition: color 0.4s ease;
+}
+.cold-dark .site-header {
+  color: #ece9e1;
+}
+.relief-fallback .cold-open-pin {
+  background: var(--wall) var(--fallback) center / cover no-repeat;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cold-open {
+    height: 100svh;
+  }
+  .cold-open-dark,
+  .cold-open-embers {
+    display: none;
+  }
+  .title-card [data-line] {
+    --in: 1;
   }
 }

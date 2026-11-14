@@ -7,7 +7,7 @@ test("opening renders real WebGL and menu supports keyboard and section navigati
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "The stillness before action.",
+    "The Eighteen Eclipses.",
   );
   await expect(page.locator("#relief canvas")).toBeVisible();
   await expect(page.locator("#relief")).not.toHaveAttribute(
@@ -27,7 +27,7 @@ test("opening renders real WebGL and menu supports keyboard and section navigati
     page.getByRole("button", { name: "Menu", exact: true }),
   ).toBeFocused();
   await page.getByRole("button", { name: "Menu", exact: true }).click();
-  await page.getByRole("link", { name: "03 The battlefield" }).click();
+  await page.getByRole("link", { name: "04 The battlefield" }).click();
   await expect(page).toHaveURL(/#story$/);
   await expect(page.getByRole("dialog")).not.toBeVisible();
   await expect(page.locator("#story")).toBeFocused();
@@ -52,7 +52,7 @@ test("narrow screen remains readable, has no horizontal overflow, and honours re
   // The reference has no motion control, so neither does this opening.
   await expect(page.getByRole("button", { name: /motion/i })).toHaveCount(0);
   await page.getByRole("link", { name: "Scroll to begin" }).click();
-  await expect(page).toHaveURL(/#story$/);
+  await expect(page).toHaveURL(/#kurukshetra$/);
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= window.innerWidth,
@@ -64,6 +64,9 @@ test("opening band follows the measured reference grid at 1440 by 810", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1440, height: 810 });
+  // The title card waits at the end of the cold open; reduced motion shows
+  // it at once, in the same place.
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
   await page.evaluate(() => document.fonts.ready);
   const left = (selector: string) =>
@@ -73,12 +76,19 @@ test("opening band follows the measured reference grid at 1440 by 810", async ({
       return range.getBoundingClientRect().left;
     });
   // Reference: identity 134.7, sentence 490.7, scroll cue 1084, corner 40.
-  expect(Math.abs((await left(".hero-identity")) - 134.7)).toBeLessThan(2);
+  expect(
+    Math.abs((await left(".title-card .hero-identity")) - 134.7),
+  ).toBeLessThan(2);
   expect(Math.abs((await left("h1")) - 490.7)).toBeLessThan(2);
-  expect(Math.abs((await left(".hero-scroll")) - 1084)).toBeLessThan(2);
+  expect(
+    Math.abs((await left(".title-card .hero-scroll")) - 1084),
+  ).toBeLessThan(2);
   expect(Math.abs((await left(".hero-corner")) - 40)).toBeLessThan(2);
   await expect(page.locator("h1")).toHaveCSS("font-size", "28px");
-  await expect(page.locator(".hero-scroll")).toHaveCSS("opacity", "0.6");
+  await expect(page.locator(".title-card .hero-scroll")).toHaveCSS(
+    "opacity",
+    "0.6",
+  );
 });
 
 test("WebGL failure keeps the narrative and controls available", async ({
@@ -124,6 +134,12 @@ test("pointer movement raises the carving out of a resting wall", async ({
     "ready",
     { timeout: 30000 },
   );
+  // The Kurukṣetra opening, after the cold open; wait for its panel.
+  await page.locator("#loader.is-done").waitFor({ timeout: 30000 });
+  await page.evaluate(() =>
+    document.querySelector("#kurukshetra")!.scrollIntoView(),
+  );
+  await page.waitForTimeout(2500);
   // A patch over the chariot wheel, away from the DOM text.
   const patch = { x: 430, y: 470, width: 150, height: 90 };
   const contrast = async () => {
@@ -158,9 +174,7 @@ test("pointer movement raises the carving out of a resting wall", async ({
 test("relief data failing to load leaves a plain wall and a usable page", async ({
   page,
 }) => {
-  await page.route("**/relief/kurukshetra-height.png", (route) =>
-    route.abort(),
-  );
+  await page.route("**/relief/wheel-height.png", (route) => route.abort());
   await page.goto("/");
   await expect(page.locator("#relief")).toHaveAttribute(
     "data-relief-state",
@@ -188,4 +202,32 @@ test("intro loader counts up, releases scroll and offers sound", async ({
   await expect(toggle).toHaveAttribute("aria-pressed", "true");
   await toggle.click();
   await expect(toggle).toHaveAttribute("aria-pressed", "false");
+});
+
+test("cold open starts dark and pulls back to the carved wheel and title", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.goto("/");
+  await page.locator("#loader.is-done").waitFor({ timeout: 30000 });
+  const dark = page.locator(".cold-open-dark");
+  expect(
+    Number(await dark.evaluate((e) => getComputedStyle(e).opacity)),
+  ).toBeGreaterThan(0.95);
+  await expect(page.locator("html")).toHaveClass(/cold-dark/);
+  await page.evaluate(() => {
+    const section = document.querySelector<HTMLElement>(".cold-open")!;
+    window.scrollTo(0, section.offsetHeight - window.innerHeight);
+  });
+  await expect
+    .poll(async () =>
+      Number(await dark.evaluate((e) => getComputedStyle(e).opacity)),
+    )
+    .toBeLessThan(0.05);
+  await expect(page.locator("html")).not.toHaveClass(/cold-dark/);
+  await expect
+    .poll(() =>
+      page.locator("h1").evaluate((e) => Number(getComputedStyle(e).opacity)),
+    )
+    .toBeGreaterThan(0.9);
 });
