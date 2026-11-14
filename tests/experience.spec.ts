@@ -299,3 +299,42 @@ test("the Hastinapura painting opens the Adi Parva wall", async ({ page }) => {
     { timeout: 30000 },
   );
 });
+
+test("the dice hall drains to crimson and casts each stake", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.goto("/sabha/");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    "The dice that broke the world.",
+  );
+  await page
+    .locator("#loader.is-done")
+    .waitFor({ state: "attached", timeout: 30000 });
+  await expect(page.locator("html")).not.toHaveAttribute(
+    "data-tone",
+    "crimson",
+  );
+  await page.locator("#dice").scrollIntoViewIfNeeded();
+  await page.evaluate(() => document.querySelector("#dice")!.scrollIntoView());
+  await expect(page.locator("html")).toHaveAttribute("data-tone", "crimson");
+  for (const stake of await page.locator(".stakes li").all()) {
+    await stake.evaluate((el) =>
+      el.scrollIntoView({ block: "center", behavior: "instant" }),
+    );
+    await expect(stake).toHaveClass(/cast/);
+  }
+});
+
+test("chapters link in story order", async ({ page }) => {
+  await page.goto("/hastinapura/");
+  await expect(
+    page.getByRole("link", { name: /Enter the Dice Hall/ }),
+  ).toHaveAttribute("href", "../sabha/");
+  await page.goto("/sabha/");
+  await expect(
+    page.getByRole("link", { name: /Enter Kurukṣetra/ }),
+  ).toHaveAttribute("href", "../kurukshetra/");
+  await page.goto("/");
+  await expect(page.locator(".chapter-card")).toHaveCount(3);
+});

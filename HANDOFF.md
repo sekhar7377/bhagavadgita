@@ -253,6 +253,34 @@ Fix: `float.ts` now puts a space after each split line, so headings read "The th
 
 Commits: use the repository's configured git identity (plain `git commit`); a privacy hook blocks passing an email on the command line.
 
+## Milestone 08: Part III, the Dice Hall (Sabhā Parva) (14 November 2026)
+
+New page `/sabha/` (`sabha/index.html`, added to `vite.config.ts`), "The dice that broke the world." Order: Hastināpura → Dice Hall → Kurukṣetra. Home cards are I Hastināpura, II The Dice Hall, III Kurukṣetra. Hastināpura's Next gateway and menu point to the Dice Hall, whose Next is Kurukṣetra.
+
+- **Panels (each a new camera, ASSET_REGISTER G12):**
+  - `mayasabha` (header): floor-level view, the crystal floor ripples like water.
+  - `khandava`: aerial ring of fire, Agni, Indra's storm, Maya begging.
+  - `rajasuya`: the discus and the light rising from Śiśupāla into Krishna. A beheading prompt was refused, so the scene uses Vyāsa's own image of the merging light.
+  - `pool`: Dutch angle of Duryodhana's fall, Bhīma laughing.
+  - `dice`: Śakuni's hand over the board.
+  - `question`: Draupadī standing, the elders bowed, Vikarṇa rising.
+  - `cloth`: the endless silk. A prompt that described the pulling was refused; it is shown as the miracle with her in prayer.
+  - `vows`, plus the branches `vidura` and `secondthrow`.
+- **Copy:** the user's script checked against the Critical Edition, with Vyāsa's details added: Agni's twelve-year sacrifice, Varuṇa's gifts, Maya's fourteen months, the closed crystal door, the hall of a thousand pillars, the usher sent first, Vikarṇa, the Prahlāda tale, the omens, Draupadī's two boons and refused third.
+  - Told as tradition: Śakuni's bone dice, Krishna's name in the disrobing, Draupadī's unbound-hair vow, the "blind man's son" taunt, and the bread that silenced Bhīṣma.
+- **Dice hall tone:** a `.tone-veil` (fixed, `mix-blend-mode: multiply`, crimson radial) fades in while a `[data-tone="crimson"]` scene holds the screen centre (IntersectionObserver sets `html[data-tone]`). It applies to the dice, question, cloth, vows and second-throw scenes.
+- **Dice sound:** `sound.dice()` synthesises two ivory clicks, a rattle and a board knock. Each `.stakes li[data-dice]` gets class `cast`, lights up and plays the sound as it crosses the middle of the screen (only when sound is on).
+- **Header painting:** `public/art/sabha.webp`, crimson colour painting matched to the Kurukṣetra painting.
+
+**Rule from the user: realistic staging.** No omen props: the user objected to jackals perched on fort walls. Regenerated without them:
+
+- `pots` (Part I): eclipsed sun only.
+- `vows`: storm sky only.
+- `vidura`: plain lattice.
+- `secondthrow`: the first version had giant floating dice; now small dice on the board, as a narrative frieze.
+
+Omens live in the text only. Memory note `realistic-scenes`.
+
 ## GPU speed-ups (14 November 2026)
 
 The user asked to use the GPU (GTX 1650) to speed up the work.

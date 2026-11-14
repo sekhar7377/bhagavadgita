@@ -1281,3 +1281,83 @@ html.is-loading body {
     width: 100%;
   }
 }
+
+/* --- the dice hall: tone veil and stakes ------------------------------------
+   A fixed veil between the wall and the text multiplies the plaster toward
+   crimson and shadow while a [data-tone="crimson"] scene is on screen. */
+.tone-veil {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at 50% 45%,
+    rgb(214 150 140) 0%,
+    rgb(150 70 64) 100%
+  );
+  mix-blend-mode: multiply;
+  opacity: 0;
+  transition: opacity 1.8s ease;
+}
+html[data-tone="crimson"] .tone-veil {
+  opacity: 0.55;
+}
+html[data-tone="crimson"] .site-header,
+html[data-tone="crimson"] [data-tone] {
+  transition: color 1.8s ease;
+}
+.stakes {
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: stake;
+  display: grid;
+  gap: 10px;
+}
+.stakes li {
+  counter-increment: stake;
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  font-family: var(--font-display);
+  font-size: clamp(14px, 1.06vw, 17px);
+  line-height: 1.45;
+  opacity: 0.35;
+  transform: translateX(-6px);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s ease;
+}
+.stakes li::before {
+  content: counter(stake, upper-roman);
+  font-size: 0.7em;
+  letter-spacing: 0.1em;
+  padding-top: 0.3em;
+  opacity: 0.6;
+}
+.stakes li.cast {
+  opacity: 1;
+  transform: none;
+}
+.scene-story .aside {
+  font-size: 0.85em;
+  opacity: 0.65;
+  font-style: italic;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tone-veil {
+    transition: none;
+  }
+  .stakes li {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Long chapter captions wrap on phones instead of widening the page. */
+.chapter-list {
+  grid-template-columns: minmax(0, 1fr);
+}
+.gateway-caption {
+  flex-wrap: wrap;
+  row-gap: 8px;
+}

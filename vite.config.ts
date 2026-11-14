@@ -11,6 +11,7 @@ export default defineConfig({
         main: resolve(__dirname, "index.html"),
         kurukshetra: resolve(__dirname, "kurukshetra/index.html"),
         hastinapura: resolve(__dirname, "hastinapura/index.html"),
+        sabha: resolve(__dirname, "sabha/index.html"),
       },
     },
   },

@@ -127,6 +127,37 @@ const mixFrame = () => {
   requestAnimationFrame(mixFrame);
 };
 requestAnimationFrame(mixFrame);
+// The dice hall: the wall drains toward crimson while a [data-tone] scene
+// holds the middle of the screen, and each stake lands with a dice cast.
+const veil = document.querySelector<HTMLElement>(".tone-veil");
+const toned = new Map<Element, boolean>();
+const toneObserver = new IntersectionObserver(
+  (entries) => {
+    for (const entry of entries) toned.set(entry.target, entry.isIntersecting);
+    const active = [...toned].find(([, on]) => on)?.[0] as
+      | HTMLElement
+      | undefined;
+    document.documentElement.dataset.tone = active?.dataset.tone ?? "";
+  },
+  { rootMargin: "-45% 0px -45% 0px" },
+);
+if (veil)
+  document
+    .querySelectorAll("[data-tone]")
+    .forEach((scene) => toneObserver.observe(scene));
+const diceObserver = new IntersectionObserver(
+  (entries) => {
+    for (const entry of entries)
+      if (entry.isIntersecting && !entry.target.classList.contains("cast")) {
+        entry.target.classList.add("cast");
+        sound.dice();
+      }
+  },
+  { rootMargin: "-40% 0px -40% 0px" },
+);
+document
+  .querySelectorAll("[data-dice]")
+  .forEach((stake) => diceObserver.observe(stake));
 // The toggle turns light over the dark closing sections.
 const darkObserver = new IntersectionObserver(
   (entries) => {
@@ -245,5 +276,7 @@ if (import.meta.hot)
     coldOpen?.dispose();
     sound.dispose();
     darkObserver.disconnect();
+    toneObserver.disconnect();
+    diceObserver.disconnect();
     observer.disconnect();
   });

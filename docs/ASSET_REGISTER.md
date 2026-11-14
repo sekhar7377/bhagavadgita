@@ -170,3 +170,24 @@ All 1774×887, made in the same ChatGPT conversation, each with its own camera. 
 ### G11 — Hastināpura chapter header painting (14 November 2026)
 
 `docs/references/hastinapura-header-chatgpt.png` (1536×1024), made in ChatGPT (user's account, same conversation) with `chariot-chatgpt-subject.png` attached so colour grading and finish match the Kurukṣetra header. It shows Devavrata's vow on the Gaṅgā at dawn, Hastināpura across the river, and Satyavatī and her father in a boat. Inspected: no text or watermark. Delivered as `public/art/hastinapura.webp`.
+
+### G12 — Part III (Sabhā Parva) panels and header painting (14 November 2026)
+
+ChatGPT (user's account, same conversation); plaster panels 1774×887, each a distinct camera; inspected for text and staged props. Built with `make_scene.sh` (horizon scan on GPU).
+
+| Name        | File                                      | Scene                                            |
+| ----------- | ----------------------------------------- | ------------------------------------------------ |
+| mayasabha   | `docs/references/mayasabha-chatgpt.png`   | Part III header, the Palace of Illusions         |
+| khandava    | `docs/references/khandava-chatgpt.png`    | the burning of Khāṇḍava                          |
+| rajasuya    | `docs/references/rajasuya-chatgpt.png`    | the Rājasūya and Śiśupāla (light, no violence)   |
+| pool        | `docs/references/pool-chatgpt.png`        | Duryodhana's fall                                |
+| dice        | `docs/references/dice-chatgpt.png`        | the game of dice                                 |
+| question    | `docs/references/question-chatgpt.png`    | Draupadī's question                              |
+| cloth       | `docs/references/cloth-chatgpt.png`       | the endless silk                                 |
+| vows        | `docs/references/vows-chatgpt.png`        | the vows (regenerated without jackals)           |
+| vidura      | `docs/references/vidura-chatgpt.png`      | branch A (regenerated without the jackal grille) |
+| secondthrow | `docs/references/secondthrow-chatgpt.png` | branch B (regenerated, dice at true scale)       |
+
+`docs/references/pots-chatgpt.png` (Part I) was regenerated without jackals on the rampart.
+
+Header painting: `docs/references/sabha-header-chatgpt.png` (1536×1024, colour, `chariot-chatgpt-subject.png` attached for finish), delivered as `public/art/sabha.webp`.

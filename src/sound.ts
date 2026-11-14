@@ -199,6 +199,47 @@ export function createSound() {
       windGain.gain.setTargetAtTime(0.05 + energy * 0.12, now, 0.25);
       windFilter.Q.setTargetAtTime(0.7 - energy * 0.3, now, 0.25);
     },
+    /**
+     * A cast of dice: two hard ivory clicks and a soft rattle, like dice
+     * striking a board. Used as each stake is reached in the dice hall.
+     */
+    dice() {
+      if (!enabled || !context || !master) return;
+      const ctx = context;
+      const now = ctx.currentTime;
+      const length = Math.floor(ctx.sampleRate * 0.05);
+      const buffer = ctx.createBuffer(1, length, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < length; i++)
+        data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, 6);
+      for (const [delay, level, freq] of [
+        [0, 0.55, 2600],
+        [0.075, 0.4, 3100],
+        [0.13, 0.18, 2200],
+        [0.17, 0.1, 2800],
+      ]) {
+        const source = ctx.createBufferSource();
+        source.buffer = buffer;
+        const band = ctx.createBiquadFilter();
+        band.type = "bandpass";
+        band.frequency.value = freq;
+        band.Q.value = 3;
+        const gain = ctx.createGain();
+        gain.gain.value = level;
+        source.connect(band).connect(gain).connect(master);
+        source.start(now + delay);
+      }
+      // The board's low knock under the first strike.
+      const knock = ctx.createOscillator();
+      knock.frequency.setValueAtTime(140, now);
+      knock.frequency.exponentialRampToValueAtTime(60, now + 0.08);
+      const knockGain = ctx.createGain();
+      knockGain.gain.setValueAtTime(0.35, now);
+      knockGain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+      knock.connect(knockGain).connect(master);
+      knock.start(now);
+      knock.stop(now + 0.14);
+    },
     /** Heartbeat and drone levels, 0..1 each (the cold open crossfades them). */
     setMix(heart: number, drone: number) {
       const next = {
