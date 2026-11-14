@@ -151,3 +151,18 @@ All 1774×887, made in the same ChatGPT conversation (the first with `chariot-ba
 | blindcrown  | `docs/references/blindcrown-chatgpt.png`  | Gāndhārī's blindfold, Dhṛtarāṣṭra, Śakuni | intimate medium two-shot     |
 | forest      | `docs/references/forest-chatgpt.png`      | Kuntī's mantra, five divine sons          | high wide over the hermitage |
 | pots        | `docs/references/pots-chatgpt.png`        | the hundred and one jars                  | low, deep vault perspective  |
+
+### G10 — Part II panels, ChatGPT plaster renders (14 November 2026)
+
+All 1774×887, made in the same ChatGPT conversation, each with its own camera. Inspected: no text or watermark. Built with `make_scene.sh`.
+
+| Name       | File                                     | Scene                                  | Camera                        |
+| ---------- | ---------------------------------------- | -------------------------------------- | ----------------------------- |
+| arena      | `docs/references/arena-chatgpt.png`      | Part II header, Arjuna's three weapons | high crane over the arena     |
+| karna      | `docs/references/karna-gate-chatgpt.png` | Karṇa enters                           | extreme low elevation         |
+| anga       | `docs/references/anga-chatgpt.png`       | the king of Aṅga bows to Adhiratha     | intimate medium               |
+| lac        | `docs/references/lac-chatgpt.png`        | the house of lac                       | cutaway cross-section         |
+| swayamvara | `docs/references/swayamvara-chatgpt.png` | the target                             | upward diagonal               |
+| hut        | `docs/references/hut-chatgpt.png`        | share it equally                       | from inside, through the door |
+| ekalavya   | `docs/references/ekalavya-chatgpt.png`   | branch A, the offering                 | side-on, kneeling height      |
+| altar      | `docs/references/altar-chatgpt.png`      | branch B, born from the altar          | frontal, symmetrical          |

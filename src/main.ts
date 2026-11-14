@@ -32,6 +32,25 @@ const coldOpen = coldOpenSection
       reducedMotion: () => reducedMotionQuery.matches,
     })
   : undefined;
+// On the epic's home page every story panel surfaces on its own as it
+// reaches the middle of the screen, so phones (no cursor) still see each
+// carving, then settles back to plaster for the cursor to rediscover.
+function surfaceShot(anchor: HTMLElement) {
+  return () => {
+    const rect = anchor.getBoundingClientRect();
+    const view = window.innerHeight;
+    const distance =
+      Math.abs(rect.top + rect.height / 2 - view / 2) / Math.max(1, view);
+    const t = Math.min(1, Math.max(0, (0.6 - distance) / 0.45));
+    const eased = t * t * (3 - 2 * t);
+    return {
+      scale: 1,
+      focusX: 0.5,
+      focusY: 0.5,
+      lift: reducedMotionQuery.matches ? 0 : 0.6 * eased,
+    };
+  };
+}
 let relief: ReturnType<typeof mountRelief> | undefined;
 try {
   relief = mountRelief(
@@ -39,7 +58,12 @@ try {
     sceneAnchors.map((anchor) => ({
       name: anchor.dataset.scene!,
       anchor,
-      shot: anchor.dataset.scene === "wheel" ? coldOpen?.shot : undefined,
+      shot:
+        anchor.dataset.scene === "wheel"
+          ? coldOpen?.shot
+          : coldOpen
+            ? surfaceShot(anchor)
+            : undefined,
     })),
   );
 } catch {

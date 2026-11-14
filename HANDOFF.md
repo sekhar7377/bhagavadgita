@@ -184,6 +184,45 @@ The user asked for two things.
 
 **Next:** the user's branch A and B scripts, then the remaining parts of the script. Each part gets the same pattern: header panel, scene panels, chronicle, branch cards.
 
+## Milestone 06: Part II, branches that open, scenes that surface (14 November 2026)
+
+The user asked for precision: every visual a masterpiece "with the eyes of Vyāsa", true to the real Mahābhārata, with permission to improve their script.
+
+**Part II, "Born from ash and sacrificial fire"** (Ādi Parva: youth, tournament, house of lac, svayaṃvara), on the home page after Part I. It has 8 new ChatGPT panels, each a new camera (ASSET_REGISTER G10):
+
+- `arena` (header): high crane view, Arjuna's fire, water and wind weapons.
+- `karna`: low elevation, Karṇa at the gate with the sun as a halo.
+- `anga`: Karṇa's crowned head at Adhiratha's feet, Duryodhana's hand on his shoulder, Bhīma laughing.
+- `lac`: cutaway; the palace burns above, the brothers walk the tunnel carrying Kuntī, and Vidura's boat waits in moonlight.
+- `swayamvara`: Arjuna draws upward while looking into the oil; the wheel and fish, Draupadī, Krishna in the gallery.
+- `hut`: Kuntī with her back turned; the brothers and Draupadī at the door.
+- Branch panels: `ekalavya` and `altar`.
+
+**Copy checked against the Critical Edition, with Vyāsa's own details added:**
+
+- Pramāṇakoṭi and Vāsuki's eight bowls of elixir.
+- Droṇa's son fed rice-flour water for milk.
+- Kṛpa's question and the anointing on a golden seat.
+- Kuntī recognising Karṇa and fainting.
+- Vidura's warning in a hidden tongue, and the miner.
+- The forest woman and her five sons found in the ashes.
+- Vidura's boat on the Gaṅgā.
+- Krishna recognising his cousins and telling Balarāma.
+- Bhīma uprooting a tree.
+- Draupadī's past life (five prayers to Śiva).
+
+Told as later tradition: the fish seen in oil (the text has a turning machine with an opening and a target) and Draupadī's rejection of Karṇa. Neither is shown as fact.
+
+**Branches open for real.** Part II's A (Ekalavya's thumb) and B (Born from the altar) are `<details class="branch-path">`; opening one unfolds its own carved scene and chronicle.
+
+- `relief.ts` skips anchors with no box, so a closed branch's panel never loads.
+- The Ekalavya render first produced no image (most likely because of the knife). It was regenerated as the dignified moment of offering: open palm on a leaf, no knife, no injury.
+- Part I's branch cards are still static, "Being carved".
+
+**Scenes surface on their own (home page only).** `surfaceShot()` in `main.ts` gives every story panel a lift of up to 0.6 as it nears the screen centre (smoothstep over 0.6→0.15 screen heights), so phones without a cursor see each carving. The cursor still raises it fully. Statements, meta and sub-headers have a soft plaster text-shadow for legibility. The Kurukṣetra page keeps the reference behaviour (rests blank).
+
+ChatGPT automation helpers live in the page as `window.__gen(prompt)` / `__send()` / `__busy()`. They are not stored anywhere and must be re-injected in a new tab. The Send button's aria-label is exactly "Send".
+
 ## Public site (GitHub Pages)
 
 The user asked to make the site public. It is live at **https://sekhar7377.github.io/bhagavadgita/**.

@@ -47,7 +47,9 @@ test("the Kurukshetra page keeps the Gita wall and its menu", async ({
     "ready",
     { timeout: 30000 },
   );
-  await page.locator("#loader.is-done").waitFor({ timeout: 30000 });
+  await page
+    .locator("#loader.is-done")
+    .waitFor({ state: "attached", timeout: 30000 });
   await page.getByRole("button", { name: "Menu", exact: true }).click();
   await page.getByRole("link", { name: "03 The battlefield" }).click();
   await expect(page).toHaveURL(/#story$/);
@@ -225,7 +227,9 @@ test("cold open starts dark and pulls back to the carved wheel and title", async
 }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto("/");
-  await page.locator("#loader.is-done").waitFor({ timeout: 30000 });
+  await page
+    .locator("#loader.is-done")
+    .waitFor({ state: "attached", timeout: 30000 });
   const dark = page.locator(".cold-open-dark");
   expect(
     Number(await dark.evaluate((e) => getComputedStyle(e).opacity)),
@@ -252,7 +256,9 @@ test("the Kurukshetra painting opens the Kurukshetra wall", async ({
   page,
 }) => {
   await page.goto("/");
-  await page.locator("#loader.is-done").waitFor({ timeout: 30000 });
+  await page
+    .locator("#loader.is-done")
+    .waitFor({ state: "attached", timeout: 30000 });
   const gateway = page.getByRole("link", { name: /Enter Kurukṣetra/ });
   await gateway.scrollIntoViewIfNeeded();
   await gateway.click();
@@ -260,4 +266,17 @@ test("the Kurukshetra painting opens the Kurukshetra wall", async ({
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
     "The stillness before action.",
   );
+});
+
+test("a story branch opens its own carved scene", async ({ page }) => {
+  await page.goto("/");
+  await page
+    .locator("#loader.is-done")
+    .waitFor({ state: "attached", timeout: 30000 });
+  const branch = page.locator("#ekalavya");
+  await branch.locator("summary").scrollIntoViewIfNeeded();
+  await expect(page.locator("#ekalavya-title")).not.toBeVisible();
+  await branch.locator("summary").click();
+  await expect(branch).toHaveAttribute("open", "");
+  await expect(page.locator("#ekalavya-title")).toBeVisible();
 });

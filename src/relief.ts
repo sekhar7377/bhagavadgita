@@ -518,6 +518,12 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
     shared.uScrollWorld.value = window.scrollY * worldPerPixel;
     scenes.forEach((state, index) => {
       const rect = state.spec.anchor.getBoundingClientRect();
+      // A scene inside a closed branch has no box yet: keep it hidden and
+      // unloaded until the visitor opens that branch.
+      if (rect.height === 0) {
+        state.mesh.visible = false;
+        return;
+      }
       const offset = rect.top + rect.height / 2 - viewHeight / 2;
       state.mesh.position.y = -offset * worldPerPixel;
       const shot = state.spec.shot?.();
