@@ -22,6 +22,7 @@ from PIL import Image
 
 import json
 import os
+from pathlib import Path
 
 manifest_path, out_dir = sys.argv[1:3]
 preview_path = sys.argv[3] if len(sys.argv) > 3 else None
@@ -213,12 +214,27 @@ def max_slope(angle):
     return best
 
 
+def max_slopes(angles):
+    """The horizon scan dominates the bake; run it on the GPU (DirectML/CUDA
+    via scripts/relief/gpu_horizon.py) when possible, else on the CPU."""
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        import gpu_horizon
+
+        if gpu_horizon.available() and not os.environ.get("RELIEF_CPU"):
+            print("horizon scan on GPU", flush=True)
+            return [r.astype(wall.dtype) for r in gpu_horizon.max_slopes(np.asarray(wall, np.float32), angles, STEPS, STEP)]
+    except Exception as error:  # any GPU trouble: fall back, never fail the bake
+        print("GPU horizon scan unavailable, using CPU:", error, flush=True)
+    return [max_slope(a) for a in angles]
+
+
 key_az = np.arctan2(LIGHT[1], LIGHT[0])
 KEY_EL = np.radians(40)
 key_dirs = [(key_az + np.radians(a), KEY_EL + np.radians(e)) for a, e in ((0, 0), (-14, 3), (14, -3), (-7, -7), (7, 7), (-20, -4), (20, 4))]
-key_slopes = [max_slope(az) for az, _ in key_dirs]
 SKY = 12
-sky_slopes = [max_slope(2 * np.pi * k / SKY) for k in range(SKY)]
+_all = max_slopes([az for az, _ in key_dirs] + [2 * np.pi * k / SKY for k in range(SKY)])
+key_slopes, sky_slopes = _all[: len(key_dirs)], _all[len(key_dirs):]
 gy_full, gx_full = np.gradient(wall)
 
 stages = []

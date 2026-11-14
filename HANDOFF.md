@@ -253,6 +253,18 @@ Fix: `float.ts` now puts a space after each split line, so headings read "The th
 
 Commits: use the repository's configured git identity (plain `git commit`); a privacy hook blocks passing an email on the command line.
 
+## GPU speed-ups (14 November 2026)
+
+The user asked to use the GPU (GTX 1650) to speed up the work.
+
+- **Tests:** `playwright.config.ts` runs Chromium on the discrete GPU on Windows (`--use-angle=d3d11 --force_high_performance_gpu --ignore-gpu-blocklist`; verified renderer "NVIDIA GeForce GTX 1650 … D3D11") with 3 parallel workers. The full suite of 13 tests runs in **56 s instead of 5½ min**. CI, cloud runs or `PW_SOFTWARE=1` keep SwiftShader with one worker.
+- **Relief bake:** the horizon scan (19 directions × 45 bilinear shifts, the bulk of the bake) runs on the GPU through `scripts/relief/gpu_horizon.py`.
+  - It is an ONNX graph run by onnxruntime-DirectML: one compiled session whose tap offsets and weights are inputs, so a single compile serves every direction.
+  - It needs `pip install onnx`. `RELIEF_CPU=1` forces the CPU path, and any GPU error falls back automatically.
+  - The result matches the CPU path to about 1e-4. Bake time went from 93 s to 56 s; depth on DirectML is about 25 s.
+  - Don't batch all 19 directions into one graph: the dispatch runs long enough that Windows resets the GPU (TDR).
+- The remaining wait per panel is ChatGPT's generation (about 2–3 min). Bake each panel while the next one generates.
+
 ## Public site (GitHub Pages)
 
 The user asked to make the site public. It is live at **https://sekhar7377.github.io/bhagavadgita/**.
