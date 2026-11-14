@@ -195,3 +195,7 @@ Header painting: `docs/references/sabha-header-chatgpt.png` (1536×1024, colour,
 ### G13 — Ekalavya panel regenerated (14 November 2026)
 
 The user rejected the first `ekalavya` render: a feather headband (Native American, culturally wrong), a dog holding a bundle of arrows like a toy, an empty open hand on a leaf, and a monk-like robe on Droṇa. It was regenerated as the real moment: a dark-skinned Niṣāda prince in bark and deerskin with his hair knotted and his bow laid at the clay statue, kneeling to touch Droṇa's feet with his fist at his heart. Droṇa wears the sacred thread, dhoti and upper cloth with his bow on his shoulder; Arjuna watches; the dog lies quietly. File: `docs/references/ekalavya-chatgpt.png`. Audit of all 28 panels found no other foreign-costume or staged-prop errors.
+
+### G14 — Śakuni redone (14 November 2026)
+
+At the user's request, Śakuni's cartoon-villain look (wide grin; Mughal-era turban and plume, anachronistic) was replaced in all three panels where he appears: `dice`, `blindcrown` (Part I) and `secondthrow`. He is now one consistent figure: a lean, elegant prince of Gāndhāra with a slim royal headband, trimmed beard, hooded eyes and only a controlled half-smile.
