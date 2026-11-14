@@ -53,6 +53,7 @@ Milestone 02: the opening wall rebuilt on the reference's architecture. Still a 
 The user asked for the whole site to be one continuous experience like the reference (not separate sections), with moving type, telling famous scenes of the Gītā. Live inspection of the reference confirmed: **one full-screen WebGL canvas, document overflow hidden, wheel-driven virtual scroll**; the wall and its carvings glide through that single canvas.
 
 **Architecture now**
+
 - `#relief` is a single `position: fixed` canvas behind the whole page (`src/relief.ts`, `mountRelief(container, scenes)`). Every `[data-scene]` element anchors one carved 2:1 panel; each frame the panel is placed at its anchor's on-screen centre (`place()`), so the wall scrolls exactly with the DOM.
 - One shared reveal field; it is **reprojected on scroll** (`uShift` in the field shader) so revealed carving stays attached to the sculpture.
 - Plaster grain is pinned to the wall (`uScrollWorld`), so bare wall between scenes scrolls continuously.
@@ -64,21 +65,23 @@ The user asked for the whole site to be one continuous experience like the refer
 - New scene: generate the plaster render, then `sh scripts/relief/make_scene.sh sceneN docs/references/<file>.png` (GPU depth, manifest, bake, fallback), then add a `<section class="scene scene--left|right|centre" data-scene="sceneN">` with a `data-float` statement.
 
 **The seven scenes (story order, each a distinct camera; see Scene variety rule)**
+
 1. `kurukshetra`: the chariot between the armies, wide (hero).
-1b. `battle`: Ch. 1, the conches sound: low in the middle of the charge, Krishna and Arjuna blowing conches, horses leaping, elephants, banners, arrows. Made from two of the user's Kalki recording frames (credits painted out / cropped away, kept outside Git) plus our scene 1 plaster panel for continuity. The user asked for battle scenes to use their recordings.
+   1b. `battle`: Ch. 1, the conches sound: low in the middle of the charge, Krishna and Arjuna blowing conches, horses leaping, elephants, banners, arrows. Made from two of the user's Kalki recording frames (credits painted out / cropped away, kept outside Git) plus our scene 1 plaster panel for continuity. The user asked for battle scenes to use their recordings.
 2. `scene2`: Ch. 1, the bow lowers: close, on the chariot.
 3. `scene3`: Ch. 2, the teaching begins: low angle from the chariot floor, canopy as halo.
 4. `scene4`: Ch. 6, the steady lamp: symbolic, a still flame between teacher and student, lotus pond.
 5. `scene5`: Ch. 11, the universal form: monumental, ordered faces and arms, tiny Arjuna below.
 6. `scene6`: Ch. 18, clarity: from behind and below, Arjuna upright lifting the bow, armies clear.
-All statements are original editorial copy with traditional chapter titles; no verse is quoted or invented.
+   All statements are original editorial copy with traditional chapter titles; no verse is quoted or invented.
 
 **Intro and sound (milestone 03b)**
+
 - `#loader` (`src/loader.ts`): identity and title on bare plaster in the hero's exact grid, a counter that follows real progress (fonts 15, opening wall settled 70, page load 15; eased, minimum 1.6 s, 0.3 s under reduced motion, gives up after 9 s), and a breathing "Click to enable sound" prompt. Scroll is held (`html.is-loading`, Lenis stopped) until it finishes; then it fades and the opening carving surfaces once (`relief.reveal()`) and settles. If scripts never run, a CSS animation hides it after 12 s.
 - Sound (`src/sound.ts`) is synthesised, no audio files: a tanpura-like drone (Pa, Sa, Sa, low Sa on C#, each pluck with a filter "bloom" imitating the jawari bridge) over band-passed pink-noise wind; Lenis scroll velocity raises the wind. Starts only on a click (loader or toggle), fades in to a low level, compressor on the master.
 - `.sound-toggle`: 30 px circle 40 px from the lower-right corner (the reference's corner control), four bars animate while on; turns light over the dark closing sections.
 
-**Still missing against the reference**: carving rising *over* letters (needs text drawn in WebGL); menu transition; header mark after scroll; the dark closing section is still milestone-01 styling.
+**Still missing against the reference**: carving rising _over_ letters (needs text drawn in WebGL); menu transition; header mark after scroll; the dark closing section is still milestone-01 styling.
 
 ## Scenes (session 3, 14 November 2026)
 
@@ -98,7 +101,11 @@ The user recorded the live reference site (`C:\Users\velpu\Videos\Screen Recordi
 - **At rest** the wall is almost blank; forms appear only where the pointer or the automatic path passes.
 - **Scroll sequence.** Hero band, then a large left-aligned four-line serif statement (about 36 px at 1920) with carving rising **over** its letters, so the letters vanish under the raised plaster. Then a dark film window grows up from the bottom edge into a large centred frame. Then a small centred label ("Our approach") over a centred three-line statement. Carving continues along the wall around all of these. The Menu label gains a small mark after scrolling.
 
-## Next work, in order
+## Scope change: the whole Mahābhārata (14 November 2026)
+
+The user said the Gītā wall is a small part of a larger "World of Mahabharata" site and asked for the whole epic narrated like a film (Hollywood restraint plus Rajamouli's elevation and interval), then built **one scene at a time** the same way. The narration is `docs/MAHABHARATA_TREATMENT.md`: prologue (Vyāsa dictating), Acts I–VII mapped to the parvas, about 70 scenes, each with camera, light, carving, sound and draft words, with Critical Edition vs. tradition marked. The Gītā wall becomes Act V, Day One, unchanged. Proposed site structure (not yet approved or built): `/` = Prologue + Act I wall, one continuous wall per act after that, a dark interval screen after Act II. **Next action: on the user's go-ahead, build P1 "The cave" as the first new panel** (ChatGPT render with the studio still and our plaster panel attached → `make_scene.sh` → section), then continue in treatment order.
+
+## Next work, in order (Gītā wall, before the scope change)
 
 1. **Story elements from the user's four screen recordings** (`C:\Users\velpu\Videos\Screen Recordings\Screen Recording 2026-11-13 202451/202649/202850/202951.mp4`, 23–29 s each, the film's opening, kept outside Git). The user said these are references and to generate our own visuals to bring the story to life. What they show: banners on poles over a battlefield; a field of arrows standing in the earth; the warrior leaping with a chariot wheel overhead; a fallen elephant with its tusk curving up; shields and swords in the dust; golden pavilion chariots and horse teams in a charge; the aftermath at sunset, with a lone bare-chested figure walking among the fallen and a white horse; a glowing light held up to the sky. Credits and subtitles are burned in throughout, so use frames only as image inputs, never directly. Generate each as a plaster element (pipeline below, frame as subject + studio still as style): (a) arrows-and-banners field, (b) fallen elephant, (c) lone figure and white horse at the aftermath. They belong on the screens below the opening once the wall extends (next item). The sunset aftermath frames also suit the later film window.
 2. Fill further. Overlapping elements keep the higher surface (max), so lay fills behind figures. A true 3D model rendered to height is better still.
