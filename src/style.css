@@ -979,3 +979,151 @@ html.is-loading body {
     --in: 1;
   }
 }
+
+/* --- Part I: chapter header, chronicle text, branches, gateway ------------- */
+.part-header .scene-statement {
+  align-self: end;
+}
+.part-sub {
+  grid-column: 4 / span 6;
+  align-self: start;
+  margin: 28px 0 0;
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.6;
+  letter-spacing: 0.02em;
+  opacity: 0.7;
+}
+/* The told story sits on bare wall between carved scenes, in a quiet
+   reading column. */
+.chronicle {
+  position: relative;
+  padding: 18svh var(--gutter);
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: 16px;
+  row-gap: 44px;
+  color: #030303;
+}
+.chronicle p {
+  grid-column: 4 / span 6;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(18px, 1.45vw, 23px);
+  line-height: 1.55;
+  letter-spacing: -0.005em;
+}
+.chronicle em {
+  font-style: italic;
+}
+.chronicle strong {
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  font-size: 0.72em;
+  text-transform: uppercase;
+}
+.branches {
+  padding: 14svh var(--gutter) 10svh;
+  color: #030303;
+  text-align: center;
+}
+.branch-list {
+  margin: 34px auto 0;
+  max-width: 980px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.branch {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto auto;
+  column-gap: 22px;
+  row-gap: 8px;
+  padding: 30px 32px;
+  text-align: left;
+  border: 1px solid rgb(3 3 3 / 0.18);
+  background: rgb(255 255 255 / 0.12);
+  backdrop-filter: blur(2px);
+}
+.branch-key {
+  grid-row: 1 / span 3;
+  font-family: var(--font-display);
+  font-size: 40px;
+  line-height: 1;
+  opacity: 0.4;
+}
+.branch-name {
+  font-family: var(--font-display);
+  font-size: 24px;
+  line-height: 1.15;
+}
+.branch-line {
+  font-size: 13px;
+  line-height: 1.5;
+  opacity: 0.7;
+}
+.branch-state {
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.45;
+}
+.gateway {
+  padding: 12svh var(--gutter) 18svh;
+  color: #030303;
+}
+.gateway > .eyebrow {
+  text-align: center;
+  margin: 0 0 30px;
+}
+.gateway-link {
+  display: block;
+  width: min(86%, 1180px);
+  margin: 0 auto;
+}
+.gateway-link img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  transition: transform 1.4s cubic-bezier(0.2, 0.7, 0.1, 1);
+}
+.gateway-link:hover img,
+.gateway-link:focus-visible img {
+  transform: scale(1.035);
+}
+.gateway-caption {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  margin-top: 17px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.gateway-enter {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  color: #030303;
+  font-size: 14px;
+}
+.gateway-link:hover .gateway-enter {
+  text-decoration: underline;
+}
+@media (max-width: 1023px) {
+  .part-sub,
+  .chronicle p {
+    grid-column: 1 / -1;
+  }
+  .part-sub {
+    text-align: left;
+  }
+  .branch-list {
+    grid-template-columns: 1fr;
+  }
+  .gateway-link {
+    width: 100%;
+  }
+}

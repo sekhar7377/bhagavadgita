@@ -162,9 +162,32 @@ The fallback image is `preview.png` resized to 1920×960 WebP.
 
 Depth estimation runs on the GPU (GTX 1650 via `onnxruntime-directml`, 14 s per image); the CPU path thrashes with the PC's 8 GB RAM. In ChatGPT, typing long prompts key by key froze the tab; insert text with `document.execCommand('insertText', …)` on the `.ProseMirror` editor and click Send. ChatGPT has real hidden `input[type=file]` elements for attaching images. On Windows use `python`, not `python3`. The model sits in `models/` (git-ignored). `npm run format:check` flags every file on Windows because git checks out CRLF; `npx prettier --check --end-of-line auto src tests index.html DESIGN.md` is the real check.
 
+## Milestone 05: two pages, Part I, and the Kurukṣetra gateway (14 November 2026)
+
+The user asked for two things.
+
+- The Kurukṣetra painting is the **heading for Kurukṣetra**: pressing it opens the Gītā wall we built, which now lives on its own page.
+- Part I of their script, "THE TERRIBLE VOW & THE BLIND CROWN" (Ādi Parva), is the second section of the home page.
+
+**Pages** (Vite multi-page, `vite.config.ts` `build.rollupOptions.input`)
+
+- `/` (`index.html`) runs in this order:
+  - the cold open and title (wheel);
+  - **Part I**: a chapter header on the `hastinapura` panel ("The throne nobody could keep."), then chronicle text, then `vow`, chronicle, `blindcrown`, chronicle (the three brothers), `forest` (five sons of the gods), chronicle, `pots` (a hundred and one), chronicle;
+  - then the two **branch cards** (A: the forgotten firstborn, i.e. Karṇa; B: the curse of Gāndhāra, i.e. Śakuni). They are marked "Being carved" because neither is built yet;
+  - then the **gateway**: the painting with "Enter Kurukṣetra", linking to `kurukshetra/`.
+- `/kurukshetra/` (`kurukshetra/index.html`) is the whole earlier Gītā wall, with its own loader ("KURUKṢETRA"), h1 "The stillness before action." and a menu that ends with "Back to the Mahābhārata". `main.ts` serves both pages: the cold open is optional, and menu links to other pages navigate normally.
+- Story copy is the user's own dramatised retelling (lightly edited for length and spelling). The footer says some details follow later tradition. The vow is presented as a retelling, not a verse.
+- `.chronicle` is a quiet reading column on bare wall, each paragraph a `data-float` block.
+
+**Panels** (ChatGPT, same conversation, each a new camera; see ASSET_REGISTER G09): `hastinapura` (symmetrical pillared hall, empty throne, Bhīṣma from behind), `vow` (low angle at the water, Devavrata's palm raised, the Gaṅgā erupting, lotus rain; the text sits on the right), `blindcrown` (two-shot, Gāndhārī binding her eyes, Dhṛtarāṣṭra reaching, Śakuni with dice), `forest` (high wide hermitage, Kuntī calling five divine forms with infants, Pāṇḍu and the fallen stag), `pots` (one-point vault of jars, the cracked jar with the infant, Vyāsa, jackals at the window).
+
+**Next:** the user's branch A and B scripts, then the remaining parts of the script. Each part gets the same pattern: header panel, scene panels, chronicle, branch cards.
+
 ## Public site (GitHub Pages)
 
 The user asked to make the site public. It is live at **https://sekhar7377.github.io/bhagavadgita/**.
+
 - `.github/workflows/pages.yml` builds with `BASE_PATH=/bhagavadgita/` and deploys on every push to `claude/festive-hamilton-s0cee2`.
 - The repo's `github-pages` environment has a branch policy that allows that branch.
 - Asset URLs in code use `import.meta.env.BASE_URL` (`vite.config.ts`), so never hard-code `/relief/...` paths.

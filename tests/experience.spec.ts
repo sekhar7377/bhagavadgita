@@ -27,7 +27,29 @@ test("opening renders real WebGL and menu supports keyboard and section navigati
     page.getByRole("button", { name: "Menu", exact: true }),
   ).toBeFocused();
   await page.getByRole("button", { name: "Menu", exact: true }).click();
-  await page.getByRole("link", { name: "04 The battlefield" }).click();
+  await page.getByRole("link", { name: "06 A hundred and one" }).click();
+  await expect(page).toHaveURL(/#hundred$/);
+  await expect(page.locator("#hundred")).toBeFocused();
+  expect(errors).toEqual([]);
+});
+
+test("the Kurukshetra page keeps the Gita wall and its menu", async ({
+  page,
+}) => {
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.goto("/kurukshetra/");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    "The stillness before action.",
+  );
+  await expect(page.locator("#relief")).toHaveAttribute(
+    "data-relief-state",
+    "ready",
+    { timeout: 30000 },
+  );
+  await page.locator("#loader.is-done").waitFor({ timeout: 30000 });
+  await page.getByRole("button", { name: "Menu", exact: true }).click();
+  await page.getByRole("link", { name: "03 The battlefield" }).click();
   await expect(page).toHaveURL(/#story$/);
   await expect(page.getByRole("dialog")).not.toBeVisible();
   await expect(page.locator("#story")).toBeFocused();
@@ -52,7 +74,7 @@ test("narrow screen remains readable, has no horizontal overflow, and honours re
   // The reference has no motion control, so neither does this opening.
   await expect(page.getByRole("button", { name: /motion/i })).toHaveCount(0);
   await page.getByRole("link", { name: "Scroll to begin" }).click();
-  await expect(page).toHaveURL(/#kurukshetra$/);
+  await expect(page).toHaveURL(/#part-1$/);
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= window.innerWidth,
@@ -108,7 +130,7 @@ test("missing artwork provides a readable fallback without losing the story", as
   page,
 }) => {
   await page.route("**/art/kurukshetra.webp", (route) => route.abort());
-  await page.goto("/");
+  await page.goto("/kurukshetra/");
   await page.locator("#battlefield").scrollIntoViewIfNeeded();
   await expect(
     page.getByText(
@@ -128,18 +150,12 @@ test("pointer movement raises the carving out of a resting wall", async ({
   // Two WebGL walls on a software renderer make each pointer frame slow.
   test.setTimeout(240000);
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("/");
+  await page.goto("/kurukshetra/");
   await expect(page.locator("#relief")).toHaveAttribute(
     "data-relief-state",
     "ready",
     { timeout: 30000 },
   );
-  // The Kurukṣetra opening, after the cold open; wait for its panel.
-  await page.locator("#loader.is-done").waitFor({ timeout: 30000 });
-  await page.evaluate(() =>
-    document.querySelector("#kurukshetra")!.scrollIntoView(),
-  );
-  await page.waitForTimeout(2500);
   // A patch over the chariot wheel, away from the DOM text.
   const patch = { x: 430, y: 470, width: 150, height: 90 };
   const contrast = async () => {
@@ -230,4 +246,18 @@ test("cold open starts dark and pulls back to the carved wheel and title", async
       page.locator("h1").evaluate((e) => Number(getComputedStyle(e).opacity)),
     )
     .toBeGreaterThan(0.9);
+});
+
+test("the Kurukshetra painting opens the Kurukshetra wall", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.locator("#loader.is-done").waitFor({ timeout: 30000 });
+  const gateway = page.getByRole("link", { name: /Enter Kurukṣetra/ });
+  await gateway.scrollIntoViewIfNeeded();
+  await gateway.click();
+  await expect(page).toHaveURL(/\/kurukshetra\/$/);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    "The stillness before action.",
+  );
 });

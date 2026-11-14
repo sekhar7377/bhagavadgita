@@ -24,10 +24,14 @@ for (const anchor of sceneAnchors)
   );
 // The cold open drives its own panel's camera (scale, focus, lift).
 const reducedMotionQuery = matchMedia("(prefers-reduced-motion: reduce)");
-const coldOpen = mountColdOpen({
-  section: document.querySelector<HTMLElement>(".cold-open")!,
-  reducedMotion: () => reducedMotionQuery.matches,
-});
+// Only the home page has a cold open; the Kurukṣetra page starts on its wall.
+const coldOpenSection = document.querySelector<HTMLElement>(".cold-open");
+const coldOpen = coldOpenSection
+  ? mountColdOpen({
+      section: coldOpenSection,
+      reducedMotion: () => reducedMotionQuery.matches,
+    })
+  : undefined;
 let relief: ReturnType<typeof mountRelief> | undefined;
 try {
   relief = mountRelief(
@@ -35,7 +39,7 @@ try {
     sceneAnchors.map((anchor) => ({
       name: anchor.dataset.scene!,
       anchor,
-      shot: anchor.dataset.scene === "wheel" ? coldOpen.shot : undefined,
+      shot: anchor.dataset.scene === "wheel" ? coldOpen?.shot : undefined,
     })),
   );
 } catch {
@@ -100,8 +104,9 @@ runLoader({
   onDone() {
     lenis?.start();
     soundToggle.hidden = false;
-    // The carving surfaces once as the intro lifts, then settles back.
-    // (The cold open starts in darkness, so the wall is not surfaced here.)
+    // The carving surfaces once as the intro lifts, then settles back
+    // (not on the home page, which starts in darkness).
+    if (!paused && !coldOpen) relief?.reveal();
   },
 });
 lenis?.on("scroll", ({ velocity }: { velocity: number }) =>
@@ -111,7 +116,8 @@ lenis?.on("scroll", ({ velocity }: { velocity: number }) =>
 // the title card and the heartbeat fades as the camera pulls back.
 let lastMix = -1;
 const mixFrame = () => {
-  const p = coldOpen.progress;
+  // Without a cold open the drone plays alone.
+  const p = coldOpen ? coldOpen.progress : 1;
   if (Math.abs(p - lastMix) > 0.005) {
     lastMix = p;
     const heart = 1 - Math.min(1, Math.max(0, (p - 0.35) / 0.4));
@@ -202,6 +208,8 @@ dialog.addEventListener("close", () => {
   } else menuButton.focus({ preventScroll: true });
 });
 dialog.querySelectorAll<HTMLAnchorElement>("a").forEach((link) => {
+  // Links to another page (the Kurukṣetra wall, back home) navigate normally.
+  if (!link.hash || link.pathname !== location.pathname) return;
   link.addEventListener("click", (event) => {
     event.preventDefault();
     pendingDestination = document.querySelector<HTMLElement>(link.hash)!;
@@ -214,10 +222,11 @@ const observer = new IntersectionObserver(
   ([entry]) => header.classList.toggle("past-hero", !entry.isIntersecting),
   { threshold: 0.05 },
 );
-observer.observe(document.querySelector(".cold-open")!);
+observer.observe(document.querySelector(".cold-open, .hero")!);
 // Keep missing artwork from collapsing the reserved exhibition window.
-const artwork = document.querySelector<HTMLImageElement>(".battlefield img")!;
+const artwork = document.querySelector<HTMLImageElement>(".battlefield img");
 function artworkFailed() {
+  if (!artwork) return;
   if (artwork.parentElement!.querySelector(".art-error")) return;
   artwork.hidden = true;
   const message = document.createElement("p");
@@ -226,14 +235,14 @@ function artworkFailed() {
     "The battlefield image could not load. The story continues below.";
   artwork.parentElement!.append(message);
 }
-artwork.addEventListener("error", artworkFailed);
-if (artwork.complete && artwork.naturalWidth === 0) artworkFailed();
+artwork?.addEventListener("error", artworkFailed);
+if (artwork?.complete && artwork.naturalWidth === 0) artworkFailed();
 if (import.meta.hot)
   import.meta.hot.dispose(() => {
     relief?.dispose();
     lenis?.destroy();
     floating.dispose();
-    coldOpen.dispose();
+    coldOpen?.dispose();
     sound.dispose();
     darkObserver.disconnect();
     observer.disconnect();

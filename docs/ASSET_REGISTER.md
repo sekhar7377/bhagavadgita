@@ -139,3 +139,15 @@ The battle render used three image inputs: two frames from the user's recordings
 ### G08 — cold open wheel, ChatGPT plaster render (14 November 2026)
 
 `docs/references/wheel-coldopen-chatgpt.png`, 1774×887. Made in the same ChatGPT conversation, with `chariot-battlefield-chatgpt.png` attached for wheel design and carving style. Subject: a shattered ornate chariot wheel half-buried in churned battlefield earth, with arrows, a torn banner, a bow, and a far smoking field with a low sun. Inspected: no text, people or watermark. Built with `make_scene.sh wheel` (GPU depth at 1022, `full`, paint 1.0) into `public/relief/wheel-*`.
+
+### G09 — Part I panels, ChatGPT plaster renders (14 November 2026)
+
+All 1774×887, made in the same ChatGPT conversation (the first with `chariot-battlefield-chatgpt.png` attached for style), each with a camera distinct from the others. Inspected: no text or watermark. Built with `make_scene.sh` into `public/relief/NAME-*`.
+
+| Name        | File                                      | Scene                                     | Camera                       |
+| ----------- | ----------------------------------------- | ----------------------------------------- | ---------------------------- |
+| hastinapura | `docs/references/hastinapura-chatgpt.png` | Part I header, the empty throne           | symmetrical one-point hall   |
+| vow         | `docs/references/vow-chatgpt.png`         | Devavrata's vow at the Gaṅgā              | very low, at the water       |
+| blindcrown  | `docs/references/blindcrown-chatgpt.png`  | Gāndhārī's blindfold, Dhṛtarāṣṭra, Śakuni | intimate medium two-shot     |
+| forest      | `docs/references/forest-chatgpt.png`      | Kuntī's mantra, five divine sons          | high wide over the hermitage |
+| pots        | `docs/references/pots-chatgpt.png`        | the hundred and one jars                  | low, deep vault perspective  |
