@@ -162,6 +162,14 @@ The fallback image is `preview.png` resized to 1920×960 WebP.
 
 Depth estimation runs on the GPU (GTX 1650 via `onnxruntime-directml`, 14 s per image); the CPU path thrashes with the PC's 8 GB RAM. In ChatGPT, typing long prompts key by key froze the tab; insert text with `document.execCommand('insertText', …)` on the `.ProseMirror` editor and click Send. ChatGPT has real hidden `input[type=file]` elements for attaching images. On Windows use `python`, not `python3`. The model sits in `models/` (git-ignored). `npm run format:check` flags every file on Windows because git checks out CRLF; `npx prettier --check --end-of-line auto src tests index.html DESIGN.md` is the real check.
 
+## Public site (GitHub Pages)
+
+The user asked to make the site public. It is live at **https://sekhar7377.github.io/bhagavadgita/**.
+- `.github/workflows/pages.yml` builds with `BASE_PATH=/bhagavadgita/` and deploys on every push to `claude/festive-hamilton-s0cee2`.
+- The repo's `github-pages` environment has a branch policy that allows that branch.
+- Asset URLs in code use `import.meta.env.BASE_URL` (`vite.config.ts`), so never hard-code `/relief/...` paths.
+- Local builds on Git Bash need `MSYS_NO_PATHCONV=1` when setting `BASE_PATH`.
+
 ## Git
 
 Origin `https://github.com/sekhar7377/bhagavadgita.git`. This session's work is on branch `claude/festive-hamilton-s0cee2`; `main` holds milestone 01. Read `git log -5 --oneline` and `git status` before editing. Never force-push.
