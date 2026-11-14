@@ -191,3 +191,7 @@ ChatGPT (user's account, same conversation); plaster panels 1774×887, each a di
 `docs/references/pots-chatgpt.png` (Part I) was regenerated without jackals on the rampart.
 
 Header painting: `docs/references/sabha-header-chatgpt.png` (1536×1024, colour, `chariot-chatgpt-subject.png` attached for finish), delivered as `public/art/sabha.webp`.
+
+### G13 — Ekalavya panel regenerated (14 November 2026)
+
+The user rejected the first `ekalavya` render: a feather headband (Native American, culturally wrong), a dog holding a bundle of arrows like a toy, an empty open hand on a leaf, and a monk-like robe on Droṇa. It was regenerated as the real moment: a dark-skinned Niṣāda prince in bark and deerskin with his hair knotted and his bow laid at the clay statue, kneeling to touch Droṇa's feet with his fist at his heart. Droṇa wears the sacred thread, dhoti and upper cloth with his bow on his shoulder; Arjuna watches; the dog lies quietly. File: `docs/references/ekalavya-chatgpt.png`. Audit of all 28 panels found no other foreign-costume or staged-prop errors.
