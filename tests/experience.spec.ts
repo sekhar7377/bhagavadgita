@@ -51,10 +51,13 @@ test("the Kurukshetra page keeps the Gita wall and its menu", async ({
     .locator("#loader.is-done")
     .waitFor({ state: "attached", timeout: 30000 });
   await page.getByRole("button", { name: "Menu", exact: true }).click();
-  await page.getByRole("link", { name: "03 The battlefield" }).click();
-  await expect(page).toHaveURL(/#story$/);
+  await page
+    .getByRole("link", { name: "04 Day one: the conches sound" })
+    .click();
+  await expect(page).toHaveURL(/#conches$/);
   await expect(page.getByRole("dialog")).not.toBeVisible();
-  await expect(page.locator("#story")).toBeFocused();
+  await expect(page.locator("#conches")).toBeFocused();
+  await page.locator("#battlefield").scrollIntoViewIfNeeded();
   await expect(page.locator(".battlefield img")).toBeVisible();
   expect(
     await page
@@ -326,8 +329,40 @@ test("chapters link in story order", async ({ page }) => {
   ).toHaveAttribute("href", "../sabha/");
   await page.goto("/sabha/");
   await expect(
+    page.getByRole("link", { name: /Enter the Forest/ }),
+  ).toHaveAttribute("href", "../vana/");
+  await page.goto("/vana/");
+  await expect(
     page.getByRole("link", { name: /Enter Kurukṣetra/ }),
   ).toHaveAttribute("href", "../kurukshetra/");
+  await page.goto("/kurukshetra/");
+  await expect(
+    page.getByRole("link", { name: /Enter the last chapter/ }),
+  ).toHaveAttribute("href", "../svarga/");
   await page.goto("/");
-  await expect(page.locator(".chapter-card")).toHaveCount(3);
+  await expect(page.locator(".chapter-card")).toHaveCount(5);
+});
+
+test("the forest chapter opens the Yaksha's questions one by one", async ({
+  page,
+}) => {
+  await page.goto("/vana/");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    "Exiles in the ashes, phantoms in the court.",
+  );
+  await page
+    .locator("#loader.is-done")
+    .waitFor({ state: "attached", timeout: 30000 });
+  const branch = page.locator("#the-questions");
+  await branch.locator("> summary").scrollIntoViewIfNeeded();
+  await branch.locator("> summary").click();
+  const riddle = branch.locator(".riddle").filter({
+    hasText: "What is the greatest wonder?",
+  });
+  await expect(riddle.locator("p")).not.toBeVisible();
+  await riddle.locator("summary").click();
+  await expect(riddle.locator("p")).toContainText("live for ever");
+  await expect(page.locator(".chapter-card")).toHaveCount(0);
+  await page.goto("/");
+  await expect(page.locator(".chapter-card")).toHaveCount(5);
 });

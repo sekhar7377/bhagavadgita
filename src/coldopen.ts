@@ -43,6 +43,8 @@ export function mountColdOpen(options: {
   const lines = [
     ...section.querySelectorAll<HTMLElement>(".title-card [data-line]"),
   ];
+  // The four lines of the cold open, one after another while it is dark.
+  const cues = [...section.querySelectorAll<HTMLElement>("[data-cue]")];
   const context = canvas.getContext("2d");
   const html = document.documentElement;
   let progress = 0;
@@ -113,6 +115,15 @@ export function mountColdOpen(options: {
       line.style.transform = reduced
         ? ""
         : `translate3d(0, ${((1 - local) * (40 + index * 12)).toFixed(1)}px, 0)`;
+    });
+    cues.forEach((cue, index) => {
+      const start = 0.015 + index * 0.075;
+      const fade = reduced
+        ? 0
+        : smooth(start, start + 0.025, progress) *
+          (1 - smooth(start + 0.055, start + 0.075, progress));
+      cue.style.opacity = fade.toFixed(3);
+      cue.style.transform = `translate3d(0, ${((1 - fade) * 10).toFixed(1)}px, 0)`;
     });
     onProgress?.(progress);
   };
