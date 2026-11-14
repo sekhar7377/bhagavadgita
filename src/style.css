@@ -708,3 +708,192 @@ nav a span {
     text-align: left;
   }
 }
+
+/* --- intro loader ---------------------------------------------------------- */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+html.is-loading,
+html.is-loading body {
+  overflow: hidden;
+}
+.loader {
+  position: fixed;
+  inset: 0;
+  /* Above the header too: nothing but the intro shows until it lifts. */
+  z-index: 1000;
+  /* If scripts never run, the intro still gets out of the way. */
+  animation: loader-timeout 0s linear 12s forwards;
+  background: var(--wall);
+  color: #030303;
+  cursor: pointer;
+  transition:
+    opacity 1.1s cubic-bezier(0.65, 0, 0.35, 1),
+    visibility 0s linear 1.1s;
+}
+.loader.is-done {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+/* Same grid as the opening band, so the title stays put as the wall appears. */
+.loader-band {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: auto auto;
+  column-gap: 16px;
+  padding: 0 16px;
+  align-content: center;
+  align-items: center;
+}
+.loader-identity {
+  grid-column: 2 / 5;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 0.235em;
+  white-space: nowrap;
+}
+.loader-title {
+  grid-column: 5 / 10;
+  margin: -0.2em 0 0;
+  font-family: var(--font-display);
+  font-size: 28px;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+.loader-count {
+  grid-column: 10 / 12;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.6;
+}
+.loader-sound {
+  grid-column: 5 / 10;
+  grid-row: 2;
+  justify-self: start;
+  margin-top: 14px;
+  padding: 6px 0;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  opacity: 0.45;
+  transition: opacity 0.4s;
+  animation: loader-breathe 2.4s ease-in-out infinite;
+}
+.loader-sound:hover,
+.loader-sound:focus-visible {
+  opacity: 0.9;
+}
+.loader-sound[aria-pressed="true"] {
+  animation: none;
+  opacity: 0.8;
+}
+@keyframes loader-breathe {
+  50% {
+    opacity: 0.2;
+  }
+}
+@media (max-width: 1023px) {
+  .loader-band {
+    grid-template-columns: 1fr;
+    align-content: center;
+    padding: 0 24px;
+    row-gap: 16px;
+  }
+  .loader-identity,
+  .loader-title,
+  .loader-count,
+  .loader-sound {
+    grid-column: 1;
+    grid-row: auto;
+    white-space: normal;
+  }
+}
+
+/* --- sound toggle ------------------------------------------------------------
+   A small circle at the lower right, as in the reference; four bars move
+   while sound plays and lie flat when it is off. */
+.sound-toggle {
+  position: fixed;
+  right: 40px;
+  bottom: 40px;
+  z-index: 20;
+  width: 30px;
+  height: 30px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  color: #030303;
+  opacity: 0.7;
+  transition: opacity 0.3s;
+}
+.sound-toggle:hover,
+.sound-toggle:focus-visible {
+  opacity: 1;
+}
+.sound-toggle[hidden] {
+  display: none;
+}
+.sound-toggle span {
+  width: 1.5px;
+  height: 2px;
+  background: currentColor;
+  transition: height 0.3s;
+}
+.sound-toggle[aria-pressed="true"] span {
+  animation: sound-bar 1.1s ease-in-out infinite;
+}
+.sound-toggle[aria-pressed="true"] span:nth-child(2) {
+  animation-delay: -0.3s;
+}
+.sound-toggle[aria-pressed="true"] span:nth-child(3) {
+  animation-delay: -0.6s;
+}
+.sound-toggle[aria-pressed="true"] span:nth-child(4) {
+  animation-delay: -0.85s;
+}
+@keyframes sound-bar {
+  0%,
+  100% {
+    height: 3px;
+  }
+  50% {
+    height: 10px;
+  }
+}
+.sound-toggle.on-dark {
+  color: var(--light);
+}
+@media (max-width: 1023px) {
+  .sound-toggle {
+    right: 24px;
+    bottom: 24px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .loader-sound,
+  .sound-toggle[aria-pressed="true"] span {
+    animation: none;
+  }
+  .sound-toggle[aria-pressed="true"] span {
+    height: 8px;
+  }
+}
+@keyframes loader-timeout {
+  to {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+}

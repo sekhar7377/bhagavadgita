@@ -73,7 +73,12 @@ The user asked for the whole site to be one continuous experience like the refer
 6. `scene6`: Ch. 18, clarity: from behind and below, Arjuna upright lifting the bow, armies clear.
 All statements are original editorial copy with traditional chapter titles; no verse is quoted or invented.
 
-**Still missing against the reference**: carving rising *over* letters (needs text drawn in WebGL); loader with sound prompt; menu transition; header mark after scroll; the dark closing section is still milestone-01 styling.
+**Intro and sound (milestone 03b)**
+- `#loader` (`src/loader.ts`): identity and title on bare plaster in the hero's exact grid, a counter that follows real progress (fonts 15, opening wall settled 70, page load 15; eased, minimum 1.6 s, 0.3 s under reduced motion, gives up after 9 s), and a breathing "Click to enable sound" prompt. Scroll is held (`html.is-loading`, Lenis stopped) until it finishes; then it fades and the opening carving surfaces once (`relief.reveal()`) and settles. If scripts never run, a CSS animation hides it after 12 s.
+- Sound (`src/sound.ts`) is synthesised, no audio files: a tanpura-like drone (Pa, Sa, Sa, low Sa on C#, each pluck with a filter "bloom" imitating the jawari bridge) over band-passed pink-noise wind; Lenis scroll velocity raises the wind. Starts only on a click (loader or toggle), fades in to a low level, compressor on the master.
+- `.sound-toggle`: 30 px circle 40 px from the lower-right corner (the reference's corner control), four bars animate while on; turns light over the dark closing sections.
+
+**Still missing against the reference**: carving rising *over* letters (needs text drawn in WebGL); menu transition; header mark after scroll; the dark closing section is still milestone-01 styling.
 
 ## Scenes (session 3, 14 November 2026)
 

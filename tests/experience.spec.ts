@@ -168,3 +168,24 @@ test("relief data failing to load leaves a plain wall and a usable page", async 
   );
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 });
+
+test("intro loader counts up, releases scroll and offers sound", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const loader = page.locator("#loader");
+  // The prompt is a real button, so keyboard and screen readers can use it.
+  await expect(
+    page.getByRole("button", { name: "Click to enable sound" }),
+  ).toBeAttached();
+  await expect(loader).toHaveClass(/is-done/, { timeout: 30000 });
+  await expect(page.locator(".loader-count")).toHaveText("100");
+  await expect(page.locator("html")).not.toHaveClass(/is-loading/);
+  const toggle = page.locator(".sound-toggle");
+  await expect(toggle).toBeVisible();
+  await expect(toggle).toHaveAttribute("aria-pressed", "false");
+  await toggle.click();
+  await expect(toggle).toHaveAttribute("aria-pressed", "true");
+  await toggle.click();
+  await expect(toggle).toHaveAttribute("aria-pressed", "false");
+});

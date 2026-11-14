@@ -7,6 +7,8 @@ import "./style.css";
 import Lenis from "lenis";
 import { mountRelief } from "./relief";
 import { mountFloatingType } from "./float";
+import { runLoader } from "./loader";
+import { createSound } from "./sound";
 
 // One wall for the whole page: every [data-scene] section anchors a carved
 // panel on a single fixed canvas, in story order.
@@ -64,6 +66,52 @@ motionPreference.addEventListener("change", (event) =>
   setMotion(event.matches),
 );
 setMotion(paused);
+
+// --- intro and sound -------------------------------------------------------
+const sound = createSound();
+const loader = document.querySelector<HTMLElement>("#loader")!;
+const loaderSound = loader.querySelector<HTMLButtonElement>(".loader-sound")!;
+const soundToggle = document.querySelector<HTMLButtonElement>(".sound-toggle")!;
+sound.onChange((on) => {
+  soundToggle.setAttribute("aria-pressed", String(on));
+  soundToggle.setAttribute("aria-label", on ? "Sound on" : "Sound off");
+  loaderSound.setAttribute("aria-pressed", String(on));
+  loaderSound.textContent = on ? "Sound enabled" : "Click to enable sound";
+});
+// As in the reference, a click anywhere on the intro turns sound on.
+loader.addEventListener("click", () => void sound.enable());
+soundToggle.addEventListener("click", () => void sound.toggle());
+lenis?.stop();
+runLoader({
+  loader,
+  relief: host,
+  minimumMs: paused ? 300 : 1600,
+  onDone() {
+    lenis?.start();
+    soundToggle.hidden = false;
+    // The carving surfaces once as the intro lifts, then settles back.
+    if (!paused) relief?.reveal();
+  },
+});
+lenis?.on("scroll", ({ velocity }: { velocity: number }) =>
+  sound.setEnergy(Math.abs(velocity) / 45),
+);
+// The toggle turns light over the dark closing sections.
+const darkObserver = new IntersectionObserver(
+  (entries) => {
+    for (const entry of entries)
+      darkSections.set(entry.target, entry.isIntersecting);
+    soundToggle.classList.toggle(
+      "on-dark",
+      [...darkSections.values()].some(Boolean),
+    );
+  },
+  { rootMargin: "-94% 0px 0px 0px" },
+);
+const darkSections = new Map<Element, boolean>();
+document
+  .querySelectorAll(".reflection, footer")
+  .forEach((section) => darkObserver.observe(section));
 
 // Trailing dot: follows the pointer over the opening wall with a soft lag.
 const dot = document.querySelector<HTMLElement>(".cursor-dot")!;
@@ -159,5 +207,7 @@ if (import.meta.hot)
     relief?.dispose();
     lenis?.destroy();
     floating.dispose();
+    sound.dispose();
+    darkObserver.disconnect();
     observer.disconnect();
   });

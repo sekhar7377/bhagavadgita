@@ -12,6 +12,22 @@
   </head>
   <body>
     <div id="relief" aria-hidden="true"></div>
+    <!-- Intro, as in the reference: identity and title on bare plaster, a
+         counter that follows the real loading, and an optional sound prompt.
+         Clicking anywhere enables sound; it hides itself once loaded. -->
+    <div class="loader" id="loader" role="status" aria-live="polite">
+      <div class="loader-band">
+        <p class="loader-identity" aria-hidden="true">BHAGAVAD GĪTĀ</p>
+        <p class="loader-title" aria-hidden="true">
+          The stillness before action.
+        </p>
+        <span class="loader-count" aria-hidden="true">0</span>
+        <button class="loader-sound" type="button">
+          Click to enable sound
+        </button>
+      </div>
+      <span class="visually-hidden">Loading the experience</span>
+    </div>
     <a class="skip-link" href="#story">Skip to the story</a>
     <header class="site-header">
       <a
@@ -203,6 +219,16 @@
       </p>
       <span class="footer-credit">THE STILLNESS BEFORE ACTION</span>
     </footer>
+    <button
+      class="sound-toggle"
+      type="button"
+      aria-pressed="false"
+      aria-label="Sound"
+      hidden
+    >
+      <span aria-hidden="true"></span><span aria-hidden="true"></span
+      ><span aria-hidden="true"></span><span aria-hidden="true"></span>
+    </button>
     <dialog id="navigation" aria-labelledby="navigation-title">
       <div class="menu-top">
         <span class="wordmark">BHAGAVAD GĪTĀ</span
