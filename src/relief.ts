@@ -323,8 +323,8 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
     if (repeat) texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
     return texture;
   };
-  const noise = data("/relief/noise.png", true);
-  const plaster = data("/relief/plaster.webp", true);
+  const noise = data(import.meta.env.BASE_URL + "relief/noise.png", true);
+  const plaster = data(import.meta.env.BASE_URL + "relief/plaster.webp", true);
   const blank = new THREE.DataTexture(
     new Uint16Array([0]),
     1,
@@ -458,11 +458,14 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
     const u = state.uniforms;
     [1, 2, 3, 4, 5].forEach((index) => {
       u[`tStage${index}`].value = data(
-        `/relief/${name}-stage${index}.webp`,
+        `${import.meta.env.BASE_URL}relief/${name}-stage${index}.webp`,
         false,
       );
     });
-    loadHeight(`/relief/${name}-height.png`, abort.signal)
+    loadHeight(
+      `${import.meta.env.BASE_URL}relief/${name}-height.png`,
+      abort.signal,
+    )
       .then((texture) => {
         if (disposed || abort.signal.aborted) return texture.dispose();
         u.tHeight.value = texture;

@@ -20,7 +20,7 @@ const sceneAnchors = [
 for (const anchor of sceneAnchors)
   anchor.style.setProperty(
     "--fallback",
-    `url("/relief/${anchor.dataset.scene}-fallback.webp")`,
+    `url("${import.meta.env.BASE_URL}relief/${anchor.dataset.scene}-fallback.webp")`,
   );
 // The cold open drives its own panel's camera (scale, focus, lift).
 const reducedMotionQuery = matchMedia("(prefers-reduced-motion: reduce)");
