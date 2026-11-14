@@ -300,9 +300,7 @@ test("the Hastinapura painting opens the Adi Parva wall", async ({ page }) => {
   );
 });
 
-test("the dice hall drains to crimson and casts each stake", async ({
-  page,
-}) => {
+test("the dice hall casts each stake as it is reached", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto("/sabha/");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
@@ -311,13 +309,8 @@ test("the dice hall drains to crimson and casts each stake", async ({
   await page
     .locator("#loader.is-done")
     .waitFor({ state: "attached", timeout: 30000 });
-  await expect(page.locator("html")).not.toHaveAttribute(
-    "data-tone",
-    "crimson",
-  );
   await page.locator("#dice").scrollIntoViewIfNeeded();
   await page.evaluate(() => document.querySelector("#dice")!.scrollIntoView());
-  await expect(page.locator("html")).toHaveAttribute("data-tone", "crimson");
   for (const stake of await page.locator(".stakes li").all()) {
     await stake.evaluate((el) =>
       el.scrollIntoView({ block: "center", behavior: "instant" }),

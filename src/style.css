@@ -1282,30 +1282,7 @@ html.is-loading body {
   }
 }
 
-/* --- the dice hall: tone veil and stakes ------------------------------------
-   A fixed veil between the wall and the text multiplies the plaster toward
-   crimson and shadow while a [data-tone="crimson"] scene is on screen. */
-.tone-veil {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background: radial-gradient(
-    ellipse at 50% 45%,
-    rgb(214 150 140) 0%,
-    rgb(150 70 64) 100%
-  );
-  mix-blend-mode: multiply;
-  opacity: 0;
-  transition: opacity 1.8s ease;
-}
-html[data-tone="crimson"] .tone-veil {
-  opacity: 0.55;
-}
-html[data-tone="crimson"] .site-header,
-html[data-tone="crimson"] [data-tone] {
-  transition: color 1.8s ease;
-}
+/* --- the dice hall: stakes ----------------------------------------------- */
 .stakes {
   margin: 4px 0 0;
   padding: 0;
@@ -1344,9 +1321,6 @@ html[data-tone="crimson"] [data-tone] {
   font-style: italic;
 }
 @media (prefers-reduced-motion: reduce) {
-  .tone-veil {
-    transition: none;
-  }
   .stakes li {
     opacity: 1;
     transform: none;

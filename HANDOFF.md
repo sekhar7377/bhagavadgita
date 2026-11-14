@@ -268,7 +268,7 @@ New page `/sabha/` (`sabha/index.html`, added to `vite.config.ts`), "The dice th
   - `vows`, plus the branches `vidura` and `secondthrow`.
 - **Copy:** the user's script checked against the Critical Edition, with Vyāsa's details added: Agni's twelve-year sacrifice, Varuṇa's gifts, Maya's fourteen months, the closed crystal door, the hall of a thousand pillars, the usher sent first, Vikarṇa, the Prahlāda tale, the omens, Draupadī's two boons and refused third.
   - Told as tradition: Śakuni's bone dice, Krishna's name in the disrobing, Draupadī's unbound-hair vow, the "blind man's son" taunt, and the bread that silenced Bhīṣma.
-- **Dice hall tone:** a `.tone-veil` (fixed, `mix-blend-mode: multiply`, crimson radial) fades in while a `[data-tone="crimson"]` scene holds the screen centre (IntersectionObserver sets `html[data-tone]`). It applies to the dice, question, cloth, vows and second-throw scenes.
+- **Dice hall tone:** the crimson veil was built and then removed at the user's request (14 November 2026); the Dice Hall stays ivory like every chapter, and the mood is carried by the words and carvings.
 - **Dice sound:** `sound.dice()` synthesises two ivory clicks, a rattle and a board knock. Each `.stakes li[data-dice]` gets class `cast`, lights up and plays the sound as it crosses the middle of the screen (only when sound is on).
 - **Header painting:** `public/art/sabha.webp`, crimson colour painting matched to the Kurukṣetra painting.
 

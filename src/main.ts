@@ -127,24 +127,7 @@ const mixFrame = () => {
   requestAnimationFrame(mixFrame);
 };
 requestAnimationFrame(mixFrame);
-// The dice hall: the wall drains toward crimson while a [data-tone] scene
-// holds the middle of the screen, and each stake lands with a dice cast.
-const veil = document.querySelector<HTMLElement>(".tone-veil");
-const toned = new Map<Element, boolean>();
-const toneObserver = new IntersectionObserver(
-  (entries) => {
-    for (const entry of entries) toned.set(entry.target, entry.isIntersecting);
-    const active = [...toned].find(([, on]) => on)?.[0] as
-      | HTMLElement
-      | undefined;
-    document.documentElement.dataset.tone = active?.dataset.tone ?? "";
-  },
-  { rootMargin: "-45% 0px -45% 0px" },
-);
-if (veil)
-  document
-    .querySelectorAll("[data-tone]")
-    .forEach((scene) => toneObserver.observe(scene));
+// The dice hall: each stake lands with a dice cast as it is reached.
 const diceObserver = new IntersectionObserver(
   (entries) => {
     for (const entry of entries)
@@ -276,7 +259,6 @@ if (import.meta.hot)
     coldOpen?.dispose();
     sound.dispose();
     darkObserver.disconnect();
-    toneObserver.disconnect();
     diceObserver.disconnect();
     observer.disconnect();
   });
