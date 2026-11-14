@@ -281,6 +281,32 @@ New page `/sabha/` (`sabha/index.html`, added to `vite.config.ts`), "The dice th
 
 Omens live in the text only. Memory note `realistic-scenes`.
 
+## Milestone 09 (in progress): Acts IV–VIII (14–15 November 2026)
+
+Pages built and tested: `/vana/` (Act IV), Parts V–VI on `/kurukshetra/`, `/svarga/` (Acts VII–VIII), the House of Kuru tree and the cold-open lines on `/`. Committed locally; **not pushed or deployed**, because carvings are still missing.
+
+**Carvings done** (each inspected at full size):
+
+- Vana: exile, kirata, yaksha, virata, kichaka, shami, sammohana (redone: correct chariot, bow at rest), kavacha. Header `public/art/vana.webp` (Arjuna's malformed bow fixed by an edit pass).
+- Part V: choice, needle, courtform, karnaride (redone: correct ratha, both standing), kuntikarna, sanjaya.
+- Part VI: bhishmawheel (redone: chariots correct), arrowbed, chakravyuha, abhimanyu (redone: wheel held horizontally overhead, as the user asked), jayadratha, ghatotkacha, dronafall (redone: chariots facing each other), draupadihair.
+
+**Still missing:**
+
+- Part VI: karnawheel, maceduel, nightraid, barbarika.
+- Svarga: widows, ironembrace, gandhari, kuntireveal, bhishmateach, dvaraka, jara, journey, dog, heaven, deadreturn.
+- The header `public/art/svarga.webp`.
+
+The precise prompts with the OBJECT SPECIFICATIONS block (chariot, bow, arrows, mace, hands) live in the ChatGPT tab as `window.__Q` / `__SPEC`; re-create them from this note if the tab is reloaded. ChatGPT's usage limit resets at 2:31 AM on 15 November.
+
+**User rules added this session:**
+
+- Inspect every render at full size. Reject wrong chariots: they must have a box on one axle with wheels at the sides and separately yoked horses, with warriors standing, never riding.
+- Reject malformed bows: one continuous limb with the string tied to both tips.
+- Hold objects the way the user specifies (Abhimanyu's wheel horizontal).
+- Memory notes `inspect-renders` and `realistic-scenes`.
+- Download images only by fetching the image itself (`window.__dl`). `models/take.sh` refuses files older than 3 minutes, after it once grabbed one of the user's own downloads (since restored).
+
 ## GPU speed-ups (14 November 2026)
 
 The user asked to use the GPU (GTX 1650) to speed up the work.
