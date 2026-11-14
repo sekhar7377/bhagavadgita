@@ -1166,11 +1166,85 @@ html.is-loading body {
   }
 }
 
-/* Statements over a surfaced carving keep a soft plaster halo so they read. */
-.scene-statement,
-.part-sub,
-.scene-meta {
-  text-shadow:
-    0 0 14px rgb(214 212 206 / 0.95),
-    0 0 32px rgb(214 212 206 / 0.8);
+/* --- the epic's story scenes, built exactly like the Kurukṣetra wall -------
+   One screen per scene: the carving is anchored to the section and scrolls
+   with the page; the statement and its story text sit together on that
+   carving, on opposite sides. At rest the plaster is blank; the carving
+   rises only under the cursor and the slow automatic path. */
+.story-scene {
+  height: auto;
+  min-height: 100svh;
+  row-gap: 28px;
+}
+.story-scene .scene-statement {
+  grid-row: 2;
+}
+.scene-story {
+  grid-row: 2;
+  align-self: center;
+  display: grid;
+  gap: 16px;
+}
+.scene-story p {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(14px, 1.06vw, 17px);
+  line-height: 1.6;
+}
+.scene-story strong {
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  font-size: 0.78em;
+  text-transform: uppercase;
+}
+.story-scene.scene--left .scene-statement {
+  grid-column: 2 / span 5;
+}
+.story-scene.scene--left .scene-story {
+  grid-column: 8 / span 4;
+}
+.story-scene.scene--right .scene-statement {
+  grid-column: 7 / span 6;
+}
+.story-scene.scene--right .scene-story {
+  grid-column: 2 / span 4;
+}
+.story-scene.scene--centre {
+  grid-template-rows: auto 1fr auto auto auto 1fr;
+}
+.story-scene.scene--centre .scene-statement {
+  grid-row: 3;
+}
+.story-scene.scene--centre .part-sub {
+  grid-row: 4;
+}
+.story-scene.scene--centre .scene-story {
+  grid-row: 5;
+  grid-column: 3 / span 8;
+  display: block;
+  columns: 2;
+  column-gap: 40px;
+  margin-top: 12px;
+}
+.story-scene.scene--centre .scene-story p + p {
+  margin-top: 16px;
+}
+@media (max-width: 1023px) {
+  .story-scene,
+  .story-scene.scene--centre {
+    grid-template-rows: auto;
+    align-content: center;
+  }
+  .story-scene .scene-statement,
+  .story-scene .part-sub,
+  .story-scene .scene-story,
+  .story-scene.scene--centre .scene-statement,
+  .story-scene.scene--centre .part-sub,
+  .story-scene.scene--centre .scene-story,
+  .story-scene.scene--left .scene-story,
+  .story-scene.scene--right .scene-story {
+    grid-row: auto;
+    grid-column: 1 / -1;
+    columns: 1;
+  }
 }

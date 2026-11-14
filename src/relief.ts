@@ -94,6 +94,7 @@ const wallVertex = /* glsl */ `
   uniform float uStill;
   uniform float uReveal;
   uniform float uLift;
+  uniform float uPresence;
   uniform float uBoost;
   uniform float uScrollWorld;
   varying vec2 vUv;
@@ -107,7 +108,9 @@ const wallVertex = /* glsl */ `
     float extrude = mix(field.b, field.a, 0.5);
     extrude = max(extrude, max(uStill, max(uReveal, uLift)) * 0.5) + uBoost * 0.5;
     float inside = step(0.0, uv.x) * step(uv.x, 1.0) * step(0.0, uv.y) * step(uv.y, 1.0);
-    float height = texture2D(tHeight, uv).r * inside;
+    // Presence dissolves the whole carving back into flat plaster (0) or
+    // condenses it out of the wall (1) when one scene hands over to the next.
+    float height = texture2D(tHeight, uv).r * inside * uPresence;
     vec3 carved = position;
     carved.z += height * uDepth * mix(0.05, 1.0, min(extrude, 1.0));
     carved.xy *= 1.004;
@@ -132,6 +135,7 @@ const wallFragment = /* glsl */ `
   uniform float uStill;
   uniform float uReveal;
   uniform float uLift;
+  uniform float uPresence;
   uniform float uReady;
   uniform float uBoost;
   varying vec2 vUv;
@@ -149,7 +153,7 @@ const wallFragment = /* glsl */ `
     float extrude = mix(field.b, field.a, 0.5);
     // Fast scrolling swells the geometry (vertex shader) but does not light up
     // carving that attention has not reached, so shading ignores uBoost.
-    extrude = max(extrude, max(uStill, max(uReveal, uLift))) * uReady;
+    extrude = max(extrude, max(uStill, max(uReveal, uLift))) * uReady * uPresence;
 
     // Lighting was baked offline at five extrusion depths. The field walks
     // through those stages in 0.2 intervals, so shade always belongs to the
@@ -244,7 +248,16 @@ export type SceneSpec = {
    * as laid out), the panel point (uv) kept at the anchor's centre, and a
    * lift that raises this panel's carving as if attention were on it.
    */
-  shot?: () => { scale: number; focusX: number; focusY: number; lift: number };
+  shot?: () => {
+    scale: number;
+    focusX: number;
+    focusY: number;
+    lift: number;
+    /** 0..1: how fully the carving has condensed out of the plaster. */
+    presence?: number;
+    /** Keep the panel centred on screen instead of following the anchor. */
+    pinned?: boolean;
+  };
 };
 
 type SceneState = {
@@ -387,6 +400,7 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
     uTexel: { value: new THREE.Vector2(1 / 1152, 1 / 576) },
     uReady: { value: 0 },
     uLift: { value: 0 },
+    uPresence: { value: 1 },
   });
   const makeMaterial = (uniforms: Record<string, THREE.IUniform>) =>
     new THREE.ShaderMaterial({
@@ -512,10 +526,16 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
   window.addEventListener("resize", resize);
 
   // Lay every panel at its anchor's current position on screen.
-  let lastScroll = window.scrollY;
   let scrollSpeed = 0;
+  // How far the carving nearest the centre actually moved on screen since
+  // the last frame. Pinned (sticky) walls stay still while the page scrolls,
+  // so the reveal history must follow the carving, not the scroll position.
+  let wallDelta = 0;
+  const lastTops = new Map<SceneState, number>();
   const place = () => {
     shared.uScrollWorld.value = window.scrollY * worldPerPixel;
+    let nearest = Infinity;
+    wallDelta = 0;
     scenes.forEach((state, index) => {
       const rect = state.spec.anchor.getBoundingClientRect();
       // A scene inside a closed branch has no box yet: keep it hidden and
@@ -525,6 +545,14 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
         return;
       }
       const offset = rect.top + rect.height / 2 - viewHeight / 2;
+      const previousTop = lastTops.get(state);
+      lastTops.set(state, rect.top);
+      const pinnedNow = state.spec.shot?.()?.pinned;
+      if (Math.abs(offset) < nearest) {
+        nearest = Math.abs(offset);
+        wallDelta =
+          pinnedNow || previousTop === undefined ? 0 : previousTop - rect.top;
+      }
       state.mesh.position.y = -offset * worldPerPixel;
       const shot = state.spec.shot?.();
       if (shot) {
@@ -534,9 +562,14 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
         state.mesh.position.x = -(shot.focusX - 0.5) * WALL_W * shot.scale;
         state.mesh.position.y -= (shot.focusY - 0.5) * WALL_H * shot.scale;
         state.uniforms.uLift.value = shot.lift;
+        state.uniforms.uPresence.value = shot.presence ?? 1;
+        if (shot.pinned)
+          state.mesh.position.y = -(shot.focusY - 0.5) * WALL_H * shot.scale;
       }
       const distance = Math.abs(offset) / viewHeight;
-      state.mesh.visible = distance < 1.2 && state.status === "ready";
+      state.mesh.visible =
+        state.status === "ready" &&
+        (shot?.pinned ? (shot.presence ?? 1) > 0.002 : distance < 1.2);
       if (distance < 1.6 && state.status === "idle")
         loadScene(state, index === 0);
       else if (distance > 3 && state.status !== "idle" && index !== 0)
@@ -658,14 +691,11 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
     lastTime = now;
     if (!document.hidden && !contextLost) {
       const dt = dtMs / 1000;
-      const scrollNow = window.scrollY;
-      const delta = scrollNow - lastScroll;
-      lastScroll = scrollNow;
       place();
       // Fast scrolling swells the whole visible carving, then it settles.
       const speed = Math.min(
         1,
-        Math.abs(delta) / Math.max(1, viewHeight * 0.05),
+        Math.abs(wallDelta) / Math.max(1, viewHeight * 0.05),
       );
       scrollSpeed +=
         (speed - scrollSpeed) * (speed > scrollSpeed ? 0.25 : 0.06);
@@ -689,7 +719,7 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
           fieldUniforms.uVelocity.value.set(0, 0);
         }
         advanceAutomatic(dt);
-        fieldUniforms.uShift.value = delta / viewHeight;
+        fieldUniforms.uShift.value = wallDelta / viewHeight;
         fieldUniforms.uStep.value = step;
         fieldUniforms.uTime.value = elapsed;
         fieldUniforms.tPrevious.value = read.texture;

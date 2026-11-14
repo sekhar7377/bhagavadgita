@@ -219,7 +219,18 @@ Told as later tradition: the fish seen in oil (the text has a turning machine wi
 - The Ekalavya render first produced no image (most likely because of the knife). It was regenerated as the dignified moment of offering: open palm on a leaf, no knife, no injury.
 - Part I's branch cards are still static, "Being carved".
 
-**Scenes surface on their own (home page only).** `surfaceShot()` in `main.ts` gives every story panel a lift of up to 0.6 as it nears the screen centre (smoothstep over 0.6→0.15 screen heights), so phones without a cursor see each carving. The cursor still raises it fully. Statements, meta and sub-headers have a soft plaster text-shadow for legibility. The Kurukṣetra page keeps the reference behaviour (rests blank).
+**Scenes are built exactly like the Kurukṣetra wall (user correction, 14 November 2026).**
+
+- The user rejected three earlier attempts:
+  - auto-surfacing carvings ("completely revealed");
+  - story text on bare wall;
+  - sticky pinned panels that dissolve into each other ("one image going into another").
+- Rule now, on the home page as on Kurukṣetra: every scene is one `<section class="scene … story-scene" data-scene>`, at least one screen tall.
+  - Its carving is anchored to the section and scrolls with the page.
+  - The statement and its story text (`.scene-story`) sit together on that carving, on opposite sides (centred scenes put the story in two columns below).
+  - At rest the plaster is blank; the carving rises only under the cursor and the automatic path.
+- Do not add auto-reveal, pinning or cross-dissolves.
+- `relief.ts` still supports `shot().presence` and `pinned` and reprojects the field by the nearest carving's on-screen movement, but nothing uses pinning now. The cold-open wheel has lift 0.
 
 ChatGPT automation helpers live in the page as `window.__gen(prompt)` / `__send()` / `__busy()`. They are not stored anywhere and must be re-injected in a new tab. The Send button's aria-label is exactly "Send".
 

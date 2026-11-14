@@ -59,8 +59,7 @@ export function mountColdOpen(options: {
 
   // The camera: very close on the wheel's hub at first, then the whole panel.
   const shot = (): ColdOpenShot => {
-    if (reducedMotion())
-      return { scale: 1, focusX: 0.5, focusY: 0.5, lift: 0.3 };
+    if (reducedMotion()) return { scale: 1, focusX: 0.5, focusY: 0.5, lift: 0 };
     const pull = smooth(0.08, 0.7, progress);
     const eased = 1 - Math.pow(1 - pull, 3);
     return {
@@ -68,10 +67,9 @@ export function mountColdOpen(options: {
       // The wheel's hub, measured on the carving (uv, y up).
       focusX: 0.49 + 0.01 * eased,
       focusY: 0.53 - 0.03 * eased,
-      // The wheel stands fully carved while the dark lifts, then softens to
-      // a resting wall that the cursor has to discover, like the reference.
-      lift:
-        smooth(0.04, 0.3, progress) * (1 - 0.75 * smooth(0.62, 0.92, progress)),
+      // The wall rests as plaster, exactly like Kurukṣetra: the wheel is
+      // only discovered where the cursor (or the slow automatic path) moves.
+      lift: 0,
     };
   };
 
