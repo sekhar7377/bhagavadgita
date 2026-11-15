@@ -318,7 +318,7 @@ The user reported four problems; all are fixed and deployed.
   - After the intro, `prefetchWall()` in `src/main.ts` warms the cache with every panel on the page, one at a time, nearest first. It is skipped when data-saver is on.
 - **Chapter paintings filled the screen.** Gateway, chapter-card and Kurukṣetra paintings are now a centred 1.95:1 frame about 52% of the view tall. Chapter card V had been pasted inside the family tree (under Bhīṣma's name); it is back in the chapter list, and a test now guards this.
 - **Bows.**
-  - Forest header: redone twice. The first edit still had a hooked tip and mismatched limbs, and the user caught it. Arjuna now holds a plain, symmetrical strung bow upright in his left hand.
+  - Forest header: redone twice. The first edit still had a hooked tip and mismatched limbs, and the user caught it. Arjuna now holds a plain, symmetrical strung bow upright in his left hand. The user then caught that its string floated free of both tips and the top tip ended in a hooked knob. That was repaired by hand in Python (inpaint the knob, draw a tapered tip and a continuous string from tip to tip), not by another AI pass.
   - Also fixed: `swayamvara` (the lower limb snaked into the pool) and `scene6` (hooked, then forked top tip).
   - Rule: zoom on each bow tip; both tips plain and matching, and the string visible from tip to tip.
 
