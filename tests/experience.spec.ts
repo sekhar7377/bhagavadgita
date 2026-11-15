@@ -341,6 +341,9 @@ test("chapters link in story order", async ({ page }) => {
   ).toHaveAttribute("href", "../svarga/");
   await page.goto("/");
   await expect(page.locator(".chapter-card")).toHaveCount(5);
+  // Every card lives in the chapter list, none stray into the family tree.
+  await expect(page.locator(".chapter-list > .chapter-card")).toHaveCount(5);
+  await expect(page.locator(".lineage .chapter-card")).toHaveCount(0);
 });
 
 test("the forest chapter opens the Yaksha's questions one by one", async ({

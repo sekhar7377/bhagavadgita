@@ -1642,3 +1642,26 @@ html.is-loading body {
     grid-column: 1;
   }
 }
+
+/* Chapter paintings sit in the middle of the screen rather than filling it:
+   a framed cinematic window onto the chapter, about half the view tall. */
+.gateway-link .art-wrap {
+  display: block;
+}
+.gateway-link,
+.chapter-list,
+.battlefield {
+  width: min(70%, 960px, calc(52svh * 1.95));
+  margin-left: auto;
+  margin-right: auto;
+}
+@media (max-width: 1023px) {
+  .gateway-link,
+  .chapter-list,
+  .battlefield {
+    width: min(100%, calc(52svh * 1.95));
+  }
+}
+.chapter-list .chapter-card {
+  width: 100%;
+}

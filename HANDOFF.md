@@ -304,6 +304,24 @@ Pages built and tested: `/vana/` (Act IV), Parts V–VI on `/kurukshetra/`, `/sv
 - Memory notes `inspect-renders` and `realistic-scenes`.
 - Download images only by fetching the image itself (`window.__dl`). `models/take.sh` refuses files older than 3 minutes, after it once grabbed one of the user's own downloads (since restored).
 
+## Milestone 10: loading, entrances, painting size, bows (15 November 2026)
+
+The user reported four problems; all are fixed and deployed.
+
+- **Carvings appeared flat, "without effect", on opening a chapter.**
+  - Cause: `relief.reveal()` set the whole wall to full depth in one frame as the intro lifted, then faded it, so it read as a flat picture.
+  - Fix: each panel now has its own entrance (`uRise` uniform; `animateEntrance` in `src/relief.ts`). Once it is fully loaded and centred on screen, it rises out of the plaster over 2.4 s, holds for 1.4 s, then settles to a soft resting relief (`REST_RELIEF` 0.42) so the wall is never blank. The cursor still lifts it fully.
+  - Leaving the screen re-arms the entrance. The first entrance waits 650 ms after the loader lifts, so it is seen.
+- **White, empty wall where carvings should be.**
+  - A panel now counts as ready only when its height map AND all five lighting stages have arrived, and it fades in over 0.5 s.
+  - Panels load 3.2 screens ahead (was 1.6) and are released beyond 5.5.
+  - After the intro, `prefetchWall()` in `src/main.ts` warms the cache with every panel on the page, one at a time, nearest first. It is skipped when data-saver is on.
+- **Chapter paintings filled the screen.** Gateway, chapter-card and Kurukṣetra paintings are now a centred 1.95:1 frame about 52% of the view tall. Chapter card V had been pasted inside the family tree (under Bhīṣma's name); it is back in the chapter list, and a test now guards this.
+- **Bows.**
+  - Forest header: redone twice. The first edit still had a hooked tip and mismatched limbs, and the user caught it. Arjuna now holds a plain, symmetrical strung bow upright in his left hand.
+  - Also fixed: `swayamvara` (the lower limb snaked into the pool) and `scene6` (hooked, then forked top tip).
+  - Rule: zoom on each bow tip; both tips plain and matching, and the string visible from tip to tip.
+
 ## GPU speed-ups (14 November 2026)
 
 The user asked to use the GPU (GTX 1650) to speed up the work.

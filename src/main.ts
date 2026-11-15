@@ -104,11 +104,41 @@ runLoader({
   onDone() {
     lenis?.start();
     soundToggle.hidden = false;
-    // The carving surfaces once as the intro lifts, then settles back
-    // (not on the home page, which starts in darkness).
-    if (!paused && !coldOpen) relief?.reveal();
+    // Each carving rises out of the plaster as it comes into view, starting
+    // with the first one as the intro lifts.
+    // Wait for the intro to finish fading so the first rise is seen whole.
+    window.setTimeout(() => relief?.reveal(), paused ? 0 : 650);
+    prefetchWall();
   },
 });
+
+// After the intro, quietly warm the browser cache with every panel on this
+// page, nearest first, one at a time, so later scenes are ready the moment
+// they are reached instead of showing bare plaster. Skipped on data-saver.
+function prefetchWall() {
+  const connection = (
+    navigator as Navigator & { connection?: { saveData?: boolean } }
+  ).connection;
+  if (connection?.saveData) return;
+  const base = `${import.meta.env.BASE_URL}relief/`;
+  const urls = sceneAnchors
+    .filter((anchor) => !anchor.closest("details:not([open])"))
+    .flatMap((anchor) => {
+      const name = anchor.dataset.scene!;
+      return [
+        `${base}${name}-height.png`,
+        ...[1, 2, 3, 4, 5].map((i) => `${base}${name}-stage${i}.webp`),
+      ];
+    });
+  const next = () => {
+    const url = urls.shift();
+    if (!url) return;
+    fetch(url, { priority: "low" } as RequestInit)
+      .catch(() => undefined)
+      .finally(() => setTimeout(next, 30));
+  };
+  next();
+}
 lenis?.on("scroll", ({ velocity }: { velocity: number }) =>
   sound.setEnergy(Math.abs(velocity) / 45),
 );

@@ -26,6 +26,15 @@ const WALL_H = 8.04;
 const DEPTH = 0.9;
 const CAMERA_DISTANCE = 15;
 const CAMERA_FOV = 30;
+// Panels start loading this many screen heights ahead, and are released
+// beyond the second distance, so scrolling rarely meets an unloaded wall.
+const LOAD_AHEAD = 3.2;
+const RELEASE_BEYOND = 5.5;
+// Entrance of each carving: seconds to rise, hold, settle; resting depth.
+const RISE_IN = 2.4;
+const RISE_HOLD = 1.4;
+const RISE_SETTLE = 2.6;
+const REST_RELIEF = 0.42;
 
 const quadVertex = /* glsl */ `
   varying vec2 vUv;
@@ -94,6 +103,7 @@ const wallVertex = /* glsl */ `
   uniform float uStill;
   uniform float uReveal;
   uniform float uLift;
+  uniform float uRise;
   uniform float uPresence;
   uniform float uBoost;
   uniform float uScrollWorld;
@@ -106,7 +116,7 @@ const wallVertex = /* glsl */ `
     vec2 screenUv = (undeformed.xy / undeformed.w + 1.0) * 0.5;
     vec4 field = texture2D(tField, screenUv);
     float extrude = mix(field.b, field.a, 0.5);
-    extrude = max(extrude, max(uStill, max(uReveal, uLift)) * 0.5) + uBoost * 0.5;
+    extrude = max(extrude, max(uStill, max(max(uReveal, uRise), uLift)) * 0.5) + uBoost * 0.5;
     float inside = step(0.0, uv.x) * step(uv.x, 1.0) * step(0.0, uv.y) * step(uv.y, 1.0);
     // Presence dissolves the whole carving back into flat plaster (0) or
     // condenses it out of the wall (1) when one scene hands over to the next.
@@ -135,6 +145,7 @@ const wallFragment = /* glsl */ `
   uniform float uStill;
   uniform float uReveal;
   uniform float uLift;
+  uniform float uRise;
   uniform float uPresence;
   uniform float uReady;
   uniform float uBoost;
@@ -153,7 +164,7 @@ const wallFragment = /* glsl */ `
     float extrude = mix(field.b, field.a, 0.5);
     // Fast scrolling swells the geometry (vertex shader) but does not light up
     // carving that attention has not reached, so shading ignores uBoost.
-    extrude = max(extrude, max(uStill, max(uReveal, uLift))) * uReady * uPresence;
+    extrude = max(extrude, max(uStill, max(max(uReveal, uRise), uLift))) * uReady * uPresence;
 
     // Lighting was baked offline at five extrusion depths. The field walks
     // through those stages in 0.2 intervals, so shade always belongs to the
@@ -267,6 +278,10 @@ type SceneState = {
   material: THREE.ShaderMaterial;
   uniforms: Record<string, THREE.IUniform>;
   abort?: AbortController;
+  /** Seconds since this panel began rising into view; -1 while waiting. */
+  riseTime: number;
+  /** Seconds since every texture arrived, for a soft fade-in. */
+  readyTime: number;
 };
 
 /**
@@ -298,6 +313,8 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
   let lastTime = 0;
   let elapsed = 0;
   let reveal = 0;
+  // Entrances wait until the intro loader has lifted, so none is missed.
+  let entrancesArmed = false;
 
   container.dataset.reliefState = "loading";
   delete container.dataset.fallback;
@@ -400,6 +417,7 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
     uTexel: { value: new THREE.Vector2(1 / 1152, 1 / 576) },
     uReady: { value: 0 },
     uLift: { value: 0 },
+    uRise: { value: 0 },
     uPresence: { value: 1 },
   });
   const makeMaterial = (uniforms: Record<string, THREE.IUniform>) =>
@@ -434,7 +452,15 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
     const mesh = new THREE.Mesh(panelGeometry, material);
     mesh.visible = false;
     scene.add(mesh);
-    return { spec, status: "idle", mesh, material, uniforms };
+    return {
+      spec,
+      status: "idle",
+      mesh,
+      material,
+      uniforms,
+      riseTime: -1,
+      readyTime: 0,
+    };
   });
 
   const camera = new THREE.PerspectiveCamera(CAMERA_FOV, 2, 5, 30);
@@ -461,6 +487,9 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
       u[key].value = blank;
     }
     u.uReady.value = 0;
+    u.uRise.value = 0;
+    state.riseTime = -1;
+    state.readyTime = 0;
     state.status = "idle";
   };
 
@@ -470,10 +499,23 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
     state.abort = abort;
     const name = state.spec.name;
     const u = state.uniforms;
+    // A panel only counts as ready once its height AND all five lighting
+    // stages have arrived; showing it earlier flashes half-lit plaster.
+    let pending = 6;
+    const arrived = () => {
+      pending -= 1;
+      if (pending > 0 || disposed || abort.signal.aborted) return;
+      u.uReady.value = 0;
+      state.readyTime = 0;
+      state.status = "ready";
+      if (first && !contextLost) container.dataset.reliefState = "ready";
+      render();
+    };
     [1, 2, 3, 4, 5].forEach((index) => {
       u[`tStage${index}`].value = data(
         `${import.meta.env.BASE_URL}relief/${name}-stage${index}.webp`,
         false,
+        arrived,
       );
     });
     loadHeight(
@@ -484,10 +526,7 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
         if (disposed || abort.signal.aborted) return texture.dispose();
         u.tHeight.value = texture;
         u.uTexel.value.set(1 / texture.image.width, 1 / texture.image.height);
-        u.uReady.value = 1;
-        state.status = "ready";
-        if (first && !contextLost) container.dataset.reliefState = "ready";
-        render();
+        arrived();
       })
       .catch(() => {
         if (disposed || abort.signal.aborted) return;
@@ -570,10 +609,17 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
       state.mesh.visible =
         state.status === "ready" &&
         (shot?.pinned ? (shot.presence ?? 1) > 0.002 : distance < 1.2);
-      if (distance < 1.6 && state.status === "idle")
+      if (distance < LOAD_AHEAD && state.status === "idle")
         loadScene(state, index === 0);
-      else if (distance > 3 && state.status !== "idle" && index !== 0)
+      else if (
+        distance > RELEASE_BEYOND &&
+        state.status !== "idle" &&
+        index !== 0
+      )
         releaseScene(state);
+      // Leaving the screen re-arms the entrance, so a panel rises again
+      // each time the visitor comes back to it.
+      if (distance > 1.1) state.riseTime = -1;
     });
   };
 
@@ -685,6 +731,38 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
     onContextRestored,
   );
 
+  // Each panel, once fully loaded and on screen, rises out of the plaster,
+  // holds at full depth for a breath, then settles to a soft resting relief
+  // so the wall never reads as empty. The cursor still raises it fully.
+  const animateEntrance = (state: SceneState, dt: number) => {
+    const u = state.uniforms;
+    if (state.status !== "ready") return;
+    state.readyTime += dt;
+    u.uReady.value = Math.min(1, state.readyTime / 0.5);
+    // The cold open drives its own camera and stays dark until the cursor.
+    if (state.spec.shot || !entrancesArmed) return;
+    const rect = state.spec.anchor.getBoundingClientRect();
+    const offset = Math.abs(rect.top + rect.height / 2 - viewHeight / 2);
+    if (state.riseTime < 0) {
+      if (offset / viewHeight > 0.45) {
+        u.uRise.value = Math.max(0, u.uRise.value - dt * 0.5);
+        return;
+      }
+      state.riseTime = 0;
+    }
+    state.riseTime += dt;
+    const t = state.riseTime;
+    const ease = (x: number) => x * x * (3 - 2 * x);
+    let rise: number;
+    if (t < RISE_IN) rise = ease(t / RISE_IN);
+    else if (t < RISE_IN + RISE_HOLD) rise = 1;
+    else {
+      const k = Math.min(1, (t - RISE_IN - RISE_HOLD) / RISE_SETTLE);
+      rise = 1 + (REST_RELIEF - 1) * ease(k);
+    }
+    u.uRise.value = rise;
+  };
+
   function tick(now: number) {
     if (disposed) return;
     const dtMs = Math.min(64, now - (lastTime || now));
@@ -692,6 +770,7 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
     if (!document.hidden && !contextLost) {
       const dt = dtMs / 1000;
       place();
+      for (const state of scenes) animateEntrance(state, dt);
       // Fast scrolling swells the whole visible carving, then it settles.
       const speed = Math.min(
         1,
@@ -747,10 +826,9 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
       shared.uStill.value = paused ? 1 : 0;
       render();
     },
+    /** Start the carvings' entrances (called as the intro lifts). */
     reveal() {
-      reveal = 1;
-      shared.uReveal.value = 1;
-      render();
+      entrancesArmed = true;
     },
     dispose() {
       disposed = true;
