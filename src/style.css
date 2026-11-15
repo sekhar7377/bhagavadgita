@@ -1665,3 +1665,38 @@ html.is-loading body {
 .chapter-list .chapter-card {
   width: 100%;
 }
+
+/* --- Home opening: five carved beats, then the title on the last one ---- */
+.opening-beat .scene-statement {
+  align-self: start;
+  margin-top: 9svh;
+}
+.opening-beat .scene-meta {
+  grid-column: 1 / -1;
+}
+.opening-title {
+  display: grid;
+  align-content: end;
+  padding-bottom: 14svh;
+}
+.opening-title .title-card {
+  align-content: end;
+  padding-bottom: 13svh;
+}
+.opening-title .hero-scroll {
+  opacity: 0.6;
+}
+.opening-title .hero-scroll:hover,
+.opening-title .hero-scroll:focus-visible {
+  opacity: 1;
+}
+/* Each chapter card stands in its own screen of carved wall. */
+.chapter-list {
+  gap: 0;
+}
+.chapter-stage {
+  position: relative;
+  min-height: 100svh;
+  display: grid;
+  align-content: center;
+}

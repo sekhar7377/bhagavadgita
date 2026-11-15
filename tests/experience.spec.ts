@@ -195,7 +195,7 @@ test("pointer movement raises the carving out of a resting wall", async ({
 test("relief data failing to load leaves a plain wall and a usable page", async ({
   page,
 }) => {
-  await page.route("**/relief/wheel-height.png", (route) => route.abort());
+  await page.route("**/relief/charge-height.png", (route) => route.abort());
   await page.goto("/");
   await expect(page.locator("#relief")).toHaveAttribute(
     "data-relief-state",
@@ -225,7 +225,7 @@ test("intro loader counts up, releases scroll and offers sound", async ({
   await expect(toggle).toHaveAttribute("aria-pressed", "false");
 });
 
-test("cold open starts dark and pulls back to the carved wheel and title", async ({
+test("the home opening is five carved beats ending on the title", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
@@ -233,26 +233,16 @@ test("cold open starts dark and pulls back to the carved wheel and title", async
   await page
     .locator("#loader.is-done")
     .waitFor({ state: "attached", timeout: 30000 });
-  const dark = page.locator(".cold-open-dark");
-  expect(
-    Number(await dark.evaluate((e) => getComputedStyle(e).opacity)),
-  ).toBeGreaterThan(0.95);
-  await expect(page.locator("html")).toHaveClass(/cold-dark/);
-  await page.evaluate(() => {
-    const section = document.querySelector<HTMLElement>(".cold-open")!;
-    window.scrollTo(0, section.offsetHeight - window.innerHeight);
-  });
-  await expect
-    .poll(async () =>
-      Number(await dark.evaluate((e) => getComputedStyle(e).opacity)),
-    )
-    .toBeLessThan(0.05);
-  await expect(page.locator("html")).not.toHaveClass(/cold-dark/);
-  await expect
-    .poll(() =>
-      page.locator("h1").evaluate((e) => Number(getComputedStyle(e).opacity)),
-    )
-    .toBeGreaterThan(0.9);
+  // No wheel any more: the war is told in five living carvings.
+  await expect(page.locator('[data-scene="wheel"]')).toHaveCount(0);
+  const beats = page.locator("main > section.scene[data-scene]");
+  await expect(beats).toHaveCount(5);
+  await expect(page.locator("[data-motion]")).toHaveCount(5);
+  await expect(page.locator('[data-scene="walk"] h1')).toHaveText(
+    "The Eighteen Eclipses.",
+  );
+  // Each chapter card stands on its own carved wall.
+  await expect(page.locator(".chapter-stage[data-scene]")).toHaveCount(5);
 });
 
 test("the Kurukshetra painting opens the Kurukshetra wall", async ({
@@ -342,7 +332,7 @@ test("chapters link in story order", async ({ page }) => {
   await page.goto("/");
   await expect(page.locator(".chapter-card")).toHaveCount(5);
   // Every card lives in the chapter list, none stray into the family tree.
-  await expect(page.locator(".chapter-list > .chapter-card")).toHaveCount(5);
+  await expect(page.locator(".chapter-list .chapter-card")).toHaveCount(5);
   await expect(page.locator(".lineage .chapter-card")).toHaveCount(0);
 });
 

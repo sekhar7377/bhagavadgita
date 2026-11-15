@@ -40,6 +40,9 @@ try {
       name: anchor.dataset.scene!,
       anchor,
       shot: anchor.dataset.scene === "wheel" ? coldOpen?.shot : undefined,
+      motion: anchor.hasAttribute("data-motion"),
+      drift: anchor.hasAttribute("data-drift"),
+      video: anchor.hasAttribute("data-video"),
     })),
   );
 } catch {

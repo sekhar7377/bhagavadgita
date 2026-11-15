@@ -304,6 +304,28 @@ Pages built and tested: `/vana/` (Act IV), Parts V–VI on `/kurukshetra/`, `/sv
 - Memory notes `inspect-renders` and `realistic-scenes`.
 - Download images only by fetching the image itself (`window.__dl`). `models/take.sh` refuses files older than 3 minutes, after it once grabbed one of the user's own downloads (since restored).
 
+## Milestone 11: home opening from the user's film references, living relief, video carving (16 November 2026)
+
+The user supplied three screen recordings of a film's Kurukṣetra end-credit sequence and asked for:
+- the home background to be designed from them, with no wheel;
+- carved walls behind the chapter cards;
+- motion in the carvings, using free tools only.
+
+The user said the film being copyrighted is fine, but everything must be in our style. Key frames are extracted to `models/film/` (gitignored) and attached to the ChatGPT prompts as composition references only.
+
+- **Opening (`index.html`):** the wheel cold open is gone. Five full-screen beats replace it: `charge`, `elephant`, `field`, `feather`, `walk`. The title card sits in the calm lower third of `walk`. `src/coldopen.ts` is now unused on every page, kept only for history.
+- **Chapter walls:** each chapter card is wrapped in a `.chapter-stage` (100svh) carrying a carving from its chapter (`vow`, `dice`, `exile`, `battle`, `journey`), revealed by the cursor around the painting.
+- **Route A, living relief:**
+  - `scripts/relief/make_motion.py` + `scripts/relief/motion.json` paint `public/relief/NAME-motion.png` (R sway, G flicker, B drift).
+  - The shader's `flow()` warps the height and the lit stages together inside those regions, so banners ripple, fires flicker and smoke and clouds drift.
+  - `data-motion` loads the map; `data-drift` adds a slow camera dolly.
+- **Route B, video carving:**
+  - The `charge` carving was animated with the free ZeroGPU Space `zerogpu-aoti/wan2-2-fp8da-aoti-faster` (Wan 2.2), giving 3.5 s at 832×480; the input was the plaster panel. `Gojoosama/wan22-i2v` failed: it asks for 360 s of GPU, over the free limit.
+  - `scripts/relief/make_video_relief.py` runs Depth Anything V2 per frame (DirectML, about 2½ min), normalises and smooths the depth over time, and writes `public/relief/charge-video.mp4`: shading above, height below, ping-pong looped.
+  - `data-video` plays it as a moving carving once the still has loaded, only while on screen and never with reduced motion.
+- Tests: the cold-open test is replaced by "the home opening is five carved beats ending on the title"; the plain-wall test now aborts `charge-height.png`.
+- Not yet done: route B on other beats; the Wan clip's slight camera drift means the loop is a ping-pong rather than seamless.
+
 ## Milestone 10: loading, entrances, painting size, bows (15 November 2026)
 
 The user reported four problems; all are fixed and deployed.

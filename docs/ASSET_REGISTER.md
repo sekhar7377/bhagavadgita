@@ -209,3 +209,9 @@ ChatGPT plaster renders (1774×887), each prompt ending with the OBJECT SPECIFIC
 - Part VI: bhishmawheel, arrowbed, chakravyuha, abhimanyu, jayadratha, ghatotkacha, dronafall, draupadihair, karnawheel, maceduel (one correction pass: Duryodhana crowned so he is distinct from Bhīma; Balarāma's plough drawn as a ploughshare, not a pickaxe), nightraid, barbarika (a later legend, labelled as such on the page).
 - Svarga: widows, ironembrace, gandhari, kuntireveal, bhishmateach, dvaraka, jara, journey, dog, heaven, deadreturn.
 - Headers: `public/art/vana.webp` (bow fixed by an edit pass) and `public/art/svarga.webp` (Yudhiṣṭhira and the dog on a Himalayan ridge at golden hour, 1536×1024, painted to match the Vana header's style; source `docs/references/svarga-header-chatgpt.png`).
+
+### G16 — Home opening beats, motion maps and the first video carving (16 November 2026)
+
+- `charge`, `elephant`, `field`, `feather`, `walk`: ChatGPT plaster renders. Each prompt attached one frame from the user's own screen recordings of a film's Kurukṣetra sequence, as a composition reference only (the frames stay in `models/film/` and are not committed). Sources are in `docs/references/NAME-chatgpt.png`, and each was inspected at full size.
+- `public/relief/{charge,elephant,field,feather,walk}-motion.png`: hand-placed motion regions from `scripts/relief/motion.json`.
+- `public/relief/charge-video.mp4`: a Wan 2.2 image-to-video clip of the `charge` panel (free Hugging Face ZeroGPU Space), with per-frame Depth Anything V2 height; generated, not hand-made.

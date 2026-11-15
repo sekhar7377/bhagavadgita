@@ -1,0 +1,207 @@
+{
+  "charge": [
+    {
+      "kind": "drift",
+      "rect": [0.0, 0.0, 1.0, 0.3],
+      "strength": 0.5,
+      "soft": 0.05
+    },
+    {
+      "kind": "drift",
+      "rect": [0.0, 0.5, 0.75, 0.82],
+      "strength": 0.35,
+      "soft": 0.04
+    },
+    {
+      "kind": "drift",
+      "rect": [0.62, 0.8, 1.0, 1.0],
+      "strength": 0.4,
+      "soft": 0.03
+    },
+    {
+      "kind": "sway",
+      "rect": [0.77, 0.04, 1.0, 0.3],
+      "strength": 0.7
+    },
+    {
+      "kind": "sway",
+      "rect": [0.0, 0.22, 0.6, 0.36],
+      "strength": 0.35
+    }
+  ],
+  "elephant": [
+    {
+      "kind": "drift",
+      "rect": [0.42, 0.0, 1.0, 0.25],
+      "strength": 0.6,
+      "soft": 0.05
+    },
+    {
+      "kind": "drift",
+      "rect": [0.42, 0.05, 0.72, 0.62],
+      "strength": 0.6,
+      "soft": 0.04
+    },
+    {
+      "kind": "drift",
+      "rect": [0.5, 0.48, 1.0, 0.6],
+      "strength": 0.35,
+      "soft": 0.04
+    },
+    {
+      "kind": "sway",
+      "rect": [0.66, 0.19, 0.79, 0.27],
+      "strength": 0.8,
+      "soft": 0.01
+    }
+  ],
+  "field": [
+    {
+      "kind": "drift",
+      "rect": [0.0, 0.0, 1.0, 0.3],
+      "strength": 0.5,
+      "soft": 0.05
+    },
+    {
+      "kind": "drift",
+      "rect": [0.46, 0.12, 0.56, 0.4],
+      "strength": 0.8
+    },
+    {
+      "kind": "drift",
+      "rect": [0.66, 0.02, 0.86, 0.38],
+      "strength": 0.8
+    },
+    {
+      "kind": "flicker",
+      "rect": [0.44, 0.36, 0.48, 0.41],
+      "soft": 0.008
+    },
+    {
+      "kind": "flicker",
+      "rect": [0.74, 0.34, 0.81, 0.53],
+      "soft": 0.01
+    },
+    {
+      "kind": "flicker",
+      "rect": [0.705, 0.385, 0.735, 0.42],
+      "soft": 0.008
+    },
+    {
+      "kind": "sway",
+      "poly": [
+        [0.12, 0.02],
+        [0.27, 0.02],
+        [0.27, 0.3],
+        [0.12, 0.3]
+      ],
+      "strength": 0.9
+    },
+    {
+      "kind": "sway",
+      "rect": [0.21, 0.26, 0.29, 0.31],
+      "strength": 0.9,
+      "soft": 0.01
+    },
+    {
+      "kind": "sway",
+      "rect": [0.64, 0.33, 0.7, 0.4],
+      "strength": 0.9,
+      "soft": 0.01
+    },
+    {
+      "kind": "sway",
+      "rect": [0.92, 0.25, 0.99, 0.32],
+      "strength": 0.9,
+      "soft": 0.01
+    }
+  ],
+  "feather": [
+    {
+      "kind": "drift",
+      "rect": [0.0, 0.05, 0.3, 1.0],
+      "strength": 0.6,
+      "soft": 0.05
+    },
+    {
+      "kind": "drift",
+      "rect": [0.72, 0.0, 1.0, 1.0],
+      "strength": 0.6,
+      "soft": 0.05
+    },
+    {
+      "kind": "sway",
+      "rect": [0.34, 0.02, 0.64, 0.6],
+      "strength": 0.35,
+      "soft": 0.04
+    }
+  ],
+  "walk": [
+    {
+      "kind": "drift",
+      "rect": [0.0, 0.0, 0.4, 0.32],
+      "strength": 0.5,
+      "soft": 0.05
+    },
+    {
+      "kind": "drift",
+      "rect": [0.6, 0.0, 1.0, 0.32],
+      "strength": 0.5,
+      "soft": 0.05
+    },
+    {
+      "kind": "drift",
+      "rect": [0.08, 0.32, 0.2, 0.55],
+      "strength": 0.8
+    },
+    {
+      "kind": "drift",
+      "rect": [0.74, 0.25, 0.93, 0.55],
+      "strength": 0.8
+    },
+    {
+      "kind": "sway",
+      "rect": [0.01, 0.12, 0.15, 0.38],
+      "strength": 0.9,
+      "soft": 0.01
+    },
+    {
+      "kind": "sway",
+      "rect": [0.19, 0.2, 0.28, 0.37],
+      "strength": 0.9,
+      "soft": 0.01
+    },
+    {
+      "kind": "sway",
+      "rect": [0.84, 0.2, 0.94, 0.4],
+      "strength": 0.9,
+      "soft": 0.01
+    },
+    {
+      "kind": "sway",
+      "rect": [0.5, 0.6, 0.6, 0.73],
+      "strength": 0.4,
+      "soft": 0.02
+    },
+    {
+      "kind": "flicker",
+      "rect": [0.01, 0.5, 0.07, 0.6],
+      "soft": 0.008
+    },
+    {
+      "kind": "flicker",
+      "rect": [0.28, 0.55, 0.33, 0.62],
+      "soft": 0.008
+    },
+    {
+      "kind": "flicker",
+      "rect": [0.67, 0.55, 0.71, 0.6],
+      "soft": 0.008
+    },
+    {
+      "kind": "flicker",
+      "rect": [0.93, 0.43, 1.0, 0.56],
+      "soft": 0.008
+    }
+  ]
+}

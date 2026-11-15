@@ -44,145 +44,200 @@
       </button>
     </header>
     <main>
-      <!-- Cold open: darkness, a single ember, then the camera pulls back to
-           a shattered chariot wheel and the title arrives (src/coldopen.ts). -->
-      <section class="cold-open" id="beginning" aria-labelledby="hero-title">
-        <div class="cold-open-pin cursor-zone" data-scene="wheel">
-          <span class="cursor-dot" aria-hidden="true"></span>
-          <div class="cold-open-dark" aria-hidden="true">
-            <span class="cold-open-cue">Scroll</span>
-            <p class="cold-open-lines">
-              <span data-cue>Before the gods walked away from men…</span>
-              <span data-cue>Before truth was traded for a throne…</span>
-              <span data-cue
-                >Four million warriors gathered on a single plain of dust.</span
-              >
-              <span data-cue
-                >Eighteen days later, almost none walked home.</span
-              >
-            </p>
-          </div>
-          <canvas class="cold-open-embers" aria-hidden="true"></canvas>
-          <div class="hero-band title-card">
-            <p class="hero-identity" data-line>MAHĀBHĀRATA</p>
-            <h1 id="hero-title" data-line>The Eighteen Eclipses.</h1>
-            <a class="hero-scroll" href="#chapters" data-line
-              >Scroll to begin</a
-            >
-          </div>
-          <a class="hero-corner" href="#about"
-            >About this experience
-            <span class="hero-dots" aria-hidden="true"></span
-          ></a>
+      <!-- The opening: five carved beats of the war, each a living relief
+           (parts move: dust, banners, fire), ending on the title. -->
+      <section
+        class="scene scene--left opening-beat cursor-zone"
+        id="beginning"
+        data-scene="charge"
+        data-video
+        data-motion
+        data-drift
+        aria-labelledby="hero-title"
+      >
+        <span class="cursor-dot" aria-hidden="true"></span>
+        <p class="scene-meta">
+          <span>KURUKṢETRA</span><span>THE FIRST DAY</span>
+        </p>
+        <h2 class="scene-statement" data-float>
+          Four million warriors<br />on a single plain of dust.
+        </h2>
+      </section>
+      <section
+        class="scene scene--right opening-beat cursor-zone"
+        data-scene="elephant"
+        data-motion
+        data-drift
+        aria-label="The giants fall"
+      >
+        <span class="cursor-dot" aria-hidden="true"></span>
+        <p class="scene-statement" data-float>
+          Even the giants<br /><em>fell in the dust.</em>
+        </p>
+      </section>
+      <section
+        class="scene scene--centre opening-beat cursor-zone"
+        data-scene="field"
+        data-motion
+        data-drift
+        aria-label="The field after the war"
+      >
+        <span class="cursor-dot" aria-hidden="true"></span>
+        <p class="scene-statement" data-float>
+          Eighteen days later,<br /><em>almost no one walked home.</em>
+        </p>
+      </section>
+      <section
+        class="scene scene--left opening-beat cursor-zone"
+        data-scene="feather"
+        data-motion
+        data-drift
+        aria-label="The charioteer"
+      >
+        <span class="cursor-dot" aria-hidden="true"></span>
+        <p class="scene-statement" data-float>
+          One man<br />had seen<br /><em>how it would end.</em>
+        </p>
+      </section>
+      <section
+        class="scene opening-title cursor-zone"
+        data-scene="walk"
+        data-motion
+        data-drift
+      >
+        <span class="cursor-dot" aria-hidden="true"></span>
+        <div class="hero-band title-card">
+          <p class="hero-identity">MAHĀBHĀRATA</p>
+          <h1 id="hero-title">The Eighteen Eclipses.</h1>
+          <a class="hero-scroll" href="#chapters">Scroll to begin</a>
         </div>
+        <a class="hero-corner" href="#about"
+          >About this experience
+          <span class="hero-dots" aria-hidden="true"></span
+        ></a>
       </section>
       <!-- The chapters of the epic. Each painting opens its own carved wall. -->
       <section class="chapters" id="chapters" aria-labelledby="chapters-title">
         <p class="eyebrow" id="chapters-title">THE CHAPTERS OF THE WALL</p>
         <div class="chapter-list">
-          <a class="gateway-link chapter-card" href="hastinapura/">
-            <span class="chapter-number">I</span>
-            <span class="art-wrap">
-              <img
-                src="/art/hastinapura.webp"
-                width="1536"
-                height="1024"
-                alt="At dawn on the Ganga, the young prince Devavrata raises his palm to take his vow, while the white and gold palaces of Hastinapura rise across the river and lotus petals drift through the light."
-                loading="lazy"
-              />
-            </span>
-            <span class="gateway-caption">
-              <span>Hastināpura. The throne nobody could keep.</span>
-              <span class="gateway-enter"
-                >Enter Hastināpura
-                <span class="diagonal-arrow" aria-hidden="true"></span
-              ></span>
-            </span>
-          </a>
-          <a class="gateway-link chapter-card" href="sabha/">
-            <span class="chapter-number">II</span>
-            <span class="art-wrap">
-              <img
-                src="/art/sabha.webp"
-                width="1536"
-                height="1024"
-                alt="In a hall lit crimson by torches, Shakuni's hand releases a pair of dice above the board while Yudhishthira watches and Draupadi is brought through the great doors behind."
-                loading="lazy"
-              />
-            </span>
-            <span class="gateway-caption">
-              <span>The Dice Hall. The dice that broke the world.</span>
-              <span class="gateway-enter"
-                >Enter the Dice Hall
-                <span class="diagonal-arrow" aria-hidden="true"></span
-              ></span>
-            </span>
-          </a>
-          <a class="gateway-link chapter-card" href="vana/">
-            <span class="chapter-number">III</span>
-            <span class="art-wrap">
-              <img
-                src="/art/vana.webp"
-                width="1536"
-                height="1024"
-                alt="Five exiled brothers and Draupadi in bark garments walk beneath towering forest trees at dawn, light falling through the mist."
-                loading="lazy"
-              />
-            </span>
-            <span class="gateway-caption">
-              <span
-                >The Forest. Exiles in the ashes, phantoms in the court.</span
-              >
-              <span class="gateway-enter"
-                >Enter the Forest
-                <span class="diagonal-arrow" aria-hidden="true"></span
-              ></span>
-            </span>
-          </a>
-          <a
-            class="gateway-link chapter-card"
-            id="kurukshetra"
-            href="kurukshetra/"
-          >
-            <span class="chapter-number">IV</span>
-            <span class="art-wrap">
-              <img
-                src="/art/kurukshetra.webp"
-                width="1536"
-                height="1024"
-                alt="Krishna holds the reins of an ornate canopied chariot drawn by four white horses; Arjuna sits beside him, looking out over two armies beneath a setting sun."
-                loading="lazy"
-              />
-            </span>
-            <span class="gateway-caption">
-              <span>Kurukṣetra. Between two armies.</span>
-              <span class="gateway-enter"
-                >Enter Kurukṣetra
-                <span class="diagonal-arrow" aria-hidden="true"></span
-              ></span>
-            </span>
-          </a>
-          <a class="gateway-link chapter-card" href="svarga/">
-            <span class="chapter-number">V</span>
-            <span class="art-wrap">
-              <img
-                src="/art/svarga.webp"
-                width="1536"
-                height="1024"
-                alt="On a knife-edge ridge of snow at the roof of the world, Yudhishthira stands beside a stray dog as golden light breaks through the clouds."
-                loading="lazy"
-              />
-            </span>
-            <span class="gateway-caption">
-              <span
-                >Ashes &amp; the Ascent. The last man and the stray dog.</span
-              >
-              <span class="gateway-enter"
-                >Enter the last chapter
-                <span class="diagonal-arrow" aria-hidden="true"></span
-              ></span>
-            </span>
-          </a>
+          <div class="chapter-stage cursor-zone" data-scene="vow">
+            <span class="cursor-dot" aria-hidden="true"></span>
+            <a class="gateway-link chapter-card" href="hastinapura/">
+              <span class="chapter-number">I</span>
+              <span class="art-wrap">
+                <img
+                  src="/art/hastinapura.webp"
+                  width="1536"
+                  height="1024"
+                  alt="At dawn on the Ganga, the young prince Devavrata raises his palm to take his vow, while the white and gold palaces of Hastinapura rise across the river and lotus petals drift through the light."
+                  loading="lazy"
+                />
+              </span>
+              <span class="gateway-caption">
+                <span>Hastināpura. The throne nobody could keep.</span>
+                <span class="gateway-enter"
+                  >Enter Hastināpura
+                  <span class="diagonal-arrow" aria-hidden="true"></span
+                ></span>
+              </span>
+            </a>
+          </div>
+          <div class="chapter-stage cursor-zone" data-scene="dice">
+            <span class="cursor-dot" aria-hidden="true"></span>
+            <a class="gateway-link chapter-card" href="sabha/">
+              <span class="chapter-number">II</span>
+              <span class="art-wrap">
+                <img
+                  src="/art/sabha.webp"
+                  width="1536"
+                  height="1024"
+                  alt="In a hall lit crimson by torches, Shakuni's hand releases a pair of dice above the board while Yudhishthira watches and Draupadi is brought through the great doors behind."
+                  loading="lazy"
+                />
+              </span>
+              <span class="gateway-caption">
+                <span>The Dice Hall. The dice that broke the world.</span>
+                <span class="gateway-enter"
+                  >Enter the Dice Hall
+                  <span class="diagonal-arrow" aria-hidden="true"></span
+                ></span>
+              </span>
+            </a>
+          </div>
+          <div class="chapter-stage cursor-zone" data-scene="exile">
+            <span class="cursor-dot" aria-hidden="true"></span>
+            <a class="gateway-link chapter-card" href="vana/">
+              <span class="chapter-number">III</span>
+              <span class="art-wrap">
+                <img
+                  src="/art/vana.webp"
+                  width="1536"
+                  height="1024"
+                  alt="Five exiled brothers and Draupadi in bark garments walk beneath towering forest trees at dawn, light falling through the mist."
+                  loading="lazy"
+                />
+              </span>
+              <span class="gateway-caption">
+                <span
+                  >The Forest. Exiles in the ashes, phantoms in the court.</span
+                >
+                <span class="gateway-enter"
+                  >Enter the Forest
+                  <span class="diagonal-arrow" aria-hidden="true"></span
+                ></span>
+              </span>
+            </a>
+          </div>
+          <div class="chapter-stage cursor-zone" data-scene="battle">
+            <span class="cursor-dot" aria-hidden="true"></span>
+            <a
+              class="gateway-link chapter-card"
+              id="kurukshetra"
+              href="kurukshetra/"
+            >
+              <span class="chapter-number">IV</span>
+              <span class="art-wrap">
+                <img
+                  src="/art/kurukshetra.webp"
+                  width="1536"
+                  height="1024"
+                  alt="Krishna holds the reins of an ornate canopied chariot drawn by four white horses; Arjuna sits beside him, looking out over two armies beneath a setting sun."
+                  loading="lazy"
+                />
+              </span>
+              <span class="gateway-caption">
+                <span>Kurukṣetra. Between two armies.</span>
+                <span class="gateway-enter"
+                  >Enter Kurukṣetra
+                  <span class="diagonal-arrow" aria-hidden="true"></span
+                ></span>
+              </span>
+            </a>
+          </div>
+          <div class="chapter-stage cursor-zone" data-scene="journey">
+            <span class="cursor-dot" aria-hidden="true"></span>
+            <a class="gateway-link chapter-card" href="svarga/">
+              <span class="chapter-number">V</span>
+              <span class="art-wrap">
+                <img
+                  src="/art/svarga.webp"
+                  width="1536"
+                  height="1024"
+                  alt="On a knife-edge ridge of snow at the roof of the world, Yudhishthira stands beside a stray dog as golden light breaks through the clouds."
+                  loading="lazy"
+                />
+              </span>
+              <span class="gateway-caption">
+                <span
+                  >Ashes &amp; the Ascent. The last man and the stray dog.</span
+                >
+                <span class="gateway-enter"
+                  >Enter the last chapter
+                  <span class="diagonal-arrow" aria-hidden="true"></span
+                ></span>
+              </span>
+            </a>
+          </div>
         </div>
       </section>
       <!-- The House of Kuru: who is whose, across seven generations. -->

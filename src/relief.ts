@@ -107,8 +107,25 @@ const wallVertex = /* glsl */ `
   uniform float uPresence;
   uniform float uBoost;
   uniform float uScrollWorld;
+  uniform sampler2D tVideo;
+  uniform float uVideoOn;
   varying vec2 vUv;
   varying vec3 vWorld;
+
+  // Living relief: a motion map (R sway, G flicker, B drift) moves parts of
+  // the carving in place, so banners ripple, fire licks and dust drifts.
+  uniform sampler2D tMotion;
+  uniform float uMotionOn;
+  uniform float uTime;
+  vec2 flow(vec2 uv) {
+    if (uMotionOn < 0.5) return uv;
+    vec3 m = texture2D(tMotion, uv).rgb;
+    float t = uTime;
+    vec2 sway = vec2(sin(t * 1.7 + uv.y * 38.0 + uv.x * 9.0), cos(t * 1.3 + uv.x * 30.0)) * vec2(0.0035, 0.0018);
+    vec2 flicker = vec2(sin(t * 6.3 + uv.y * 85.0) * 0.0016, -abs(sin(t * 4.1 + uv.x * 60.0)) * 0.0032);
+    vec2 drift = vec2(sin(t * 0.22 + uv.y * 5.0) * 0.012, sin(t * 0.17 + uv.x * 4.0) * 0.004);
+    return uv + m.r * sway + m.g * flicker + m.b * drift;
+  }
 
   void main() {
     vUv = uv;
@@ -120,7 +137,10 @@ const wallVertex = /* glsl */ `
     float inside = step(0.0, uv.x) * step(uv.x, 1.0) * step(0.0, uv.y) * step(uv.y, 1.0);
     // Presence dissolves the whole carving back into flat plaster (0) or
     // condenses it out of the wall (1) when one scene hands over to the next.
-    float height = texture2D(tHeight, uv).r * inside * uPresence;
+    float stillHeight = texture2D(tHeight, flow(uv)).r;
+    // A video carving keeps its height in the lower half of each frame.
+    float movingHeight = texture2D(tVideo, vec2(uv.x, uv.y * 0.5)).r;
+    float height = mix(stillHeight, movingHeight, uVideoOn) * inside * uPresence;
     vec3 carved = position;
     carved.z += height * uDepth * mix(0.05, 1.0, min(extrude, 1.0));
     carved.xy *= 1.004;
@@ -149,8 +169,25 @@ const wallFragment = /* glsl */ `
   uniform float uPresence;
   uniform float uReady;
   uniform float uBoost;
+  uniform sampler2D tVideo;
+  uniform float uVideoOn;
   varying vec2 vUv;
   varying vec3 vWorld;
+
+  // Living relief: a motion map (R sway, G flicker, B drift) moves parts of
+  // the carving in place, so banners ripple, fire licks and dust drifts.
+  uniform sampler2D tMotion;
+  uniform float uMotionOn;
+  uniform float uTime;
+  vec2 flow(vec2 uv) {
+    if (uMotionOn < 0.5) return uv;
+    vec3 m = texture2D(tMotion, uv).rgb;
+    float t = uTime;
+    vec2 sway = vec2(sin(t * 1.7 + uv.y * 38.0 + uv.x * 9.0), cos(t * 1.3 + uv.x * 30.0)) * vec2(0.0035, 0.0018);
+    vec2 flicker = vec2(sin(t * 6.3 + uv.y * 85.0) * 0.0016, -abs(sin(t * 4.1 + uv.x * 60.0)) * 0.0032);
+    vec2 drift = vec2(sin(t * 0.22 + uv.y * 5.0) * 0.012, sin(t * 0.17 + uv.x * 4.0) * 0.004);
+    return uv + m.r * sway + m.g * flicker + m.b * drift;
+  }
 
   const float REST = 0.54504;
 
@@ -170,13 +207,21 @@ const wallFragment = /* glsl */ `
     // through those stages in 0.2 intervals, so shade always belongs to the
     // depth the geometry currently has.
     float inside = step(0.0, vUv.x) * step(vUv.x, 1.0) * step(0.0, vUv.y) * step(vUv.y, 1.0);
+    vec2 fuv = flow(vUv);
     float o = REST;
-    o = mix(o, texture2D(tStage1, vUv).g, smoothstep(0.0, 0.2, extrude) * inside);
-    o = mix(o, texture2D(tStage2, vUv).g, smoothstep(0.2, 0.4, extrude) * inside);
-    o = mix(o, texture2D(tStage3, vUv).g, smoothstep(0.4, 0.6, extrude) * inside);
-    o = mix(o, texture2D(tStage4, vUv).g, smoothstep(0.6, 0.8, extrude) * inside);
-    o = mix(o, texture2D(tStage5, vUv).g, smoothstep(0.8, 1.0, extrude) * inside);
+    o = mix(o, texture2D(tStage1, fuv).g, smoothstep(0.0, 0.2, extrude) * inside);
+    o = mix(o, texture2D(tStage2, fuv).g, smoothstep(0.2, 0.4, extrude) * inside);
+    o = mix(o, texture2D(tStage3, fuv).g, smoothstep(0.4, 0.6, extrude) * inside);
+    o = mix(o, texture2D(tStage4, fuv).g, smoothstep(0.6, 0.8, extrude) * inside);
+    o = mix(o, texture2D(tStage5, fuv).g, smoothstep(0.8, 1.0, extrude) * inside);
 
+    // A video carving brings its own moving plaster shading (upper half),
+    // levelled to the baked stages so it sits in the same wall.
+    if (uVideoOn > 0.0) {
+      float shade = texture2D(tVideo, vec2(vUv.x, 0.5 + vUv.y * 0.5)).r;
+      float moving = REST + (shade - 0.751) * 0.95;
+      o = mix(o, mix(REST, moving, smoothstep(0.0, 0.6, extrude)), uVideoOn * inside);
+    }
     float plaster = texture2D(tPlaster, vWorld.xy / 10.0).g;
     float wash = mix(1.0, 0.5, length(screenUv - vec2(0.0, 0.8)));
     float tone = o * plaster + wash * 0.7 * 0.17;
@@ -254,6 +299,12 @@ export type SceneSpec = {
   name: string;
   /** The page element the carving is centred on; it scrolls with the page. */
   anchor: HTMLElement;
+  /** Load NAME-motion.png and let parts of the carving move (living relief). */
+  motion?: boolean;
+  /** A slow camera drift across the panel while it is on screen. */
+  drift?: boolean;
+  /** Play NAME-video.mp4 (shading above, height below) as a moving carving. */
+  video?: boolean;
   /**
    * Optional camera for this panel, read every frame: scale (1 = the panel
    * as laid out), the panel point (uv) kept at the anchor's centre, and a
@@ -282,6 +333,7 @@ type SceneState = {
   riseTime: number;
   /** Seconds since every texture arrived, for a soft fade-in. */
   readyTime: number;
+  video?: HTMLVideoElement;
 };
 
 /**
@@ -405,6 +457,7 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
     uReveal: { value: 0 },
     uBoost: { value: 0 },
     uScrollWorld: { value: 0 },
+    uTime: { value: 0 },
   };
   const makeUniforms = () => ({
     ...shared,
@@ -419,6 +472,10 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
     uLift: { value: 0 },
     uRise: { value: 0 },
     uPresence: { value: 1 },
+    tMotion: { value: blank as THREE.Texture },
+    uMotionOn: { value: 0 },
+    tVideo: { value: blank as THREE.Texture },
+    uVideoOn: { value: 0 },
   });
   const makeMaterial = (uniforms: Record<string, THREE.IUniform>) =>
     new THREE.ShaderMaterial({
@@ -482,15 +539,45 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
       "tStage3",
       "tStage4",
       "tStage5",
+      "tMotion",
+      "tVideo",
     ]) {
       if (u[key].value !== blank) u[key].value.dispose();
       u[key].value = blank;
     }
     u.uReady.value = 0;
     u.uRise.value = 0;
+    u.uMotionOn.value = 0;
+    u.uVideoOn.value = 0;
+    state.video?.pause();
+    state.video?.removeAttribute("src");
+    state.video = undefined;
     state.riseTime = -1;
     state.readyTime = 0;
     state.status = "idle";
+  };
+
+  // The still carving shows first; the moving one takes over once playing.
+  const startVideo = (state: SceneState) => {
+    const video = document.createElement("video");
+    video.src = `${import.meta.env.BASE_URL}relief/${state.spec.name}-video.mp4`;
+    video.muted = true;
+    video.loop = true;
+    video.playsInline = true;
+    video.preload = "auto";
+    video.crossOrigin = "anonymous";
+    state.video = video;
+    const texture = new THREE.VideoTexture(video);
+    texture.colorSpace = THREE.NoColorSpace;
+    texture.minFilter = THREE.LinearFilter;
+    state.uniforms.tVideo.value = texture;
+    video.addEventListener(
+      "playing",
+      () => {
+        if (state.video === video && !paused) state.uniforms.uVideoOn.value = 1;
+      },
+      { once: true },
+    );
   };
 
   const loadScene = (state: SceneState, first: boolean) => {
@@ -501,16 +588,26 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
     const u = state.uniforms;
     // A panel only counts as ready once its height AND all five lighting
     // stages have arrived; showing it earlier flashes half-lit plaster.
-    let pending = 6;
+    let pending = state.spec.motion ? 7 : 6;
+
     const arrived = () => {
       pending -= 1;
       if (pending > 0 || disposed || abort.signal.aborted) return;
       u.uReady.value = 0;
       state.readyTime = 0;
       state.status = "ready";
+      if (state.spec.video) startVideo(state);
       if (first && !contextLost) container.dataset.reliefState = "ready";
       render();
     };
+    if (state.spec.motion) {
+      u.tMotion.value = data(
+        `${import.meta.env.BASE_URL}relief/${name}-motion.png`,
+        false,
+        arrived,
+      );
+      u.uMotionOn.value = 1;
+    }
     [1, 2, 3, 4, 5].forEach((index) => {
       u[`tStage${index}`].value = data(
         `${import.meta.env.BASE_URL}relief/${name}-stage${index}.webp`,
@@ -594,6 +691,12 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
       }
       state.mesh.position.y = -offset * worldPerPixel;
       const shot = state.spec.shot?.();
+      if (!shot && state.spec.drift) {
+        // A slow breathing dolly: a little closer, a little across, never still.
+        const s = 1.05 + 0.035 * Math.sin(elapsed * 0.11);
+        state.mesh.scale.set(s, s, Math.sqrt(s));
+        state.mesh.position.x = Math.sin(elapsed * 0.07) * WALL_W * 0.018;
+      }
       if (shot) {
         // Keep the chosen point of the panel at the anchor's centre while
         // scaling, so the camera appears to pull back from that point.
@@ -606,6 +709,12 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
           state.mesh.position.y = -(shot.focusY - 0.5) * WALL_H * shot.scale;
       }
       const distance = Math.abs(offset) / viewHeight;
+      if (state.video) {
+        const onScreen = distance < 1.1 && !paused;
+        if (onScreen && state.video.paused)
+          void state.video.play().catch(() => {});
+        else if (!onScreen && !state.video.paused) state.video.pause();
+      }
       state.mesh.visible =
         state.status === "ready" &&
         (shot?.pinned ? (shot.presence ?? 1) > 0.002 : distance < 1.2);
@@ -770,6 +879,7 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
     if (!document.hidden && !contextLost) {
       const dt = dtMs / 1000;
       place();
+      shared.uTime.value = elapsed;
       for (const state of scenes) animateEntrance(state, dt);
       // Fast scrolling swells the whole visible carving, then it settles.
       const speed = Math.min(
