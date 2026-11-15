@@ -199,3 +199,13 @@ The user rejected the first `ekalavya` render: a feather headband (Native Americ
 ### G14 — Śakuni redone (14 November 2026)
 
 At the user's request, Śakuni's cartoon-villain look (wide grin; Mughal-era turban and plume, anachronistic) was replaced in all three panels where he appears: `dice`, `blindcrown` (Part I) and `secondthrow`. He is now one consistent figure: a lean, elegant prince of Gāndhāra with a slim royal headband, trimmed beard, hooded eyes and only a controlled half-smile.
+
+### G15 — Acts IV–VIII panels and headers (14–15 November 2026)
+
+ChatGPT plaster renders (1774×887), each prompt ending with the OBJECT SPECIFICATIONS block (chariot, bow, arrows, mace, hands) and each inspected at full size before baking. Sources in `docs/references/NAME-chatgpt.png`; baked by `scripts/relief/make_scene.sh`.
+
+- Vana: exile, kirata, yaksha, virata, kichaka, shami, sammohana, kavacha.
+- Part V: choice, needle, courtform, karnaride, kuntikarna, sanjaya.
+- Part VI: bhishmawheel, arrowbed, chakravyuha, abhimanyu, jayadratha, ghatotkacha, dronafall, draupadihair, karnawheel, maceduel (one correction pass: Duryodhana crowned so he is distinct from Bhīma; Balarāma's plough drawn as a ploughshare, not a pickaxe), nightraid, barbarika (a later legend, labelled as such on the page).
+- Svarga: widows, ironembrace, gandhari, kuntireveal, bhishmateach, dvaraka, jara, journey, dog, heaven, deadreturn.
+- Headers: `public/art/vana.webp` (bow fixed by an edit pass) and `public/art/svarga.webp` (Yudhiṣṭhira and the dog on a Himalayan ridge at golden hour, 1536×1024, painted to match the Vana header's style; source `docs/references/svarga-header-chatgpt.png`).

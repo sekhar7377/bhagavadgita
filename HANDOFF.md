@@ -281,23 +281,20 @@ New page `/sabha/` (`sabha/index.html`, added to `vite.config.ts`), "The dice th
 
 Omens live in the text only. Memory note `realistic-scenes`.
 
-## Milestone 09 (in progress): Acts IV–VIII (14–15 November 2026)
+## Milestone 09: Acts IV–VIII (14–15 November 2026)
 
-Pages built and tested: `/vana/` (Act IV), Parts V–VI on `/kurukshetra/`, `/svarga/` (Acts VII–VIII), the House of Kuru tree and the cold-open lines on `/`. Committed locally; **not pushed or deployed**, because carvings are still missing.
+Pages built and tested: `/vana/` (Act IV), Parts V–VI on `/kurukshetra/`, `/svarga/` (Acts VII–VIII), the House of Kuru tree and the cold-open lines on `/`. **Every carving and header is now in**, so the milestone was committed and pushed to deploy.
 
-**Carvings done** (each inspected at full size):
+**Carvings** (each inspected at full size; see ASSET_REGISTER G15):
 
 - Vana: exile, kirata, yaksha, virata, kichaka, shami, sammohana (redone: correct chariot, bow at rest), kavacha. Header `public/art/vana.webp` (Arjuna's malformed bow fixed by an edit pass).
 - Part V: choice, needle, courtform, karnaride (redone: correct ratha, both standing), kuntikarna, sanjaya.
-- Part VI: bhishmawheel (redone: chariots correct), arrowbed, chakravyuha, abhimanyu (redone: wheel held horizontally overhead, as the user asked), jayadratha, ghatotkacha, dronafall (redone: chariots facing each other), draupadihair.
+- Part VI: bhishmawheel (redone), arrowbed, chakravyuha, abhimanyu (redone: wheel held horizontally overhead), jayadratha, ghatotkacha, dronafall (redone: chariots facing each other), draupadihair, karnawheel, maceduel (one correction pass), nightraid, barbarika.
+- Svarga: widows, ironembrace, gandhari, kuntireveal, bhishmateach, dvaraka, jara, journey, dog, heaven, deadreturn. Header `public/art/svarga.webp`.
 
-**Still missing:**
+**Rebuilding the ChatGPT helpers:** the prompts with the OBJECT SPECIFICATIONS block lived in the ChatGPT tab (`window.__Q`, `__SPEC`, `__dl`, `__next`, `__send`, `__wait`). They were lost when the tab closed and were re-created from the session transcript. `models/take.sh NAME` now takes only `~/Downloads/NAME-download.png`, the exact file that `window.__dl(NAME)` saves, so it can never pick up the user's own downloads. Calls through the Chrome extension time out at 45 s, so poll with `__wait(40000)`.
 
-- Part VI: karnawheel, maceduel, nightraid, barbarika.
-- Svarga: widows, ironembrace, gandhari, kuntireveal, bhishmateach, dvaraka, jara, journey, dog, heaven, deadreturn.
-- The header `public/art/svarga.webp`.
-
-The precise prompts with the OBJECT SPECIFICATIONS block (chariot, bow, arrows, mace, hands) live in the ChatGPT tab as `window.__Q` / `__SPEC`; re-create them from this note if the tab is reloaded. ChatGPT's usage limit resets at 2:31 AM on 15 November.
+**Next:** the user's next act or polish request. Possible extras: a dedicated Part VII/VIII image pass if the user flags anything, and the Gītā reader (needs a verified edition).
 
 **User rules added this session:**
 
