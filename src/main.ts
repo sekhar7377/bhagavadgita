@@ -84,7 +84,7 @@ function setMotion(value: boolean) {
     lenis?.destroy();
     lenis = undefined;
   } else if (!lenis)
-    lenis = new Lenis({ autoRaf: true, lerp: 0.085, anchors: true });
+    lenis = new Lenis({ autoRaf: true, lerp: 0.12, anchors: true });
   document.documentElement.classList.toggle("motion-paused", value);
 }
 motionPreference.addEventListener("change", (event) =>

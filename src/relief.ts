@@ -28,7 +28,7 @@ const CAMERA_DISTANCE = 15;
 const CAMERA_FOV = 30;
 // Panels start loading this many screen heights ahead, and are released
 // beyond the second distance, so scrolling rarely meets an unloaded wall.
-const LOAD_AHEAD = 3.2;
+const LOAD_AHEAD = 2.4;
 const RELEASE_BEYOND = 5.5;
 // Entrance of each carving: seconds to rise, hold, settle; resting depth.
 const RISE_IN = 2.4;
@@ -372,7 +372,10 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
 
   container.dataset.reliefState = "loading";
   delete container.dataset.fallback;
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  // Sharp but affordable: the plaster is soft, so 1.5x is visually enough,
+  // and the frame loop lowers it further on a struggling GPU.
+  let pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
+  renderer.setPixelRatio(pixelRatio);
   renderer.setClearColor("#c8c8c8");
   renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
   renderer.domElement.setAttribute("aria-hidden", "true");
@@ -398,13 +401,30 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
     FIELD_SIZE,
     targetOptions,
   );
-  const loader = new THREE.TextureLoader();
+  // Images decode off the main thread (ImageBitmap), and each one is sent
+  // to the GPU as soon as it arrives, so scrolling never stalls on a decode
+  // or a first-use upload. The bitmap is flipped while decoding.
+  const loader = new THREE.ImageBitmapLoader();
+  loader.setOptions({ imageOrientation: "flipY", premultiplyAlpha: "none" });
   const data = (url: string, repeat: boolean, onLoad?: () => void) => {
-    // The frame loop redraws continuously, so a finished load needs no
-    // render call of its own (and may arrive before render exists).
-    const texture = loader.load(url, () => onLoad?.());
+    const texture = new THREE.Texture();
+    texture.flipY = false;
     texture.colorSpace = THREE.NoColorSpace;
     if (repeat) texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    texture.addEventListener("dispose", () => {
+      (texture.image as ImageBitmap | null)?.close?.();
+    });
+    loader.load(
+      url,
+      (bitmap) => {
+        texture.image = bitmap;
+        texture.needsUpdate = true;
+        if (renderer && !contextLost) renderer.initTexture(texture);
+        onLoad?.();
+      },
+      undefined,
+      () => undefined,
+    );
     return texture;
   };
   const noise = data(import.meta.env.BASE_URL + "relief/noise.png", true);
@@ -865,6 +885,12 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
       state.riseTime = 0;
     }
     state.riseTime += dt;
+    // Pages that rest as bare plaster show nothing until the cursor or the
+    // slow path reveals it, not even an entrance.
+    if (state.spec.rest === 0) {
+      u.uRise.value = 0;
+      return;
+    }
     const t = state.riseTime;
     const ease = (x: number) => x * x * (3 - 2 * x);
     let rise: number;
@@ -878,10 +904,36 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
     u.uRise.value = rise;
   };
 
+  let frameAverage = 16;
+  let framesSinceChange = 0;
   function tick(now: number) {
     if (disposed) return;
-    const dtMs = Math.min(64, now - (lastTime || now));
+    const rawMs = now - (lastTime || now);
+    const dtMs = Math.min(64, rawMs);
     lastTime = now;
+    // Adaptive resolution: if frames run slow for about a second, render
+    // fewer pixels (never below 0.75x); recover when there is headroom.
+    if (rawMs > 0 && rawMs < 200 && !document.hidden) {
+      frameAverage += (rawMs - frameAverage) * 0.05;
+      framesSinceChange += 1;
+      if (framesSinceChange > 60) {
+        const next =
+          frameAverage > 24
+            ? Math.max(0.75, pixelRatio - 0.25)
+            : frameAverage < 14
+              ? Math.min(
+                  Math.min(window.devicePixelRatio || 1, 1.5),
+                  pixelRatio + 0.25,
+                )
+              : pixelRatio;
+        if (next !== pixelRatio) {
+          pixelRatio = next;
+          renderer.setPixelRatio(pixelRatio);
+          resize();
+          framesSinceChange = 0;
+        }
+      }
+    }
     if (!document.hidden && !contextLost) {
       const dt = dtMs / 1000;
       place();

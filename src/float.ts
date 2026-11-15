@@ -57,9 +57,12 @@ export function mountFloatingType(elements: Iterable<HTMLElement>) {
   const tick = (now: number) => {
     const time = (now - start) / 1000;
     const height = window.innerHeight;
-    for (const { element, lines } of items) {
-      const rect = element.getBoundingClientRect();
-      if (rect.bottom < -height * 0.5 || rect.top > height * 1.5) continue;
+    // Read every position first, then write every transform, so the browser
+    // lays the page out once per frame instead of once per text block.
+    const rects = items.map(({ element }) => element.getBoundingClientRect());
+    items.forEach(({ lines }, itemIndex) => {
+      const rect = rects[itemIndex];
+      if (rect.bottom < -height * 0.5 || rect.top > height * 1.5) return;
       // 0 as the block reaches the lower fifth of the screen, 1 a little later.
       const enter = (height * 0.92 - rect.top) / (height * 0.45);
       // Distance of the block's centre from the screen centre, -1..1.
@@ -72,10 +75,13 @@ export function mountFloatingType(elements: Iterable<HTMLElement>) {
         const drift = offset * (index - middle) * 14;
         const breathe = Math.sin(time * 0.6 + index * 0.9) * 1.6;
         const rise = (1 - eased) * (56 + index * 14);
-        line.style.transform = `translate3d(0, ${(rise + drift + breathe).toFixed(2)}px, 0)`;
-        line.style.opacity = eased.toFixed(3);
+        const transform = `translate3d(0, ${(rise + drift + breathe).toFixed(1)}px, 0)`;
+        const opacity = eased.toFixed(2);
+        if (line.style.transform !== transform)
+          line.style.transform = transform;
+        if (line.style.opacity !== opacity) line.style.opacity = opacity;
       });
-    }
+    });
     frame = requestAnimationFrame(tick);
   };
 

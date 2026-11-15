@@ -215,3 +215,9 @@ ChatGPT plaster renders (1774×887), each prompt ending with the OBJECT SPECIFIC
 - `charge`, `elephant`, `field`, `feather`, `walk`: ChatGPT plaster renders. Each prompt attached one frame from the user's own screen recordings of a film's Kurukṣetra sequence, as a composition reference only (the frames stay in `models/film/` and are not committed). Sources are in `docs/references/NAME-chatgpt.png`, and each was inspected at full size.
 - `public/relief/{charge,elephant,field,feather,walk}-motion.png`: hand-placed motion regions from `scripts/relief/motion.json`.
 - `public/relief/charge-video.mp4`: a Wan 2.2 image-to-video clip of the `charge` panel (free Hugging Face ZeroGPU Space), with per-frame Depth Anything V2 height; generated, not hand-made.
+
+### G17 — New story carvings and site art (16 November 2026)
+
+- `amba`, `hidimba`, `jarasandha`, `hanuman`, `brahmastra` (one correction pass for Arjuna's bow) and `forestfire`: ChatGPT plaster renders with the object-spec block, each inspected at full size. Sources are in `docs/references/NAME-chatgpt.png`.
+- `public/social/*.jpg`: 1200×630 share cards cropped from our own carvings and header paintings.
+- `public/favicon.svg`: a hand-drawn chariot wheel, original.

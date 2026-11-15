@@ -1438,8 +1438,28 @@ html.is-loading body {
 
 /* --- the House of Kuru ------------------------------------------------------- */
 .lineage {
+  position: relative;
+  min-height: 300svh;
+  box-sizing: border-box;
   padding: 16svh var(--gutter) 20svh;
   color: #030303;
+}
+/* The carved walls fill the section in three equal screens behind the
+   tree; the tree itself sits above them. */
+.lineage-walls {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+}
+.lineage-wall {
+  flex: 1;
+  min-height: 100svh;
+  pointer-events: auto;
+}
+.lineage > :not(.lineage-walls) {
+  position: relative;
 }
 .lineage > .eyebrow {
   text-align: center;

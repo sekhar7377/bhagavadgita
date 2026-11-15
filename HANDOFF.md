@@ -304,6 +304,42 @@ Pages built and tested: `/vana/` (Act IV), Parts V–VI on `/kurukshetra/`, `/sv
 - Memory notes `inspect-renders` and `realistic-scenes`.
 - Download images only by fetching the image itself (`window.__dl`). `models/take.sh` refuses files older than 3 minutes, after it once grabbed one of the user's own downloads (since restored).
 
+## Milestone 12: polish pass for the award submission (16 November 2026, overnight)
+
+The user's goal for the night:
+- no carving visible before the cursor reveals it;
+- smoother loading and scrolling;
+- add the missing stories with visuals;
+- carved walls behind the family tree;
+- a full bug audit.
+
+- **No glimpse on the home page:** panels with `rest: 0` (all of `index.html` via `<main data-rest="0">`) skip the entrance rise entirely. Only the cursor and the slow path reveal them.
+- **Performance (`src/relief.ts`, `src/float.ts`):**
+  - Textures decode off the main thread (`THREE.ImageBitmapLoader`, flipY at decode) and upload with `renderer.initTexture` on arrival, so first use on scroll no longer stalls.
+  - Pixel ratio is capped at 1.5 and adapts down to 0.75 when frames average over 24 ms.
+  - Load-ahead is 2.4 screens.
+  - The floating type reads all rects before writing, so there is no layout thrash.
+  - Lenis lerp is 0.12.
+  - Measured in uncapped Chromium on the GTX 1650: median frame 0.7–1.1 ms, no long tasks while scrolling Kurukṣetra.
+  - Probes: `tests/perf.mjs`, `tests/audit.mjs`. These are not part of the suite.
+- **New stories (copy written from the Critical Edition outline, each with an inspected ChatGPT carving):**
+  - `amba`: Ambā's vow, Hastināpura, after the vow.
+  - `hidimba`: Bhīma's watch and Hiḍimbā, after the house of lac.
+  - `jarasandha`: in the Sabhā, before the Rājasūya.
+  - `hanuman`: Bhīma meets Hanumān, in the Forest.
+  - `brahmastra`: the two weapons over the Gaṅgā, Kurukṣetra, after the night raid. The Parīkṣit paragraph moved here from `nightraid`.
+  - `forestfire`: the elders' end in the forest, Ascent, before Part VIII.
+  - The `brahmastra` render was redone once: the first had a hooked bow tip and a string to the hand.
+  - Menus gained the new entries and were renumbered. The Ascent menu had skipped 07, and Jarā's entry was missing.
+- **Family tree:** `.lineage-walls` holds three 100svh carved walls behind the tree (`.lineage` min-height 300svh). The intended new carvings `roots`, `tree` and `tellers` (prompts are in the session's `window.__P`) were blocked by ChatGPT's usage limit (resets 04:30). Until then the walls use `vow`, `pots` and `sanjaya`.
+- **Site polish:**
+  - favicon (`public/favicon.svg`);
+  - Open Graph and Twitter tags plus a canonical URL on every page, with 1200×630 cards in `public/social/`;
+  - `public/404.html` for GitHub Pages;
+  - `scripts/check_site.py`, a static check of links, anchors, images, carving assets, duplicate ids and alts, with 0 problems;
+  - no horizontal overflow on any page at 390 px or 1440 px.
+- `nightraid`'s copy still ends at the killing of the sleepers; the curse is told in `brahmastra`.
+
 ## Milestone 11: home opening from the user's film references, living relief, video carving (16 November 2026)
 
 The user supplied three screen recordings of a film's Kurukṣetra end-credit sequence and asked for:
