@@ -32,6 +32,10 @@ const coldOpen = coldOpenSection
       reducedMotion: () => reducedMotionQuery.matches,
     })
   : undefined;
+const restOf = (anchor: HTMLElement) => {
+  const owner = anchor.closest<HTMLElement>("[data-rest]");
+  return owner ? Number(owner.dataset.rest) : undefined;
+};
 let relief: ReturnType<typeof mountRelief> | undefined;
 try {
   relief = mountRelief(
@@ -43,6 +47,9 @@ try {
       motion: anchor.hasAttribute("data-motion"),
       drift: anchor.hasAttribute("data-drift"),
       video: anchor.hasAttribute("data-video"),
+      // A page (or section) can ask for bare plaster at rest, so its
+      // carvings appear only where the cursor or the slow path reveals them.
+      rest: restOf(anchor),
     })),
   );
 } catch {

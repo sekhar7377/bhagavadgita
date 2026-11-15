@@ -324,7 +324,12 @@ The user said the film being copyrighted is fine, but everything must be in our 
   - `scripts/relief/make_video_relief.py` runs Depth Anything V2 per frame (DirectML, about 2½ min), normalises and smooths the depth over time, and writes `public/relief/charge-video.mp4`: shading above, height below, ping-pong looped.
   - `data-video` plays it as a moving carving once the still has loaded, only while on screen and never with reduced motion.
 - Tests: the cold-open test is replaced by "the home opening is five carved beats ending on the title"; the plain-wall test now aborts `charge-height.png`.
-- Not yet done: route B on other beats; the Wan clip's slight camera drift means the loop is a ping-pong rather than seamless.
+- **16 Nov follow-up (user feedback):**
+  - The ping-pong loop looked wrong. The clip is now forward-only; it plays once in step with the panel's entrance, then holds its last frame and never restarts.
+  - Home carvings were "completely visible". `<main data-rest="0">` now sets a per-panel `rest` (SceneSpec), so after the entrance rise every home carving settles back to bare plaster that only the cursor and the slow path reveal, like the Kurukṣetra wall. Other pages keep `REST_RELIEF` (0.42).
+  - The video's own shading follows the reveal field.
+  - Vite's dev server answers one range request with 416; this is harmless, as the 206 responses load the video.
+- Research for more video (16 Nov): Google Flow (Veo 3.1 Lite, about 50 free daily credits), Dreamina (Seedance, free daily credits, no watermark), Kling (trial credits), Wan 2.2 on free Colab/Kaggle T4 notebooks, and Wan2GP and FramePack locally. Local options need at least 6 GB of VRAM, more than this GTX 1650 has. The user will choose after reviewing the header video.
 
 ## Milestone 10: loading, entrances, painting size, bows (15 November 2026)
 

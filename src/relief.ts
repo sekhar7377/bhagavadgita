@@ -220,7 +220,7 @@ const wallFragment = /* glsl */ `
     if (uVideoOn > 0.0) {
       float shade = texture2D(tVideo, vec2(vUv.x, 0.5 + vUv.y * 0.5)).r;
       float moving = REST + (shade - 0.751) * 0.95;
-      o = mix(o, mix(REST, moving, smoothstep(0.0, 0.6, extrude)), uVideoOn * inside);
+      o = mix(o, mix(REST, moving, smoothstep(0.0, 0.8, extrude)), uVideoOn * inside);
     }
     float plaster = texture2D(tPlaster, vWorld.xy / 10.0).g;
     float wash = mix(1.0, 0.5, length(screenUv - vec2(0.0, 0.8)));
@@ -305,6 +305,8 @@ export type SceneSpec = {
   drift?: boolean;
   /** Play NAME-video.mp4 (shading above, height below) as a moving carving. */
   video?: boolean;
+  /** How much carving stays visible at rest (0 = bare plaster). */
+  rest?: number;
   /**
    * Optional camera for this panel, read every frame: scale (1 = the panel
    * as laid out), the panel point (uv) kept at the anchor's centre, and a
@@ -562,7 +564,7 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
     const video = document.createElement("video");
     video.src = `${import.meta.env.BASE_URL}relief/${state.spec.name}-video.mp4`;
     video.muted = true;
-    video.loop = true;
+    video.loop = false;
     video.playsInline = true;
     video.preload = "auto";
     video.crossOrigin = "anonymous";
@@ -710,10 +712,13 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
       }
       const distance = Math.abs(offset) / viewHeight;
       if (state.video) {
-        const onScreen = distance < 1.1 && !paused;
-        if (onScreen && state.video.paused)
-          void state.video.play().catch(() => {});
-        else if (!onScreen && !state.video.paused) state.video.pause();
+        // Played once, in step with the panel's entrance, then held on its
+        // last frame; it never runs backwards or restarts.
+        const video = state.video;
+        const go = state.riseTime >= 0 && distance < 1.1 && !paused;
+        if (go && video.paused && !video.ended)
+          void video.play().catch(() => {});
+        else if (!go && !video.paused) video.pause();
       }
       state.mesh.visible =
         state.status === "ready" &&
@@ -867,7 +872,8 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
     else if (t < RISE_IN + RISE_HOLD) rise = 1;
     else {
       const k = Math.min(1, (t - RISE_IN - RISE_HOLD) / RISE_SETTLE);
-      rise = 1 + (REST_RELIEF - 1) * ease(k);
+      const rest = state.spec.rest ?? REST_RELIEF;
+      rise = 1 + (rest - 1) * ease(k);
     }
     u.uRise.value = rise;
   };

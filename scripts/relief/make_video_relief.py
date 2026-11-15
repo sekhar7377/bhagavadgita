@@ -6,8 +6,8 @@ For every frame, Depth Anything V2 (ONNX, on the GPU when available)
 estimates depth, smoothed over time so the carving does not flicker. The
 output, public/relief/NAME-video.mp4, stacks two halves: the frame's own
 plaster shading on top and its height below, so one <video> element keeps
-both in sync. The clip is played forward and then backward, so it loops
-without a jump.
+both in sync. The clip runs forward once; the page plays it a single time
+and holds the last frame, so it never rocks back and forth.
 """
 
 import subprocess
@@ -66,7 +66,7 @@ def main():
         smoothed[i] = stack[a:b].mean(0)
 
     tmp = Path(tempfile.mkdtemp())
-    order = list(range(len(frames))) + list(range(len(frames) - 2, 0, -1))
+    order = list(range(len(frames)))
     for out_index, i in enumerate(order):
         shade = cv2.cvtColor(frames[i], cv2.COLOR_BGR2GRAY)
         shade = cv2.resize(shade, (OUT_W, OUT_H), interpolation=cv2.INTER_AREA)
