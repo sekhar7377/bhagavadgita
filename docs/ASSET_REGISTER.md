@@ -219,5 +219,6 @@ ChatGPT plaster renders (1774×887), each prompt ending with the OBJECT SPECIFIC
 ### G17 — New story carvings and site art (16 November 2026)
 
 - `amba`, `hidimba`, `jarasandha`, `hanuman`, `brahmastra` (one correction pass for Arjuna's bow) and `forestfire`: ChatGPT plaster renders with the object-spec block, each inspected at full size. Sources are in `docs/references/NAME-chatgpt.png`.
+- `roots`, `tree`, `tellers`: family-tree walls, ChatGPT plaster renders inspected at full size (Arjuna's bow in `tree` checked at 2×).
 - `public/social/*.jpg`: 1200×630 share cards cropped from our own carvings and header paintings.
 - `public/favicon.svg`: a hand-drawn chariot wheel, original.

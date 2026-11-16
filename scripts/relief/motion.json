@@ -270,5 +270,34 @@
       "strength": 0.4,
       "soft": 0.04
     }
+  ],
+  "roots": [
+    {
+      "kind": "drift",
+      "rect": [0.2, 0.62, 1.0, 0.95],
+      "strength": 0.4,
+      "soft": 0.04
+    },
+    {
+      "kind": "sway",
+      "rect": [0.35, 0.4, 0.55, 0.62],
+      "strength": 0.4,
+      "soft": 0.04
+    }
+  ],
+  "tellers": [
+    {
+      "kind": "flicker",
+      "rect": [0.44, 0.38, 0.52, 0.56],
+      "soft": 0.008
+    }
+  ],
+  "tree": [
+    {
+      "kind": "sway",
+      "rect": [0.0, 0.0, 1.0, 0.3],
+      "strength": 0.25,
+      "soft": 0.05
+    }
   ]
 }

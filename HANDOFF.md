@@ -331,7 +331,7 @@ The user's goal for the night:
   - `forestfire`: the elders' end in the forest, Ascent, before Part VIII.
   - The `brahmastra` render was redone once: the first had a hooked bow tip and a string to the hand.
   - Menus gained the new entries and were renumbered. The Ascent menu had skipped 07, and Jarā's entry was missing.
-- **Family tree:** `.lineage-walls` holds three 100svh carved walls behind the tree (`.lineage` min-height 300svh). The intended new carvings `roots`, `tree` and `tellers` (prompts are in the session's `window.__P`) were blocked by ChatGPT's usage limit (resets 04:30). Until then the walls use `vow`, `pots` and `sanjaya`.
+- **Family tree:** `.lineage-walls` holds three 100svh carved walls behind the tree (`.lineage` min-height 300svh). The walls carry three new carvings, generated after ChatGPT's usage limit reset and each inspected at full size: `roots` (Śantanu, Gaṅgā, Satyavatī, the boy Vyāsa), `tree` (a banyan with the Kauravas under one limb, the Pāṇḍavas and Draupadī under the other, and Karṇa alone at the trunk) and `tellers` (Vaiśampāyana telling the story at Janamejaya's sacrifice). Each has gentle living motion.
 - **Site polish:**
   - favicon (`public/favicon.svg`);
   - Open Graph and Twitter tags plus a canonical URL on every page, with 1200×630 cards in `public/social/`;

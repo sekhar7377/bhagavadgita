@@ -237,7 +237,7 @@ test("the home opening is five carved beats ending on the title", async ({
   await expect(page.locator('[data-scene="wheel"]')).toHaveCount(0);
   const beats = page.locator("main > section.scene[data-scene]");
   await expect(beats).toHaveCount(5);
-  await expect(page.locator("[data-motion]")).toHaveCount(5);
+  await expect(page.locator("main > section [data-motion], main > section[data-motion]")).toHaveCount(8);
   await expect(page.locator('[data-scene="walk"] h1')).toHaveText(
     "The Eighteen Eclipses.",
   );
