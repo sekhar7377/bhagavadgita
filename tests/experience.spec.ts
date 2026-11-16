@@ -1,15 +1,16 @@
 import { test, expect } from "@playwright/test";
 
-// Most tests visit as a returning reader who has already entered; the entry
-// title itself has its own test below.
+// The home page opens on the entry title; most tests step through it.
 test.beforeEach(async ({ page }, info) => {
   if (info.title.includes("entry title")) return;
   await page.addInitScript(() => {
-    try {
-      sessionStorage.setItem("mb-entered", "1");
-    } catch {
-      // ignore
-    }
+    // Enter as soon as the title is ready, as a visitor's tap would.
+    const tap = () => {
+      const loader = document.querySelector("#loader.is-ready");
+      if (loader) (loader as HTMLElement).click();
+      else requestAnimationFrame(tap);
+    };
+    addEventListener("DOMContentLoaded", tap);
   });
 });
 
@@ -17,7 +18,7 @@ test("the entry title decodes, then waits for a click to enter with sound", asyn
   page,
 }) => {
   await page.goto("/");
-  const enter = page.getByRole("button", { name: "Enter with sound" });
+  const enter = page.getByText("Enter with sound");
   await expect(page.locator(".entry-letter")).toHaveCount(11);
   await expect(enter).toBeVisible({ timeout: 30000 });
   await expect(page.locator(".entry-word")).toHaveAttribute(
@@ -244,7 +245,7 @@ test("relief data failing to load leaves a plain wall and a usable page", async 
 test("intro loader counts up, releases scroll and offers sound", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/sabha/");
   const loader = page.locator("#loader");
   // The prompt is a real button, so keyboard and screen readers can use it.
   await expect(

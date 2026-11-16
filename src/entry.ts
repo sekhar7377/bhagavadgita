@@ -4,10 +4,10 @@
  * (Devanagari, Bengali, Gurmukhi, Gujarati, Odia, Tamil, Telugu, Kannada,
  * Malayalam) and locks into place, left to right, on the white plaster.
  * The subtitle follows, and only when the title is complete and the wall
- * has loaded does "Enter with sound" appear. Entering is always a click.
+ * has loaded does the small "Enter with sound" line appear. A tap or click
+ * anywhere enters.
  *
- * Once a visitor has entered in this browser tab, returning to the home
- * page from a chapter skips the gate and plays the short loader instead.
+ * It plays on every load of the home page.
  */
 // NFC keeps Ā as one letter (a decomposed macron would get its own slot).
 const TITLE = "MAHĀBHĀRATA".normalize("NFC");
@@ -61,16 +61,6 @@ const GLYPHS = [
   "ര",
   "ത", // Malayalam
 ];
-const ENTERED = "mb-entered";
-
-export function entryWasSeen() {
-  try {
-    return sessionStorage.getItem(ENTERED) === "1";
-  } catch {
-    return false;
-  }
-}
-
 export function mountEntry(options: {
   loader: HTMLElement;
   reducedMotion: boolean;
@@ -148,11 +138,6 @@ export function mountEntry(options: {
     if (entered || !loader.classList.contains("is-ready")) return;
     event.stopPropagation();
     entered = true;
-    try {
-      sessionStorage.setItem(ENTERED, "1");
-    } catch {
-      // Private mode: the gate simply shows again next time.
-    }
     onEnter();
   };
   // A click anywhere on the finished title page enters, as does the button

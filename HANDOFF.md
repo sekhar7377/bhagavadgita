@@ -310,7 +310,11 @@ The user gave a reference film title sequence: each letter flickers through Indi
 - `src/entry.ts` + `.entry` markup in `index.html`. MAHĀBHĀRATA decodes through Devanagari, Bengali, Gurmukhi, Gujarati, Odia, Tamil, Telugu, Kannada and Malayalam glyphs (a 260 ms stagger and 700 ms of flicker per letter), then "The Eighteen Eclipses" fades in.
 - When the title is complete and the loader reports the wall is ready (`loader.isReady`), the "Enter with sound" button appears. A click on it, or anywhere on the finished page, enables sound, and `runLoader`'s new `gate` lets the intro lift.
 - Ā is drawn as A with a CSS bar, because the font's macron sat off-centre. The title is normalised to NFC so Ā stays one slot.
-- `sessionStorage['mb-entered']` skips the gate on later home visits in the same tab. Tests set it in `beforeEach`, except the new entry-title test.
+- **Follow-up from the user:**
+  - The title now plays on every home load; the sessionStorage skip was removed after the user's reload showed the old loader.
+  - "Enter with sound" is a small breathing text line, not a pill button; a tap anywhere enters.
+  - The relief does not render or simulate while `html.is-loading` covers the page, though it still calls `place()` so panels load. Measured worst frame during the entry: 172 ms before, 5 ms after.
+  - Tests step through the entry in `beforeEach` by clicking the ready loader. The old counting-loader test now runs on `/sabha/`.
 - Reduced motion shows the title at once. The CSS 12 s auto-hide is disabled on the gated loader.
 
 ## Milestone 17: every chariot redone as a true war ratha, with Gemini (16 November 2026)

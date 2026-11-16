@@ -978,7 +978,12 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
     const rawMs = now - (lastTime || now);
     const dtMs = Math.min(64, rawMs);
     lastTime = now;
-    if (!document.hidden && !contextLost) {
+    // Nothing is visible under the intro, so the wall does no work until it
+    // lifts (keeps the entry title smooth on slower GPUs).
+    const covered = document.documentElement.classList.contains("is-loading");
+    // Still place panels while covered: that is what starts their loading.
+    if (covered && !contextLost) place();
+    if (!document.hidden && !contextLost && !covered) {
       const dt = dtMs / 1000;
       place();
       shared.uTime.value = elapsed;
