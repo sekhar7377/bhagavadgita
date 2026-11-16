@@ -304,6 +304,21 @@ Pages built and tested: `/vana/` (Act IV), Parts V–VI on `/kurukshetra/`, `/sv
 - Memory notes `inspect-renders` and `realistic-scenes`.
 - Download images only by fetching the image itself (`window.__dl`). `models/take.sh` refuses files older than 3 minutes, after it once grabbed one of the user's own downloads (since restored).
 
+## Milestone 17: every chariot redone as a true war ratha, with Gemini (16 November 2026)
+
+The user approved redoing the eight older cart-like chariots: `karnaride`, `bhishmawheel`, `jayadratha`, `dronafall`, `karnawheel`, `ghatotkacha`, `sammohana` and `charge` (plus the true-colour `chargecolor` layer).
+- **Tool:** gemini.google.com, model 3.1 Pro with High thinking.
+  - Every prompt carries a rules block condensed from `docs/MAHABHARATA_VISUAL_REFERENCE.md`: ratha construction, two wheels only, mast emblems per hero, four horses on one pole.
+  - Long Gemini chats start silently dropping requests; start a new chat when that happens.
+- **Getting full-size images out of Gemini (2912×1440):**
+  - Chrome began blocking the page's downloads after several, and the page cannot post to localhost (CSP).
+  - Working route: a fetch hook captures the full-size blob from the "Download full-sized image" request, which is re-encoded to JPEG and base64. A page button is clicked to copy it to the clipboard, and `models/clipsave.ps1 NAME` decodes it into `~/Downloads/NAME-download.jpg`.
+  - `models/gfix.py` covers Gemini's corner sparkle with texture cloned from nearby; `take.sh` bakes.
+- **Fixes caught in inspection:**
+  - `jayadratha`: a second near-side wheel (a four-wheeled cart), so a single wheel was requested.
+  - `karnawheel`: a whole golden elephant emblem, which is Duryodhana's, so it was replaced with Karṇa's girth-rope.
+  - The `chargecolor` colour layer has its sparkle inpainted; its edges were checked against the plaster version (aligned).
+
 ## Milestone 16: more of the war, true war chariots (16 November 2026)
 
 - **Bridges:** all 11 are done and active, including the `b-warning` correction to long four-sided pāsaka dice.
