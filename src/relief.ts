@@ -328,6 +328,13 @@ export type SceneSpec = {
   /** Reveal the carving in true colour from NAME-color.webp. */
   color?: boolean;
   /**
+   * The figure's horizontal span in the panel (0..1 from the left). When the
+   * anchor holds a painting, the panel is shrunk and moved so that span
+   * stands whole in the margin beside it, instead of the painting covering
+   * the body and leaving a head poking out above it.
+   */
+  beside?: [number, number];
+  /**
    * Optional camera for this panel, read every frame: scale (1 = the panel
    * as laid out), the panel point (uv) kept at the anchor's centre, and a
    * lift that raises this panel's carving as if attention were on it.
@@ -783,6 +790,26 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
         const s = 1.05 + 0.035 * Math.sin(elapsed * 0.11);
         state.mesh.scale.set(s, s, Math.sqrt(s));
         state.mesh.position.x = Math.sin(elapsed * 0.07) * WALL_W * 0.018;
+      }
+      if (!shot && state.spec.beside) {
+        const art = state.spec.anchor.querySelector(".art-wrap");
+        const artLeft = art?.getBoundingClientRect().left ?? 0;
+        const [from, to] = state.spec.beside;
+        const panelPx = WALL_W / worldPerPixel;
+        const gap = 28;
+        const room = artLeft - gap - 12;
+        const s = Math.min(1, room / ((to - from) * panelPx));
+        // On narrow screens there is no margin to stand in: leave it as is.
+        if (s >= 0.4) {
+          const left = artLeft - gap - to * s * panelPx;
+          const centre = left + (s * panelPx) / 2;
+          state.mesh.scale.set(s, s, Math.sqrt(s));
+          state.mesh.position.x =
+            (centre - window.innerWidth / 2) * worldPerPixel;
+        } else {
+          state.mesh.scale.set(1, 1, 1);
+          state.mesh.position.x = 0;
+        }
       }
       if (shot) {
         // Keep the chosen point of the panel at the anchor's centre while

@@ -54,6 +54,9 @@ try {
       rest: restOf(anchor),
       bridge: anchor.hasAttribute("data-bridge"),
       color: anchor.hasAttribute("data-color"),
+      beside: anchor.dataset.beside
+        ? (anchor.dataset.beside.split(" ").map(Number) as [number, number])
+        : undefined,
     })),
   );
 } catch {
