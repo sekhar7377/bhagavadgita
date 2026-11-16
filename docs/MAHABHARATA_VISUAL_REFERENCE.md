@@ -1,4 +1,5 @@
 # Visual reference sheet: the Mahābhārata as Vyāsa describes it
+> **Correction (16 Nov 2026):** Arjuna's banner shows **Hanumān**. Vyāsa's own text has Hanumān promise Bhīma, in the Āraṇyaka Parva, that he will sit on Arjuna's banner and roar. The "[LATER TRADITION]" note below about Hanumān is wrong; always depict Hanumān, not a plain ape or monkey head.
 
 Compiled by Gemini (web search over the K. M. Ganguli translation) on 16 November 2026, at the user's request, as binding rules for every carving.
 Items marked [LATER TRADITION] are popular iconography not found in Vyāsa's text.
