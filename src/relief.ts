@@ -578,6 +578,10 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
     if (spec.bridge) {
       mesh.position.z = -0.0015;
       mesh.renderOrder = -0.5;
+      // Drawn first and never written to the depth buffer, so its relief can
+      // never rise through a neighbouring carving: when the cursor lifted
+      // both, the bridge's sand used to bury the figure beside it.
+      material.depthWrite = false;
     }
     scene.add(mesh);
     return {
