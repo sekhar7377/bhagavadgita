@@ -515,6 +515,16 @@ The user reported four problems; all are fixed and deployed.
   - Also fixed: `swayamvara` (the lower limb snaked into the pool) and `scene6` (hooked, then forked top tip).
   - Rule: zoom on each bow tip; both tips plain and matching, and the string visible from tip to tip.
 
+## Milestone 20: Viśvarūpa header (17 November 2026)
+
+At the user's request the first home carving is new: `vishvarupa` replaces `charge` as `#beginning`'s scene. The old `charge` assets are kept but unused.
+- **Source:** ChatGPT, in two passes, recorded in `docs/references/vishvarupa-chatgpt.png`. The second pass was an edit of the first.
+- **Subject:** Gītā ch. 11 on the first morning of Kurukṣetra. Kṛṣṇa's universal form, as Mahāviṣṇu, rises over Arjuna's ratha between the two armies.
+- **The universal form:** a tall jewelled kirīṭa crown with no peacock feather (Gītā 11.17, 11.46: "with crown, mace and discus"). Tiers of crowned faces, many arms holding Pāñcajanya, Sudarśana, Kaumodakī, a lotus, bows and swords. A galaxy, planets, mountains and rivers in his body, and streams of warriors flowing into him. Gods with joined palms at his flanks. The sun and moon are carved in the halo; his eyes are normal, open and serene.
+- **The chariot:** a ratha with one axle, four plumed white horses, and Hanumān (crowned, with mace) on the banner, streaming behind the direction of travel. Kṛṣṇa, as charioteer, alone wears the peacock feather. Arjuna stands with palms joined above his head and Gāṇḍīva laid down.
+- **Rejected first render:** sun and moon drawn literally as eyes (the user found them blind-looking), a peacock feather on the cosmic form (the user: that is Kṛṣṇa's, not Mahāviṣṇu's), wheels on two axle lines, and too tight a frame.
+- **Bake:** `make_scene.sh` ("full" separation). The 3:2 render sits centred on the 2:1 wall with plaster margins; the headline sits over the calm left sky.
+
 ## GPU speed-ups (14 November 2026)
 
 The user asked to use the GPU (GTX 1650) to speed up the work.
