@@ -171,6 +171,8 @@ const wallFragment = /* glsl */ `
   uniform float uBoost;
   uniform sampler2D tVideo;
   uniform float uVideoOn;
+  uniform sampler2D tColor;
+  uniform float uColorOn;
   varying vec2 vUv;
   varying vec3 vWorld;
 
@@ -227,6 +229,14 @@ const wallFragment = /* glsl */ `
     float tone = o * plaster + wash * 0.7 * 0.17;
     tone = tone * 0.6 + 0.4;
     vec3 color = vec3(tone);
+    // A coloured carving: where the relief is revealed it shows its true
+    // colours, lit by the same carved shading; at rest it stays plaster.
+    if (uColorOn > 0.5) {
+      vec3 albedo = texture2D(tColor, fuv).rgb;
+      float light = clamp(o / REST, 0.0, 1.6);
+      vec3 painted = albedo * (0.25 + 0.85 * light);
+      color = mix(color, painted, smoothstep(0.0, 0.55, extrude) * inside);
+    }
 
     // While plaster is moving, shadowed rims pick up a faint iridescence
     // whose hue follows the direction the surface faces. It fades with the
@@ -312,6 +322,11 @@ export type SceneSpec = {
   video?: boolean;
   /** How much carving stays visible at rest (0 = bare plaster). */
   rest?: number;
+  /** A bridge carving: drawn just behind its neighbours, so it only shows
+   *  in the gap between two scenes. */
+  bridge?: boolean;
+  /** Reveal the carving in true colour from NAME-color.webp. */
+  color?: boolean;
   /**
    * Optional camera for this panel, read every frame: scale (1 = the panel
    * as laid out), the panel point (uv) kept at the anchor's centre, and a
@@ -519,6 +534,8 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
     uMotionOn: { value: 0 },
     tVideo: { value: blank as THREE.Texture },
     uVideoOn: { value: 0 },
+    tColor: { value: blank as THREE.Texture },
+    uColorOn: { value: 0 },
   });
   const makeMaterial = (uniforms: Record<string, THREE.IUniform>) =>
     new THREE.ShaderMaterial({
@@ -551,6 +568,10 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
     const material = makeMaterial(uniforms);
     const mesh = new THREE.Mesh(panelGeometry, material);
     mesh.visible = false;
+    if (spec.bridge) {
+      mesh.position.z = -0.0015;
+      mesh.renderOrder = -0.5;
+    }
     scene.add(mesh);
     return {
       spec,
@@ -584,6 +605,7 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
       "tStage5",
       "tMotion",
       "tVideo",
+      "tColor",
     ]) {
       if (u[key].value !== blank) u[key].value.dispose();
       u[key].value = blank;
@@ -592,6 +614,7 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
     u.uRise.value = 0;
     u.uMotionOn.value = 0;
     u.uVideoOn.value = 0;
+    u.uColorOn.value = 0;
     state.video?.pause();
     state.video?.removeAttribute("src");
     state.video = undefined;
@@ -631,7 +654,28 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
     const u = state.uniforms;
     // A panel only counts as ready once its height AND all five lighting
     // stages have arrived; showing it earlier flashes half-lit plaster.
-    let pending = state.spec.motion ? 7 : 6;
+    let pending = (state.spec.motion ? 7 : 6) + (state.spec.color ? 1 : 0);
+    if (state.spec.color) {
+      const colorTexture = new THREE.Texture();
+      colorTexture.flipY = false;
+      colorTexture.colorSpace = THREE.NoColorSpace;
+      colorTexture.generateMipmaps = false;
+      colorTexture.minFilter = THREE.LinearFilter;
+      new THREE.ImageBitmapLoader()
+        .setOptions({ imageOrientation: "flipY", premultiplyAlpha: "none" })
+        .load(
+          `${import.meta.env.BASE_URL}relief/${name}-color.webp`,
+          (bitmap) => {
+            colorTexture.image = bitmap;
+            colorTexture.needsUpdate = true;
+            u.uColorOn.value = 1;
+            arrived();
+          },
+          undefined,
+          () => arrived(),
+        );
+      u.tColor.value = colorTexture;
+    }
 
     const arrived = () => {
       pending -= 1;
@@ -711,66 +755,59 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
   // so the reveal history must follow the carving, not the scroll position.
   let wallDelta = 0;
   const lastTops = new Map<SceneState, number>();
-  // The carvings form one continuous column at their natural size, each
-  // meeting the next edge to edge, so there is never blank wall between
-  // two carvings and nothing is cropped or zoomed. The column scrolls so
-  // that each carving is centred on the screen exactly when its own section
-  // is, and glides between neighbours in between.
   const place = () => {
     shared.uScrollWorld.value = window.scrollY * worldPerPixel;
     let nearest = Infinity;
     wallDelta = 0;
-    const panelH = WALL_H / worldPerPixel;
-    const rects = scenes.map((state) =>
-      state.spec.anchor.getBoundingClientRect(),
-    );
     scenes.forEach((state, index) => {
-      // A scene inside a closed branch has no box yet: hidden and unloaded.
-      if (rects[index].height === 0) state.mesh.visible = false;
-    });
-    const live = scenes
-      .map((state, index) => ({
-        state,
-        index,
-        centre: rects[index].top + rects[index].height / 2,
-      }))
-      .filter(({ index }) => rects[index].height > 0)
-      .sort((a, b) => a.centre - b.centre);
-    if (!live.length) return;
-    // Where the column stands: fractional panel index at the screen centre.
-    const middle = viewHeight / 2;
-    let position: number;
-    const last = live.length - 1;
-    if (middle <= live[0].centre) position = (middle - live[0].centre) / panelH;
-    else if (middle >= live[last].centre)
-      position = last + (middle - live[last].centre) / panelH;
-    else {
-      let k = 0;
-      while (k < last && live[k + 1].centre <= middle) k++;
-      const span = live[k + 1].centre - live[k].centre;
-      position = k + (middle - live[k].centre) / Math.max(1, span);
-    }
-    live.forEach(({ state, index }, order) => {
-      const offset = (order - position) * panelH;
-      const previous = lastTops.get(state);
-      lastTops.set(state, offset);
+      const rect = state.spec.anchor.getBoundingClientRect();
+      // A scene inside a closed branch has no box yet: keep it hidden and
+      // unloaded until the visitor opens that branch.
+      if (rect.height === 0) {
+        state.mesh.visible = false;
+        return;
+      }
+      const offset = rect.top + rect.height / 2 - viewHeight / 2;
+      const previousTop = lastTops.get(state);
+      lastTops.set(state, rect.top);
+      const pinnedNow = state.spec.shot?.()?.pinned;
       if (Math.abs(offset) < nearest) {
         nearest = Math.abs(offset);
-        wallDelta = previous === undefined ? 0 : previous - offset;
+        wallDelta =
+          pinnedNow || previousTop === undefined ? 0 : previousTop - rect.top;
       }
-      state.mesh.scale.set(1, 1, 1);
-      state.mesh.position.x = 0;
       state.mesh.position.y = -offset * worldPerPixel;
+      const shot = state.spec.shot?.();
+      if (!shot && state.spec.drift) {
+        // A slow breathing dolly: a little closer, a little across, never still.
+        const s = 1.05 + 0.035 * Math.sin(elapsed * 0.11);
+        state.mesh.scale.set(s, s, Math.sqrt(s));
+        state.mesh.position.x = Math.sin(elapsed * 0.07) * WALL_W * 0.018;
+      }
+      if (shot) {
+        // Keep the chosen point of the panel at the anchor's centre while
+        // scaling, so the camera appears to pull back from that point.
+        state.mesh.scale.set(shot.scale, shot.scale, Math.sqrt(shot.scale));
+        state.mesh.position.x = -(shot.focusX - 0.5) * WALL_W * shot.scale;
+        state.mesh.position.y -= (shot.focusY - 0.5) * WALL_H * shot.scale;
+        state.uniforms.uLift.value = shot.lift;
+        state.uniforms.uPresence.value = shot.presence ?? 1;
+        if (shot.pinned)
+          state.mesh.position.y = -(shot.focusY - 0.5) * WALL_H * shot.scale;
+      }
       const distance = Math.abs(offset) / viewHeight;
       if (state.video) {
+        // Played once, in step with the panel's entrance, then held on its
+        // last frame; it never runs backwards or restarts.
         const video = state.video;
         const go = state.riseTime >= 0 && distance < 1.1 && !paused;
         if (go && video.paused && !video.ended)
           void video.play().catch(() => {});
         else if (!go && !video.paused) video.pause();
       }
-      const reach = (viewHeight / 2 + panelH / 2) / viewHeight + 0.05;
-      state.mesh.visible = state.status === "ready" && distance < reach;
+      state.mesh.visible =
+        state.status === "ready" &&
+        (shot?.pinned ? (shot.presence ?? 1) > 0.002 : distance < 1.2);
       if (distance < LOAD_AHEAD && state.status === "idle")
         loadScene(state, index === 0);
       else if (
@@ -779,6 +816,8 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
         index !== 0
       )
         releaseScene(state);
+      // Leaving the screen re-arms the entrance, so a panel rises again
+      // each time the visitor comes back to it.
       if (distance > 1.1) state.riseTime = -1;
     });
   };

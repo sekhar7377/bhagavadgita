@@ -51,6 +51,8 @@ try {
       // A page (or section) can ask for bare plaster at rest, so its
       // carvings appear only where the cursor or the slow path reveals them.
       rest: restOf(anchor),
+      bridge: anchor.hasAttribute("data-bridge"),
+      color: anchor.hasAttribute("data-color"),
     })),
   );
 } catch {

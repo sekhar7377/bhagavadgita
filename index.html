@@ -96,7 +96,8 @@
       <section
         class="scene scene--left opening-beat cursor-zone"
         id="beginning"
-        data-scene="charge"
+        data-scene="chargecolor"
+        data-color
         aria-labelledby="hero-title"
       >
         <span class="cursor-dot" aria-hidden="true"></span>
@@ -151,7 +152,14 @@
       </section>
       <!-- The chapters of the epic. Each painting opens its own carved wall. -->
       <section class="chapters" id="chapters" aria-labelledby="chapters-title">
-        <p class="eyebrow" id="chapters-title">THE CHAPTERS OF THE WALL</p>
+        <p
+          class="eyebrow"
+          id="chapters-title"
+          data-scene="b-chapters"
+          data-bridge
+        >
+          THE CHAPTERS OF THE WALL
+        </p>
         <div class="chapter-list">
           <div class="chapter-stage cursor-zone" data-scene="vow">
             <span class="cursor-dot" aria-hidden="true"></span>
@@ -287,7 +295,9 @@
             <span class="cursor-dot"></span>
           </div>
         </div>
-        <p class="eyebrow">THE HOUSE OF KURU</p>
+        <p class="eyebrow" data-scene="b-lineage" data-bridge>
+          THE HOUSE OF KURU
+        </p>
         <h2 id="lineage-title" class="lineage-title" data-float>
           One family.<br /><em>Seven generations to the war and after.</em>
         </h2>

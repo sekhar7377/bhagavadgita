@@ -304,6 +304,23 @@ Pages built and tested: `/vana/` (Act IV), Parts V–VI on `/kurukshetra/`, `/sv
 - Memory notes `inspect-renders` and `realistic-scenes`.
 - Download images only by fetching the image itself (`window.__dl`). `models/take.sh` refuses files older than 3 minutes, after it once grabbed one of the user's own downloads (since restored).
 
+## Milestone 15: bridge carvings in the gaps, and a true-colour trial (16 November 2026)
+
+The user rejected both the zoom-to-cover and the continuous column ("don't connect everything, it hurts the experience"). They asked for new creative carvings that fill only the gaps between scenes.
+
+- `place()` is restored to the original anchor-centred rule from 6dd2f0d: natural size, each carving centred on its own section.
+- **Bridges:**
+  - Gap map from `tests/gaps.mjs 1440 810`: 11 desktop gaps. These are the "story divides" sections, the Gītā intro, the Kurukṣetra gateway, and two seams on the home page.
+  - Each gap element carries `data-scene="b-…" data-bridge`. A bridge mesh sits at z −0.0015, so its neighbours draw over it and it only shows in the gap.
+  - Prompts put the content in the middle 45% band, with soft carved sky and ground fading out.
+  - Done: `b-chapters` (footprints from the wheel to the Gaṅgā at dawn), `b-lineage` (the Gaṅgā's descent from the glacier), `b-firstborn` (a banyan fork: a basket on the river and the road to Gandhāra), `b-altar` (the clay teacher in the forest and the sacrificial fire).
+  - Still to generate: `b-warning`, `b-lake`, `b-sight`, `b-armies`, `b-hill`, `b-evening`, `b-moonriver`. These are parked as `data-pending-bridge` in the HTML, and their prompts are in the session's `window.__P`. To activate one, bake it and change its attribute back to `data-scene="NAME" data-bridge`.
+- **True-colour trial (user request: one visual "with reality colour", the rest unchanged):**
+  - `chargecolor` is a colour repaint of `charge` with the identical composition. It was baked from the colour image itself, so the depth aligns exactly.
+  - `public/relief/chargecolor-color.webp` is the albedo; `data-color` loads it into `tColor`.
+  - The shader mixes `albedo × relief light` in where the carving is revealed. At rest the wall is still plaster.
+  - It is used as the first home beat, and the plain `charge` assets remain.
+
 ## Milestone 14: a continuous wall, and robustness off the happy path (16 November 2026)
 
 The user's requests:
