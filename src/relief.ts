@@ -28,13 +28,13 @@ const CAMERA_DISTANCE = 15;
 const CAMERA_FOV = 30;
 // Panels start loading this many screen heights ahead, and are released
 // beyond the second distance, so scrolling rarely meets an unloaded wall.
-const LOAD_AHEAD = 2.4;
-const RELEASE_BEYOND = 5.5;
+const LOAD_AHEAD = 1.8;
+const RELEASE_BEYOND = 3;
 // Entrance of each carving: seconds to rise, hold, settle; resting depth.
 const RISE_IN = 2.4;
 const RISE_HOLD = 1.4;
 const RISE_SETTLE = 2.6;
-const REST_RELIEF = 0.42;
+const REST_RELIEF = 0;
 
 const quadVertex = /* glsl */ `
   varying vec2 vUv;
@@ -209,11 +209,11 @@ const wallFragment = /* glsl */ `
     float inside = step(0.0, vUv.x) * step(vUv.x, 1.0) * step(0.0, vUv.y) * step(vUv.y, 1.0);
     vec2 fuv = flow(vUv);
     float o = REST;
-    o = mix(o, texture2D(tStage1, fuv).g, smoothstep(0.0, 0.2, extrude) * inside);
-    o = mix(o, texture2D(tStage2, fuv).g, smoothstep(0.2, 0.4, extrude) * inside);
-    o = mix(o, texture2D(tStage3, fuv).g, smoothstep(0.4, 0.6, extrude) * inside);
-    o = mix(o, texture2D(tStage4, fuv).g, smoothstep(0.6, 0.8, extrude) * inside);
-    o = mix(o, texture2D(tStage5, fuv).g, smoothstep(0.8, 1.0, extrude) * inside);
+    o = mix(o, texture2D(tStage1, fuv).r, smoothstep(0.0, 0.2, extrude) * inside);
+    o = mix(o, texture2D(tStage2, fuv).r, smoothstep(0.2, 0.4, extrude) * inside);
+    o = mix(o, texture2D(tStage3, fuv).r, smoothstep(0.4, 0.6, extrude) * inside);
+    o = mix(o, texture2D(tStage4, fuv).r, smoothstep(0.6, 0.8, extrude) * inside);
+    o = mix(o, texture2D(tStage5, fuv).r, smoothstep(0.8, 1.0, extrude) * inside);
 
     // A video carving brings its own moving plaster shading (upper half),
     // levelled to the baked stages so it sits in the same wall.
@@ -256,42 +256,47 @@ type Segment = {
   jitter: number[];
 };
 
-async function loadHeight(url: string, signal: AbortSignal) {
-  const response = await fetch(url, { signal });
-  if (!response.ok) throw new Error(`height ${response.status}`);
-  const bitmap = await createImageBitmap(await response.blob(), {
-    colorSpaceConversion: "none",
-    premultiplyAlpha: "none",
-  });
-  const canvas = document.createElement("canvas");
-  canvas.width = bitmap.width;
-  canvas.height = bitmap.height;
-  const context = canvas.getContext("2d", { willReadFrequently: true })!;
-  context.drawImage(bitmap, 0, 0);
-  const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
-  const data = new Uint16Array(canvas.width * canvas.height);
-  // Rows are flipped so that v = 0 is the bottom of the wall.
-  for (let y = 0; y < canvas.height; y++) {
-    const source = (canvas.height - 1 - y) * canvas.width * 4;
-    const target = y * canvas.width;
-    for (let x = 0; x < canvas.width; x++) {
-      const value =
-        (pixels[source + x * 4] * 256 + pixels[source + x * 4 + 1]) / 65535;
-      data[target + x] = THREE.DataUtils.toHalfFloat(value);
-    }
+// Height maps decode in a worker; one worker serves the whole page.
+let heightWorker: Worker | undefined;
+let heightJob = 0;
+const heightJobs = new Map<
+  number,
+  { resolve: (t: THREE.DataTexture) => void; reject: (e: Error) => void }
+>();
+function loadHeight(url: string, signal: AbortSignal) {
+  if (!heightWorker) {
+    heightWorker = new Worker(new URL("./height-worker.ts", import.meta.url), {
+      type: "module",
+    });
+    heightWorker.onmessage = (event) => {
+      const { id, width, height, data, error } = event.data;
+      const job = heightJobs.get(id);
+      if (!job) return;
+      heightJobs.delete(id);
+      if (error) return job.reject(new Error(error));
+      const texture = new THREE.DataTexture(
+        data,
+        width,
+        height,
+        THREE.RedFormat,
+        THREE.HalfFloatType,
+      );
+      texture.minFilter = THREE.LinearFilter;
+      texture.magFilter = THREE.LinearFilter;
+      texture.needsUpdate = true;
+      job.resolve(texture);
+    };
   }
-  bitmap.close();
-  const texture = new THREE.DataTexture(
-    data,
-    canvas.width,
-    canvas.height,
-    THREE.RedFormat,
-    THREE.HalfFloatType,
-  );
-  texture.minFilter = THREE.LinearFilter;
-  texture.magFilter = THREE.LinearFilter;
-  texture.needsUpdate = true;
-  return texture;
+  const id = ++heightJob;
+  const absolute = new URL(url, window.location.href).href;
+  return new Promise<THREE.DataTexture>((resolve, reject) => {
+    heightJobs.set(id, { resolve, reject });
+    signal.addEventListener("abort", () => {
+      heightJobs.delete(id);
+      reject(new Error("aborted"));
+    });
+    heightWorker!.postMessage({ id, url: absolute });
+  });
 }
 
 export type SceneSpec = {
@@ -372,9 +377,12 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
 
   container.dataset.reliefState = "loading";
   delete container.dataset.fallback;
-  // Sharp but affordable: the plaster is soft, so 1.5x is visually enough,
-  // and the frame loop lowers it further on a struggling GPU.
-  let pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
+  // Sharp but affordable: the plaster is soft, so 1.5x (1.25x on touch
+  // devices, whose GPUs are smaller) is visually enough.
+  const pixelRatio = Math.min(
+    window.devicePixelRatio || 1,
+    matchMedia("(pointer: coarse)").matches ? 1.25 : 1.5,
+  );
   renderer.setPixelRatio(pixelRatio);
   renderer.setClearColor("#c8c8c8");
   renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
@@ -409,6 +417,14 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
   const data = (url: string, repeat: boolean, onLoad?: () => void) => {
     const texture = new THREE.Texture();
     texture.flipY = false;
+    if (!repeat) {
+      // Panels are shown near 1:1, so mipmaps only cost GPU memory.
+      texture.generateMipmaps = false;
+      texture.minFilter = THREE.LinearFilter;
+      // The baked stages are greyscale: one channel is a quarter of the
+      // GPU memory of RGBA, which keeps phones from losing the context.
+      texture.format = THREE.RedFormat;
+    }
     texture.colorSpace = THREE.NoColorSpace;
     if (repeat) texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
     texture.addEventListener("dispose", () => {
@@ -853,6 +869,10 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
     if (disposed) return;
     contextLost = false;
     staleInput = true;
+    // Every GPU resource was lost with the context: load the panels again.
+    scenes.forEach((state) => {
+      if (state.status !== "idle") releaseScene(state);
+    });
     render();
     renderer.domElement.style.visibility = "visible";
     delete container.dataset.fallback;
@@ -887,7 +907,7 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
     state.riseTime += dt;
     // Pages that rest as bare plaster show nothing until the cursor or the
     // slow path reveals it, not even an entrance.
-    if (state.spec.rest === 0) {
+    if ((state.spec.rest ?? REST_RELIEF) === 0) {
       u.uRise.value = 0;
       return;
     }
@@ -904,36 +924,11 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
     u.uRise.value = rise;
   };
 
-  let frameAverage = 16;
-  let framesSinceChange = 0;
   function tick(now: number) {
     if (disposed) return;
     const rawMs = now - (lastTime || now);
     const dtMs = Math.min(64, rawMs);
     lastTime = now;
-    // Adaptive resolution: if frames run slow for about a second, render
-    // fewer pixels (never below 0.75x); recover when there is headroom.
-    if (rawMs > 0 && rawMs < 200 && !document.hidden) {
-      frameAverage += (rawMs - frameAverage) * 0.05;
-      framesSinceChange += 1;
-      if (framesSinceChange > 60) {
-        const next =
-          frameAverage > 24
-            ? Math.max(0.75, pixelRatio - 0.25)
-            : frameAverage < 14
-              ? Math.min(
-                  Math.min(window.devicePixelRatio || 1, 1.5),
-                  pixelRatio + 0.25,
-                )
-              : pixelRatio;
-        if (next !== pixelRatio) {
-          pixelRatio = next;
-          renderer.setPixelRatio(pixelRatio);
-          resize();
-          framesSinceChange = 0;
-        }
-      }
-    }
     if (!document.hidden && !contextLost) {
       const dt = dtMs / 1000;
       place();

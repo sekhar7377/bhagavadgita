@@ -225,7 +225,7 @@ test("intro loader counts up, releases scroll and offers sound", async ({
   await expect(toggle).toHaveAttribute("aria-pressed", "false");
 });
 
-test("the home opening is five carved beats ending on the title", async ({
+test("the home opening is five static carved beats ending on the title", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
@@ -237,7 +237,8 @@ test("the home opening is five carved beats ending on the title", async ({
   await expect(page.locator('[data-scene="wheel"]')).toHaveCount(0);
   const beats = page.locator("main > section.scene[data-scene]");
   await expect(beats).toHaveCount(5);
-  await expect(page.locator("main > section [data-motion], main > section[data-motion]")).toHaveCount(8);
+  // Static carvings only: no video and no animated parts.
+  await expect(page.locator("[data-video], [data-motion]")).toHaveCount(0);
   await expect(page.locator('[data-scene="walk"] h1')).toHaveText(
     "The Eighteen Eclipses.",
   );

@@ -129,7 +129,8 @@ function prefetchWall() {
   const connection = (
     navigator as Navigator & { connection?: { saveData?: boolean } }
   ).connection;
-  if (connection?.saveData) return;
+  // Phones keep their memory and data for the scenes being read.
+  if (connection?.saveData || matchMedia("(pointer: coarse)").matches) return;
   const base = `${import.meta.env.BASE_URL}relief/`;
   const urls = sceneAnchors
     .filter((anchor) => !anchor.closest("details:not([open])"))

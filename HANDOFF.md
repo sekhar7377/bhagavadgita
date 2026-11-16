@@ -304,6 +304,28 @@ Pages built and tested: `/vana/` (Act IV), Parts V–VI on `/kurukshetra/`, `/sv
 - Memory notes `inspect-renders` and `realistic-scenes`.
 - Download images only by fetching the image itself (`window.__dl`). `models/take.sh` refuses files older than 3 minutes, after it once grabbed one of the user's own downloads (since restored).
 
+## Milestone 13: static carvings, hidden at rest everywhere, no context loss (16 November 2026)
+
+The user reported, from mobile:
+- remove the header motion video and keep high-quality static visuals, like the rest of the site;
+- carvings inside the chapters showed fully;
+- after a while the effect stopped working;
+- scrolling still lagged;
+- white spaces appeared.
+
+- **Static:** removed every `data-video`, `data-motion` and `data-drift` from all pages. The engine support and the `scripts/relief/make_motion.py` and `make_video_relief.py` tools remain, unused.
+- **Hidden at rest everywhere:** `REST_RELIEF` is now 0 and the entrance rise is skipped on every page. Each carving shows only where the cursor or the slow automatic path reveals it, like the original Kurukṣetra wall.
+- **Effect dying after a while:** the cause was GPU memory. Each panel uploaded five RGBA 2304×1152 stages with mipmaps (about 70 MB), and several were resident at once, so phones lost the WebGL context and the page fell back to flat images (the "fully revealed" and "white" look). The fix:
+  - stages upload as single-channel `RedFormat` (they are greyscale; the shader reads `.r`) with no mipmaps, about 13 MB per panel;
+  - load-ahead is 1.8 screens and release is beyond 3;
+  - the pixel ratio is fixed at 1.5 (1.25 on touch);
+  - a restored context reloads every panel;
+  - no background prefetch on touch devices.
+- **Lag:** the 16-bit height-map decode and half-float conversion ran on the main thread on every panel load (up to about 480 ms long tasks). It now runs in `src/height-worker.ts`.
+  - Measured on the GPU: Kurukṣetra worst frame 7.5 ms, 0 long tasks.
+  - `tests/stress.mjs` (3× full scroll on phone and desktop): 0 context losses, no fallback.
+  - `tests/shot.mjs` captures a scene at rest and revealed.
+
 ## Milestone 12: polish pass for the award submission (16 November 2026, overnight)
 
 The user's goal for the night:
