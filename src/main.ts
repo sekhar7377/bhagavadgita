@@ -10,6 +10,7 @@ import { mountFloatingType } from "./float";
 import { runLoader } from "./loader";
 import { createSound } from "./sound";
 import { mountColdOpen } from "./coldopen";
+import { mountResilience } from "./resilience";
 
 // One wall for the whole page: every [data-scene] section anchors a carved
 // panel on a single fixed canvas, in story order.
@@ -292,6 +293,13 @@ function artworkFailed() {
 }
 artwork?.addEventListener("error", artworkFailed);
 if (artwork?.complete && artwork.naturalWidth === 0) artworkFailed();
+mountResilience({
+  sound,
+  wake() {
+    relief?.wake();
+    lenis?.resize();
+  },
+});
 if (import.meta.hot)
   import.meta.hot.dispose(() => {
     relief?.dispose();

@@ -1,0 +1,22 @@
+{
+ "name": "Mahābhārata — The Eighteen Eclipses",
+ "short_name": "Mahābhārata",
+ "start_url": "/bhagavadgita/",
+ "scope": "/bhagavadgita/",
+ "display": "standalone",
+ "background_color": "#d4d1ca",
+ "theme_color": "#cfcdc7",
+ "icons": [
+  {
+   "src": "/bhagavadgita/icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png"
+  },
+  {
+   "src": "/bhagavadgita/icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any maskable"
+  }
+ ]
+}

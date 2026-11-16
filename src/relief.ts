@@ -350,7 +350,12 @@ type SceneState = {
  * away. The first scene drives the container's ready/plain state.
  */
 export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
-  const noop = { dispose() {}, setPaused(_: boolean) {}, reveal() {} };
+  const noop = {
+    dispose() {},
+    setPaused(_: boolean) {},
+    reveal() {},
+    wake() {},
+  };
   let renderer: THREE.WebGLRenderer;
   try {
     renderer = new THREE.WebGLRenderer({
@@ -706,59 +711,81 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
   // so the reveal history must follow the carving, not the scroll position.
   let wallDelta = 0;
   const lastTops = new Map<SceneState, number>();
+  // Each carving owns a stretch of the page, from its own section to the
+  // next carving's section (so choice cards, gateways and long text have a
+  // carving behind them too). While that stretch fills the screen the
+  // carving stays fixed and covers the whole view, like a wall seen through
+  // a window; at the edges it slides away as the next one slides in, edge to
+  // edge, so the wall never shows a blank gap.
   const place = () => {
     shared.uScrollWorld.value = window.scrollY * worldPerPixel;
     let nearest = Infinity;
     wallDelta = 0;
+    const panelW = WALL_W / worldPerPixel;
+    const panelH = WALL_H / worldPerPixel;
+    const viewWidth = window.innerWidth;
+    const cover = Math.max(1, viewHeight / panelH, viewWidth / panelW) * 1.01;
+    const coverH = panelH * cover;
+    const rects = scenes.map((state) =>
+      state.spec.anchor.getBoundingClientRect(),
+    );
+    const live = scenes
+      .map((state, index) => ({ state, index, rect: rects[index] }))
+      .filter(({ rect }) => rect.height > 0)
+      .sort((a, b) => a.rect.top - b.rect.top);
+    const pageTop = -window.scrollY;
+    const footer = document.querySelector("footer");
+    const pageEnd = footer
+      ? footer.getBoundingClientRect().top
+      : document.documentElement.scrollHeight - window.scrollY;
     scenes.forEach((state, index) => {
-      const rect = state.spec.anchor.getBoundingClientRect();
-      // A scene inside a closed branch has no box yet: keep it hidden and
-      // unloaded until the visitor opens that branch.
-      if (rect.height === 0) {
+      if (rects[index].height === 0) {
+        // A scene inside a closed branch has no box yet: hidden and unloaded.
         state.mesh.visible = false;
-        return;
       }
-      const offset = rect.top + rect.height / 2 - viewHeight / 2;
-      const previousTop = lastTops.get(state);
-      lastTops.set(state, rect.top);
-      const pinnedNow = state.spec.shot?.()?.pinned;
+    });
+    live.forEach(({ state, index, rect }, order) => {
+      const start = order === 0 ? Math.min(rect.top, pageTop) : rect.top;
+      const next = live[order + 1];
+      const end = next ? next.rect.top : Math.max(rect.bottom, pageEnd);
+      const span = end - start;
+      // Sticky inside its stretch, centred on the screen.
+      const centre =
+        span >= coverH
+          ? Math.min(
+              Math.max(viewHeight / 2, start + coverH / 2),
+              end - coverH / 2,
+            )
+          : start + span / 2;
+      const offset = centre - viewHeight / 2;
+      const previous = lastTops.get(state);
+      lastTops.set(state, centre);
       if (Math.abs(offset) < nearest) {
         nearest = Math.abs(offset);
-        wallDelta =
-          pinnedNow || previousTop === undefined ? 0 : previousTop - rect.top;
+        wallDelta = previous === undefined ? 0 : previous - centre;
       }
+      state.mesh.scale.set(cover, cover, Math.sqrt(cover));
+      state.mesh.position.x = 0;
       state.mesh.position.y = -offset * worldPerPixel;
       const shot = state.spec.shot?.();
-      if (!shot && state.spec.drift) {
-        // A slow breathing dolly: a little closer, a little across, never still.
-        const s = 1.05 + 0.035 * Math.sin(elapsed * 0.11);
-        state.mesh.scale.set(s, s, Math.sqrt(s));
-        state.mesh.position.x = Math.sin(elapsed * 0.07) * WALL_W * 0.018;
-      }
       if (shot) {
-        // Keep the chosen point of the panel at the anchor's centre while
-        // scaling, so the camera appears to pull back from that point.
         state.mesh.scale.set(shot.scale, shot.scale, Math.sqrt(shot.scale));
         state.mesh.position.x = -(shot.focusX - 0.5) * WALL_W * shot.scale;
         state.mesh.position.y -= (shot.focusY - 0.5) * WALL_H * shot.scale;
         state.uniforms.uLift.value = shot.lift;
         state.uniforms.uPresence.value = shot.presence ?? 1;
-        if (shot.pinned)
-          state.mesh.position.y = -(shot.focusY - 0.5) * WALL_H * shot.scale;
       }
-      const distance = Math.abs(offset) / viewHeight;
+      // How far (in screens) the carving is from covering the view.
+      const distance =
+        Math.max(0, Math.abs(offset) - (coverH - viewHeight) / 2) / viewHeight;
       if (state.video) {
-        // Played once, in step with the panel's entrance, then held on its
-        // last frame; it never runs backwards or restarts.
         const video = state.video;
         const go = state.riseTime >= 0 && distance < 1.1 && !paused;
         if (go && video.paused && !video.ended)
           void video.play().catch(() => {});
         else if (!go && !video.paused) video.pause();
       }
-      state.mesh.visible =
-        state.status === "ready" &&
-        (shot?.pinned ? (shot.presence ?? 1) > 0.002 : distance < 1.2);
+      state.mesh.visible = state.status === "ready" && distance < 1.05;
       if (distance < LOAD_AHEAD && state.status === "idle")
         loadScene(state, index === 0);
       else if (
@@ -767,8 +794,6 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
         index !== 0
       )
         releaseScene(state);
-      // Leaving the screen re-arms the entrance, so a panel rises again
-      // each time the visitor comes back to it.
       if (distance > 1.1) state.riseTime = -1;
     });
   };
@@ -988,6 +1013,12 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
       staleInput = true;
       shared.uStill.value = paused ? 1 : 0;
       render();
+    },
+    /** Back from a hidden tab: drop stale pointer history and big frame gaps. */
+    wake() {
+      staleInput = true;
+      lastTime = 0;
+      if (!contextLost) render();
     },
     /** Start the carvings' entrances (called as the intro lifts). */
     reveal() {

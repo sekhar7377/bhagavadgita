@@ -304,6 +304,38 @@ Pages built and tested: `/vana/` (Act IV), Parts V–VI on `/kurukshetra/`, `/sv
 - Memory notes `inspect-renders` and `realistic-scenes`.
 - Download images only by fetching the image itself (`window.__dl`). `models/take.sh` refuses files older than 3 minutes, after it once grabbed one of the user's own downloads (since restored).
 
+## Milestone 14: a continuous wall, and robustness off the happy path (16 November 2026)
+
+The user's requests:
+- no white spaces between carvings;
+- check the reference site;
+- make the site work at any time: returning after leaving, no internet, server down;
+- cover every front-end rule.
+
+- **Continuous wall (`place()` in `src/relief.ts`):**
+  - The problem, measured with `tests/gaps.mjs` (old rule): on phones about half of each page had no carving behind it, because a 2:1 panel fitted to a 390 px width is only 473 px tall. On desktop, 5–13% was uncovered (choice cards, gateways, the Gītā intro).
+  - Each carving now owns the stretch from its section to the next carving's section. It is scaled to cover the whole view (`cover = max(1, vh/panelH, vw/panelW)`) and stays fixed (sticky) while that stretch fills the screen, then hands over edge to edge.
+  - `wallDelta` follows the panel's on-screen centre, so the reveal stays with the carving.
+  - Checked with `tests/strip.mjs` (reduced motion shows every carving): continuous on phone and desktop.
+- **Leaving and returning (`src/resilience.ts`):**
+  - On hide, sound fades out and resumes on return.
+  - `relief.wake()` drops stale pointer history and the frame gap; Lenis resizes.
+  - The same happens on bfcache `pageshow`.
+- **No internet / server down (`public/sw.js`, registered in production only, scope = base):**
+  - Pages are network-first, with the cached copy as fallback, then `offline.html`.
+  - Hashed `/assets/` are cache-first.
+  - Carvings, paintings and social images are stale-while-revalidate, so redone carvings with the same name refresh.
+  - The cache is capped at 400 entries; the shell (all six pages, plaster, noise, favicon) is precached.
+  - `tests/serverdown.mjs` actually kills the preview server: a reload still shows the chapter with live carvings, other chapters open, and unknown pages show `offline.html`.
+  - A polite live-region notice shows when the connection drops or returns.
+  - Bump `VERSION` in `sw.js` only if a non-hashed file must be evicted at once.
+- **Failed paintings:** every `main img` gets a framed note (its alt text) instead of a broken image, retried when the connection returns.
+- **Head and meta, after checking the reference site's head:**
+  - `site.webmanifest`, `apple-touch-icon.png`, `favicon-32.png`, `icon-192` and `icon-512`;
+  - `apple-mobile-web-app-title`, `format-detection`;
+  - `robots.txt` and `sitemap.xml`;
+  - a `<noscript>` rule that removes the loader so the story reads without JavaScript.
+
 ## Milestone 13: static carvings, hidden at rest everywhere, no context loss (16 November 2026)
 
 The user reported, from mobile:
