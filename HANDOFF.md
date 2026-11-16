@@ -326,6 +326,7 @@ At the user's request the site's sound is now the user-supplied track "The Flute
 - The synthesised tanpura, wind and heartbeat are removed. `setEnergy` and `setMix` remain as no-ops; the dice-hall clicks are still synthesised and play over the music.
 - Range requests bypass the service worker, so the track is not cached offline.
 - Lofi treatment (user request, same day): `public/audio/flute-lofi.mp3` replaces `flute.mp3`. It is slowed and pitched down to 0.92×, low-passed at 3.8 kHz, warmed at 220 Hz with 2.5 kHz eased off, given a gentle 0.45 Hz tape wobble, a small room echo and light compression. A faint, seeded vinyl bed (hiss and sparse crackle, about 30 dB under the music) is mixed in. Runtime is 202 s. The vinyl generator was a scratch script and is not in the repo.
+- Soft pass (user request: "pleasant even at high system volume"): `public/audio/flute-soft.mp3` replaces `flute-lofi.mp3`. It uses the same lofi chain, but low-passed at 2.8 kHz, eases off 2 kHz by 4 dB, applies gentle compression, and is loudness-normalised to about −26 LUFS (LRA 5 LU, peaks −12 dBFS). In-app `MUSIC` gain is 0.6, so playback is roughly −30 LUFS: a soft backdrop with no loud swells.
 - Note: this is a commercial film recording. Clearing its rights for a public site is the user's call.
 
 ## Milestone 17: every chariot redone as a true war ratha, with Gemini (16 November 2026)
