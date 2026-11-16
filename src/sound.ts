@@ -1,5 +1,5 @@
 /**
- * The site's score: a recorded flute piece, looped, faded in when the
+ * The site's score: a recorded flute piece in a lofi treatment, looped, faded in when the
  * visitor asks for sound and faded out when they turn it off or leave the
  * tab. Nothing downloads or plays until then.
  *
@@ -10,7 +10,7 @@
  * The dice hall's cast of dice is still synthesised and plays over it.
  */
 
-const TRACK = `${import.meta.env.BASE_URL}audio/flute.mp3`;
+const TRACK = `${import.meta.env.BASE_URL}audio/flute-lofi.mp3`;
 const MUSIC = 0.7; // the recording is mastered loud; this sits under reading
 const EFFECTS = 0.22;
 const POSITION_KEY = "gita-music-position";
