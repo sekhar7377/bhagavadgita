@@ -317,6 +317,16 @@ The user gave a reference film title sequence: each letter flickers through Indi
   - Tests step through the entry in `beforeEach` by clicking the ready loader. The old counting-loader test now runs on `/sabha/`.
 - Reduced motion shows the title at once. The CSS 12 s auto-hide is disabled on the gated loader.
 
+
+## Milestone 19: recorded flute score (16 November 2026)
+
+At the user's request the site's sound is now the user-supplied track "The Flute Of Srikrishna" (Kaala Bhairava). It is re-encoded to 128 kbps / 44.1 kHz with metadata stripped (`public/audio/flute.mp3`, 2.9 MB). The original stays outside the repo in Downloads.
+- `src/sound.ts` plays it on a loop through Web Audio. It fades in on "Enter with sound" or the sound toggle, and fades out and pauses when sound is turned off or the tab is hidden.
+- Each page is a separate document, so the playing position is saved in sessionStorage on `pagehide` and resumed on the next page.
+- The synthesised tanpura, wind and heartbeat are removed. `setEnergy` and `setMix` remain as no-ops; the dice-hall clicks are still synthesised and play over the music.
+- Range requests bypass the service worker, so the track is not cached offline.
+- Note: this is a commercial film recording. Clearing its rights for a public site is the user's call.
+
 ## Milestone 17: every chariot redone as a true war ratha, with Gemini (16 November 2026)
 
 The user approved redoing the eight older cart-like chariots: `karnaride`, `bhishmawheel`, `jayadratha`, `dronafall`, `karnawheel`, `ghatotkacha`, `sammohana` and `charge` (plus the true-colour `chargecolor` layer).
