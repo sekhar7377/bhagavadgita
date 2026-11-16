@@ -304,6 +304,15 @@ Pages built and tested: `/vana/` (Act IV), Parts V–VI on `/kurukshetra/`, `/sv
 - Memory notes `inspect-renders` and `realistic-scenes`.
 - Download images only by fetching the image itself (`window.__dl`). `models/take.sh` refuses files older than 3 minutes, after it once grabbed one of the user's own downloads (since restored).
 
+## Milestone 18: the entry title (16 November 2026)
+
+The user gave a reference film title sequence: each letter flickers through Indian scripts and locks in, left to right. They asked for the same effect on our white plaster, ending in "Enter with sound", with the home page shown only after a click.
+- `src/entry.ts` + `.entry` markup in `index.html`. MAHĀBHĀRATA decodes through Devanagari, Bengali, Gurmukhi, Gujarati, Odia, Tamil, Telugu, Kannada and Malayalam glyphs (a 260 ms stagger and 700 ms of flicker per letter), then "The Eighteen Eclipses" fades in.
+- When the title is complete and the loader reports the wall is ready (`loader.isReady`), the "Enter with sound" button appears. A click on it, or anywhere on the finished page, enables sound, and `runLoader`'s new `gate` lets the intro lift.
+- Ā is drawn as A with a CSS bar, because the font's macron sat off-centre. The title is normalised to NFC so Ā stays one slot.
+- `sessionStorage['mb-entered']` skips the gate on later home visits in the same tab. Tests set it in `beforeEach`, except the new entry-title test.
+- Reduced motion shows the title at once. The CSS 12 s auto-hide is disabled on the gated loader.
+
 ## Milestone 17: every chariot redone as a true war ratha, with Gemini (16 November 2026)
 
 The user approved redoing the eight older cart-like chariots: `karnaride`, `bhishmawheel`, `jayadratha`, `dronafall`, `karnawheel`, `ghatotkacha`, `sammohana` and `charge` (plus the true-colour `chargecolor` layer).

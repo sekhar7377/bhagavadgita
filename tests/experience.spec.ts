@@ -1,5 +1,42 @@
 import { test, expect } from "@playwright/test";
 
+// Most tests visit as a returning reader who has already entered; the entry
+// title itself has its own test below.
+test.beforeEach(async ({ page }, info) => {
+  if (info.title.includes("entry title")) return;
+  await page.addInitScript(() => {
+    try {
+      sessionStorage.setItem("mb-entered", "1");
+    } catch {
+      // ignore
+    }
+  });
+});
+
+test("the entry title decodes, then waits for a click to enter with sound", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const enter = page.getByRole("button", { name: "Enter with sound" });
+  await expect(page.locator(".entry-letter")).toHaveCount(11);
+  await expect(enter).toBeVisible({ timeout: 30000 });
+  await expect(page.locator(".entry-word")).toHaveAttribute(
+    "aria-label",
+    "Mahābhārata",
+  );
+  // It does not lift on its own.
+  await page.waitForTimeout(1500);
+  await expect(page.locator("#loader")).not.toHaveClass(/is-done/);
+  await enter.click();
+  await expect(page.locator("#loader")).toHaveClass(/is-done/, {
+    timeout: 15000,
+  });
+  await expect(page.locator(".sound-toggle")).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+});
+
 test("opening renders real WebGL and menu supports keyboard and section navigation", async ({
   page,
 }) => {

@@ -1,7 +1,12 @@
 import { chromium } from "@playwright/test";
 import { spawn, execSync } from "node:child_process";
-const port = 4177, base = `http://localhost:${port}/`;
-const start = () => spawn("npx", ["vite", "preview", "--port", String(port), "--strictPort"], { shell: true, stdio: "ignore" });
+const port = 4177,
+  base = `http://localhost:${port}/`;
+const start = () =>
+  spawn("npx", ["vite", "preview", "--port", String(port), "--strictPort"], {
+    shell: true,
+    stdio: "ignore",
+  });
 let server = start();
 await new Promise((r) => setTimeout(r, 5000));
 const browser = await chromium.launch();
@@ -9,33 +14,66 @@ const ctx = await browser.newContext();
 const page = await ctx.newPage();
 const log = (k, v) => console.log(k.padEnd(34), v);
 await page.goto(base);
-await page.locator("#loader.is-done").waitFor({ state: "attached", timeout: 60000 });
-await page.waitForFunction(() => navigator.serviceWorker?.controller, null, { timeout: 30000 }).catch(() => {});
+await page
+  .locator("#loader.is-done")
+  .waitFor({ state: "attached", timeout: 60000 });
+await page
+  .waitForFunction(() => navigator.serviceWorker?.controller, null, {
+    timeout: 30000,
+  })
+  .catch(() => {});
 await page.goto(base + "sabha/");
-await page.locator("#loader.is-done").waitFor({ state: "attached", timeout: 60000 });
+await page
+  .locator("#loader.is-done")
+  .waitFor({ state: "attached", timeout: 60000 });
 await page.waitForTimeout(3000);
 // Server goes down.
-execSync(`powershell -NoProfile -Command "Get-NetTCPConnection -LocalPort ${port} -State Listen | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }"`);
+execSync(
+  `powershell -NoProfile -Command "Get-NetTCPConnection -LocalPort ${port} -State Listen | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }"`,
+);
 await new Promise((r) => setTimeout(r, 1500));
 await page.reload();
-await page.locator("#loader.is-done").waitFor({ state: "attached", timeout: 60000 });
-log("server down: reload heading", (await page.locator("h1").first().textContent()).trim());
-log("server down: carvings", await page.evaluate(() => document.querySelector("#relief").dataset.reliefState));
+await page
+  .locator("#loader.is-done")
+  .waitFor({ state: "attached", timeout: 60000 });
+log(
+  "server down: reload heading",
+  (await page.locator("h1").first().textContent()).trim(),
+);
+log(
+  "server down: carvings",
+  await page.evaluate(
+    () => document.querySelector("#relief").dataset.reliefState,
+  ),
+);
 await page.goto(base + "svarga/");
 log("server down: precached chapter", await page.title());
 await page.goto(base + "no-such-page/");
-log("server down: unknown page", (await page.locator("h1").textContent()).trim());
+log(
+  "server down: unknown page",
+  (await page.locator("h1").textContent()).trim(),
+);
 await browser.close();
 // Failed painting, no service worker.
-server = start(); await new Promise((r) => setTimeout(r, 5000));
+server = start();
+await new Promise((r) => setTimeout(r, 5000));
 const b2 = await chromium.launch();
 const c2 = await b2.newContext({ serviceWorkers: "block" });
 const p2 = await c2.newPage();
 await p2.route("**/art/sabha.webp", (r) => r.abort());
 await p2.goto(base);
-await p2.locator("#loader.is-done").waitFor({ state: "attached", timeout: 60000 });
-await p2.evaluate(() => document.querySelector('a[href="sabha/"]').scrollIntoView());
+await p2
+  .locator("#loader.is-done")
+  .waitFor({ state: "attached", timeout: 60000 });
+await p2.evaluate(() =>
+  document.querySelector('a[href="sabha/"]').scrollIntoView(),
+);
 await p2.waitForTimeout(1500);
-log("failed painting: note shown", await p2.locator(".art-missing .art-error").count());
+log(
+  "failed painting: note shown",
+  await p2.locator(".art-missing .art-error").count(),
+);
 await b2.close();
-execSync(`powershell -NoProfile -Command "Get-NetTCPConnection -LocalPort ${port} -State Listen | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }"`);
+execSync(
+  `powershell -NoProfile -Command "Get-NetTCPConnection -LocalPort ${port} -State Listen | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }"`,
+);

@@ -11,6 +11,7 @@ import { runLoader } from "./loader";
 import { createSound } from "./sound";
 import { mountColdOpen } from "./coldopen";
 import { mountResilience } from "./resilience";
+import { entryWasSeen, mountEntry } from "./entry";
 
 // One wall for the whole page: every [data-scene] section anchors a carved
 // panel on a single fixed canvas, in story order.
@@ -110,9 +111,23 @@ sound.onChange((on) => {
 loader.addEventListener("click", () => void sound.enable());
 soundToggle.addEventListener("click", () => void sound.toggle());
 lenis?.stop();
+// The home page opens on the entry title; it waits for the visitor's click.
+const entry =
+  loader.querySelector(".entry-word") && !entryWasSeen()
+    ? mountEntry({
+        loader,
+        reducedMotion: paused,
+        ready: () =>
+          (loader as HTMLElement & { isReady?: () => boolean }).isReady?.() ??
+          true,
+        onEnter: () => void sound.enable(),
+      })
+    : undefined;
+if (!entry) loader.querySelector(".entry")?.remove();
 runLoader({
   loader,
   relief: host,
+  gate: entry?.isOpen,
   minimumMs: paused ? 300 : 1600,
   onDone() {
     lenis?.start();

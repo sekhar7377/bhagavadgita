@@ -9,8 +9,10 @@ export function runLoader(options: {
   relief: HTMLElement;
   minimumMs: number;
   onDone: () => void;
+  /** Optional gate: the intro waits until this returns true (the entry). */
+  gate?: () => boolean;
 }) {
-  const { loader, relief, minimumMs, onDone } = options;
+  const { loader, relief, minimumMs, onDone, gate } = options;
   const count = loader.querySelector<HTMLElement>(".loader-count")!;
   const html = document.documentElement;
   html.classList.add("is-loading");
@@ -35,6 +37,9 @@ export function runLoader(options: {
   const giveUp = window.setTimeout(() => {
     fonts = wall = page = 1;
   }, 9000);
+  /** True once fonts, the first wall and the page have all arrived. */
+  (loader as HTMLElement & { isReady?: () => boolean }).isReady = () =>
+    fonts * 15 + wall * 70 + page * 15 >= 100;
 
   const finish = () => {
     finished = true;
@@ -61,7 +66,8 @@ export function runLoader(options: {
     count.textContent = String(Math.min(99, Math.round(shown)));
     if (target >= 100 && !completeAt) completeAt = now;
     const settled = shown > 97 || (completeAt && now - completeAt > 1200);
-    if (target >= 100 && elapsed >= minimumMs && settled) finish();
+    if (target >= 100 && elapsed >= minimumMs && settled && (!gate || gate()))
+      finish();
     else requestAnimationFrame(tick);
   };
   loader.setAttribute("aria-busy", "true");

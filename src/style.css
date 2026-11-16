@@ -1772,3 +1772,131 @@ html.is-loading body {
     transition: none;
   }
 }
+
+/* --- entry title (home): the name passes through the scripts of India ---- */
+.entry {
+  display: none;
+}
+.loader.is-entry {
+  animation: none;
+}
+.loader.is-entry .loader-band {
+  display: none;
+}
+.loader.is-entry .entry {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  row-gap: 22px;
+  padding: 0 16px;
+  text-align: center;
+}
+.entry-word {
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(26px, 5.2vw, 76px);
+  line-height: 1.1;
+  color: #030303;
+}
+.entry-letter {
+  display: inline-block;
+  width: 1.05em;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(0.12em);
+  transition:
+    opacity 0.25s ease,
+    transform 0.6s cubic-bezier(0.2, 0.7, 0.1, 1),
+    letter-spacing 0.6s ease;
+}
+.entry-letter.is-live {
+  opacity: 0.55;
+  transform: none;
+  font-family: "Nirmala UI", "Noto Sans Devanagari", "Noto Sans", sans-serif;
+  font-size: 0.7em;
+}
+.entry-letter.is-locked {
+  opacity: 1;
+  transform: none;
+  font-family: var(--font-display);
+  font-size: 1em;
+}
+.entry-sub {
+  margin: 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(15px, 1.5vw, 22px);
+  letter-spacing: 0.02em;
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity 1.2s ease 0.2s,
+    transform 1.2s ease 0.2s;
+}
+.loader.is-titled .entry-sub {
+  opacity: 0.7;
+  transform: none;
+}
+.entry-enter {
+  margin-top: 18px;
+  padding: 12px 26px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  background: none;
+  color: #030303;
+  font-family: var(--font-body);
+  font-size: 13px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  animation:
+    entry-in 1s ease both,
+    loader-breathe 2.8s ease-in-out 1s infinite;
+}
+.entry-enter:hover,
+.entry-enter:focus-visible {
+  animation: entry-in 1s ease both;
+  background: #030303;
+  color: var(--wall);
+}
+@keyframes entry-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+@media (max-width: 600px) {
+  .entry-letter {
+    width: 0.92em;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .entry-letter,
+  .entry-sub,
+  .entry-enter {
+    transition: none;
+    animation: none;
+  }
+  .entry-letter {
+    opacity: 1;
+    transform: none;
+  }
+}
+.entry-letter {
+  position: relative;
+}
+.entry-letter.has-macron::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0.02em;
+  width: 0.42em;
+  height: 0.055em;
+  background: currentColor;
+  transform: translateX(-50%);
+}
