@@ -304,6 +304,24 @@ Pages built and tested: `/vana/` (Act IV), Parts V–VI on `/kurukshetra/`, `/sv
 - Memory notes `inspect-renders` and `realistic-scenes`.
 - Download images only by fetching the image itself (`window.__dl`). `models/take.sh` refuses files older than 3 minutes, after it once grabbed one of the user's own downloads (since restored).
 
+## Milestone 16: more of the war, true war chariots (16 November 2026)
+
+- **Bridges:** all 11 are done and active, including the `b-warning` correction to long four-sided pāsaka dice.
+- **Six new battle scenes** on `/kurukshetra/`, written from the Bhīṣma, Droṇa, Karṇa and Śalya Parvas and placed in day order:
+  - `kalinga`: Day 2, Bhīma on foot against the Kaliṅga elephants;
+  - `samshaptaka`: Day 12, the sworn Trigartas;
+  - `vaishnava`: Day 12, Bhagadatta's Vaiṣṇava weapon becomes a garland on Krishna;
+  - `narayana`: Day 15, the Nārāyaṇa weapon, with Bhīma dragged from his chariot;
+  - `nagastra`: Day 17, the serpent arrow takes Arjuna's crown as Krishna presses the chariot into the earth;
+  - `shalya`: Day 18, Yudhiṣṭhira's spear.
+  - Menus are updated; the duplicate serpent-arrow sentence was removed from `karnawheel`.
+- **Chariots:** the user said a chariot "looks like a bull cart, not a war chariot". The prompt spec is now a grand ratha: high gilded walls, shoulder-height iron-rimmed wheels, a tall flagstaff with an emblem banner, a parasol, racked weapons, four plumed horses on one pole, and a raised charioteer's seat. `narayana`, `vaishnava` and `samshaptaka` were re-edited to it. See memory `war-chariot`.
+  - Older carvings still show the plain box chariot: `karnaride`, `bhishmawheel`, `jayadratha`, `dronafall`, `karnawheel`, `ghatotkacha`, `sammohana`, `charge`. These are not changed unless the user asks.
+- **Banners:**
+  - `shalya`'s first render had a European scales-of-justice emblem; the second had a crescent and stars (which reads as a modern flag).
+  - The final image was repaired by hand (inpaint, then a carved full-moon disc). The text gives Yudhiṣṭhira a golden moon banner ringed by planets.
+- **ChatGPT research:** the user asked that ChatGPT "read the Mahābhārata". A request is queued in the conversation for a cited reference sheet (chariots, every hero's banner, weapons, armour, elephants) as binding rules. ChatGPT's 5-hour limit hit before it answered; it resets at 3:36 PM. Read its answer before the next renders and fold it into the prompts.
+
 ## Milestone 15: bridge carvings in the gaps, and a true-colour trial (16 November 2026)
 
 The user rejected both the zoom-to-cover and the continuous column ("don't connect everything, it hurts the experience"). They asked for new creative carvings that fill only the gaps between scenes.
