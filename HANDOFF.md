@@ -312,6 +312,7 @@ The user's requests:
 - make the site work at any time: returning after leaving, no internet, server down;
 - cover every front-end rule.
 
+- **Superseded the same day:** the user rejected the cover/zoom approach because it cropped half of each carving, and asked to fill only the gaps between carvings, not the borders. `place()` now lays the carvings at their natural size (scale 1) as one continuous column, edge to edge. Its position is interpolated so each carving is centred exactly when its own section is centred, and glides between neighbours. No zoom, no cropping, no blank wall between carvings. The notes below describe the earlier, replaced rule.
 - **Continuous wall (`place()` in `src/relief.ts`):**
   - The problem, measured with `tests/gaps.mjs` (old rule): on phones about half of each page had no carving behind it, because a 2:1 panel fitted to a 390 px width is only 473 px tall. On desktop, 5–13% was uncovered (choice cards, gateways, the Gītā intro).
   - Each carving now owns the stretch from its section to the next carving's section. It is scaled to cover the whole view (`cover = max(1, vh/panelH, vw/panelW)`) and stays fixed (sticky) while that stretch fills the screen, then hands over edge to edge.
