@@ -233,7 +233,9 @@ test("pointer movement raises the carving out of a resting wall", async ({
 test("relief data failing to load leaves a plain wall and a usable page", async ({
   page,
 }) => {
-  await page.route("**/relief/vishvarupa-height.png", (route) => route.abort());
+  await page.route("**/relief/arjunacharge-height.png", (route) =>
+    route.abort(),
+  );
   await page.goto("/");
   await expect(page.locator("#relief")).toHaveAttribute(
     "data-relief-state",

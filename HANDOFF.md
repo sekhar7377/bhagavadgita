@@ -525,6 +525,15 @@ At the user's request the first home carving is new: `vishvarupa` replaces `char
 - **Rejected first render:** sun and moon drawn literally as eyes (the user found them blind-looking), a peacock feather on the cosmic form (the user: that is Kṛṣṇa's, not Mahāviṣṇu's), wheels on two axle lines, and too tight a frame.
 - **Bake:** `make_scene.sh` ("full" separation). The 3:2 render sits centred on the 2:1 wall with plaster margins; the headline sits over the calm left sky.
 
+## Milestone 21: head-on charge header (17 November 2026)
+
+`arjunacharge` replaces `vishvarupa` as `#beginning`'s scene; both earlier header carvings remain in `public/relief` unused.
+- **Origin:** the user rejected the Viśvarūpa header, then three whole-epic concepts (Vyāsa and Gaṇeśa's story ribbon, the epic inside Kṛṣṇa's feather, the dice-board heroes). They then supplied a painted head-on charge poster.
+- **Render:** ChatGPT, with that poster attached as a composition and energy reference only. It is white plaster, not the poster's colours. The poster is kept outside Git at `models/film/charge-poster-ref.jpg`.
+- **Content:** a low camera; four horses (the poster had five; Arjuna's team was four); Kṛṣṇa large at the centre holding the reins, with the peacock feather; Arjuna at full draw behind him; Hanumān's banner streaming in the army's wind; one axle; a central pole.
+- **Hand repair:** both bow tips came out as curled knobs. I inpainted them and redrew plain tapered points, checked at 6×.
+- **Source:** `docs/references/arjunacharge-chatgpt.png` is the repaired image.
+
 ## GPU speed-ups (14 November 2026)
 
 The user asked to use the GPU (GTX 1650) to speed up the work.
