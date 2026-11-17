@@ -24,6 +24,14 @@ function splitLines(element: HTMLElement) {
       return;
     }
     const tag = node.nodeName.toLowerCase();
+    // A quoted verse's source keeps its own small style, on its own line.
+    if ((node as Element).classList?.contains("scene-source")) {
+      lines.push(
+        `<span class="scene-source">${escape(node.textContent ?? "").trim()}</span>`,
+        "",
+      );
+      return;
+    }
     node.childNodes.forEach((child) => walk(child, tag === "em" ? "em" : wrap));
   };
   element.childNodes.forEach((child) => walk(child, null));
