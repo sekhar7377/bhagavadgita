@@ -54,6 +54,16 @@
       name="twitter:image"
       content="https://sekhar7377.github.io/bhagavadgita/social/hastinapura.jpg"
     />
+    <!-- Plain plaster until the stylesheet arrives: never a flash of
+         unstyled links and images on a refresh. -->
+    <style>
+      html {
+        background: #c8c8c8;
+      }
+      body {
+        visibility: hidden;
+      }
+    </style>
     <title>Hastināpura — Mahābhārata, The Eighteen Eclipses</title>
     <noscript>
       <style>
@@ -307,24 +317,105 @@
         aria-labelledby="branches-title"
       >
         <p class="eyebrow" id="branches-title">THE STORY DIVIDES</p>
-        <div class="branch-list">
-          <div class="branch">
+        <details class="branch-path" id="forgotten-firstborn">
+          <summary class="branch">
             <span class="branch-key">A</span>
             <span class="branch-name">The forgotten firstborn</span>
             <span class="branch-line"
               >What Kuntī hid before she ever married Pāṇḍu.</span
             >
-            <span class="branch-state">Being carved</span>
+            <span class="branch-state">Open this path</span>
+          </summary>
+          <div class="branch-body">
+            <section
+              class="scene scene--right story-scene"
+              data-scene="kuntiriver"
+              aria-labelledby="firstborn-title"
+            >
+              <p class="scene-meta">
+                <span>THE RIVER AŚVĀ</span><span>THE FORGOTTEN FIRSTBORN</span>
+              </p>
+              <h3 id="firstborn-title" class="scene-statement" data-float>
+                She gave her firstborn<br />to the river,<br /><em
+                  >and kept the secret<br />for a lifetime.</em
+                >
+              </h3>
+              <div class="scene-story">
+                <p data-float>
+                  As a girl in the house of her foster father Kuntibhoja, Pṛthā
+                  served the fierce sage Durvāsas for a year without one fault.
+                  Pleased, he gave her a mantra: whichever god she called would
+                  come and give her a son.
+                </p>
+                <p data-float>
+                  Curious, she said the words to the rising Sun. Sūrya stood
+                  before her, and could not be sent away unanswered. Her son was
+                  born shining, wearing armour that grew from his own skin and a
+                  pair of earrings, and by the god's grace she remained a
+                  maiden.
+                </p>
+                <p data-float>
+                  Afraid of the shame, she laid the child in a basket sealed
+                  with wax and set it on the river Aśvā, weeping. The current
+                  carried him to the Gaṅgā, where the charioteer Adhiratha and
+                  his wife Rādhā lifted him out and raised him as their own. The
+                  world would know him as Karṇa, the son of a charioteer. Kuntī
+                  married Pāṇḍu and told no one.
+                </p>
+              </div>
+            </section>
           </div>
-          <div class="branch">
+        </details>
+        <details class="branch-path" id="curse-of-gandhara">
+          <summary class="branch">
             <span class="branch-key">B</span>
             <span class="branch-name">The curse of Gāndhāra</span>
             <span class="branch-line"
               >Why Śakuni swore to rot Hastināpura from within.</span
             >
-            <span class="branch-state">Being carved</span>
+            <span class="branch-state">Open this path</span>
+          </summary>
+          <div class="branch-body">
+            <section
+              class="scene scene--left story-scene"
+              data-scene="gandhara"
+              aria-labelledby="gandhara-title"
+            >
+              <p class="scene-meta">
+                <span>GĀNDHĀRA · HASTINĀPURA</span
+                ><span>THE CURSE OF GĀNDHĀRA</span>
+              </p>
+              <h3 id="gandhara-title" class="scene-statement" data-float>
+                His sister<br />bound her eyes.<br /><em
+                  >He never closed his.</em
+                >
+              </h3>
+              <div class="scene-story">
+                <p data-float>
+                  Bhīṣma asked the king of Gāndhāra for his daughter as a bride
+                  for blind Dhṛtarāṣṭra. Subala agreed. When Gāndhārī learned
+                  her husband could not see, she folded a cloth many times and
+                  bound her own eyes, so that she would never have what he
+                  lacked. Her brother Śakuni brought her to Hastināpura, and
+                  stayed.
+                </p>
+                <p data-float>
+                  In Vyāsa's telling, that is all the reason the epic gives:
+                  Śakuni stands beside his nephew Duryodhana, and his skill with
+                  the dice becomes the Kauravas' weapon.
+                </p>
+                <p data-float>
+                  Later retellings across India add a darker tale, not found in
+                  Vyāsa: that the Kurus threw Subala and his hundred sons into a
+                  prison and fed them one handful of rice a day; that the father
+                  gave every grain to his youngest so that one son would live to
+                  take revenge; and that Śakuni carved his dice from his
+                  father's bones, so they would always fall as he wished.
+                </p>
+              </div>
+            </section>
           </div>
-        </div>
+        </details>
       </section>
       <!-- PART II · Ādi Parva (youth, tournament, house of lac, svayaṃvara).
            Copy follows the user's script, checked against the Critical

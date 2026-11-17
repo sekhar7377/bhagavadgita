@@ -534,6 +534,14 @@ At the user's request the first home carving is new: `vishvarupa` replaces `char
 - **Hand repair:** both bow tips came out as curled knobs. I inpainted them and redrew plain tapered points, checked at 6×.
 - **Source:** `docs/references/arjunacharge-chatgpt.png` is the repaired image.
 
+## Milestone 22: the two Hastināpura paths, and no flash on refresh (17 November 2026)
+
+- **The Hastināpura "story divides" paths are complete.** Both were previously marked "Being carved".
+  - **A · The forgotten firstborn** (`kuntiriver`): Kuntī sets Sūrya's son, born with armour and earrings, adrift on the Aśvā; Adhiratha and Rādhā raise him as Karṇa.
+  - **B · The curse of Gāndhāra** (`gandhara`): Gāndhārī binds her eyes; Śakuni stays at court. The text says plainly that the prison, rice and bone-dice tale is from later retellings, not from Vyāsa.
+- **Sources:** both carvings are ChatGPT plaster renders, kept in `docs/references/`. In `gandhara`, a distant caravan of Western-looking hooped wagons was inpainted away by hand.
+- **No flash on refresh:** every page now hides its body inline (with the `#c8c8c8` plaster background) until `style.css` loads, which sets `body { visibility: visible }`. This removes the brief unstyled flash of blue links on refresh, seen in dev, where Vite injects the CSS from JavaScript.
+
 ## GPU speed-ups (14 November 2026)
 
 The user asked to use the GPU (GTX 1650) to speed up the work.
