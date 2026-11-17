@@ -772,9 +772,13 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
     wallDelta = 0;
     scenes.forEach((state, index) => {
       const rect = state.spec.anchor.getBoundingClientRect();
-      // A scene inside a closed branch has no box yet: keep it hidden and
-      // unloaded until the visitor opens that branch.
-      if (rect.height === 0) {
+      // A scene inside a closed branch stays hidden and unloaded until the
+      // visitor opens that branch. Current browsers can still give a closed
+      // <details> body a layout box, so check the branch, not only the size.
+      if (
+        rect.height === 0 ||
+        state.spec.anchor.closest("details:not([open]) > :not(summary)")
+      ) {
         state.mesh.visible = false;
         return;
       }
