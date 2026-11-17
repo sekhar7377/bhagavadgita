@@ -13,6 +13,21 @@ import { mountColdOpen } from "./coldopen";
 import { mountResilience } from "./resilience";
 import { mountEntry } from "./entry";
 
+// A refresh always begins at the website's opening: a reload of any chapter
+// returns to the home page's entry title, and every page starts at its top
+// (the browser would otherwise restore the old scroll position mid-story).
+const home = import.meta.env.BASE_URL;
+const navigation = performance.getEntriesByType("navigation")[0] as
+  | PerformanceNavigationTiming
+  | undefined;
+if (
+  navigation?.type === "reload" &&
+  location.pathname.replace(/index\.html$/, "") !== home
+)
+  location.replace(home);
+if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+if (!location.hash) window.scrollTo(0, 0);
+
 // One wall for the whole page: every [data-scene] section anchors a carved
 // panel on a single fixed canvas, in story order.
 const host = document.querySelector<HTMLElement>("#relief")!;

@@ -727,7 +727,8 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
         if (disposed || abort.signal.aborted) return;
         // The plaster wall still renders; the page stays fully readable.
         state.status = "failed";
-        if (first) container.dataset.reliefState = "plain";
+        if (first && container.dataset.reliefState === "loading")
+          container.dataset.reliefState = "plain";
       });
   };
 
@@ -844,7 +845,9 @@ export function mountRelief(container: HTMLElement, specs: SceneSpec[]) {
         state.status === "ready" &&
         (shot?.pinned ? (shot.presence ?? 1) > 0.002 : distance < 1.2);
       if (distance < LOAD_AHEAD && state.status === "idle")
-        loadScene(state, index === 0);
+        // The wall counts as arrived when the first panel, or the one on
+        // screen, is ready: a reload can restore the page far from the top.
+        loadScene(state, index === 0 || distance < 0.5);
       else if (
         distance > RELEASE_BEYOND &&
         state.status !== "idle" &&
